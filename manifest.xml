@@ -1,0 +1,18 @@
+<package>
+  <description brief="SpeakEasy: GUI for text-to-speech and sounds on
+		      a robot">
+
+     SpeakEasy provides a sound node to run on a robot, and a GUI to
+     run on a client. GUI users can type text for conversion to speech
+     by the sound node. Utterances can be saved to buttons, and sound
+     effects are available via buttons.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/speakeasy</url>
+
+</package>
+
+
