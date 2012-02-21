@@ -51,10 +51,10 @@ if __name__ == '__main__':
         exit(-1)
 
     # Import after printing usage for speed.
-    import roslib; roslib.load_manifest('sound_play')
+    import roslib; roslib.load_manifest('speakeasy')
     import rospy
-    from sound_play.msg import SoundRequest
-    from sound_play.libsoundplay import SoundClient
+    from speakeasy.msg import SpeakEasyRequest
+    from speakeasy.libspeakeasy import SoundClient
     
     if len(sys.argv) == 1:
         print 'Awaiting something to say on standard input.'

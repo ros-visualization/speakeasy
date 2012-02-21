@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+# TODO:
+#   - publish latched sound files
+#   - publish latched sound engines
+#   - test Cepstral
+#   - update GUI
+
+
 #***********************************************************
 #* Software License Agreement (BSD License)
 #*
@@ -36,6 +43,11 @@
 
 # Author: Blaise Gassend
 
+# This node is a derivative of Blaise's original soundplay_node.py.
+# The modifications and additions were kept to a minimum, and backward
+# comnpatibility for clients of soundplay_node.py was retained.
+# Here are the changes:
+
 # Andreas Paepcke: I kludged a 'fix' for identical texts not playing
 #                  when submitted in short intervals. Only the first
 #                  text would play, the others would not. Playback started
@@ -47,23 +59,25 @@
 #                  The small text variations cause a cache miss and new
 #                  text-to-speech conversion each time. The critical point
 #                  is at:
-# 			elif data.sound == SoundRequest.SAY:
-# 		   --->	    if not data.arg in self.voicesounds.keys():
-# 			        rospy.logdebug('command for uncached text: "%s"' % data.arg)
-# 			        txtfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.txt')
-# 			        wavfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.wav')
+#             elif data.sound == SpeakEasyRequest.SAY:
+#            --->        if not data.arg in self.voicesounds.keys():
+#                     rospy.logdebug('command for uncached text: "%s"' % data.arg)
+#                     txtfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.txt')
+#                     wavfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.wav')
 #                                      ...
 #                  A true fix would track down the cache corruption. As
 #                  a stop-gap, I modified the 'if' to 'if True', thereby
 #                  forcing text conversion each time.
+#
+# Andreas Paepcke: 
 
-
-import roslib; roslib.load_manifest('sound_play')
+import roslib; roslib.load_manifest('speakeasy')
 
 import rospy
 import threading
-from sound_play.msg import SoundRequest
+from speakeasy.msg import SpeakEasyRequest
 import os
+import time
 import logging
 import sys
 import traceback
@@ -155,11 +169,11 @@ class soundtype:
             self.lock.release()
 
     def command(self, cmd):
-         if cmd == SoundRequest.PLAY_STOP:
+         if cmd == SpeakEasyRequest.PLAY_STOP:
              self.stop()
-         elif cmd == SoundRequest.PLAY_ONCE:
+         elif cmd == SpeakEasyRequest.PLAY_ONCE:
              self.single()
-         elif cmd == SoundRequest.PLAY_START:
+         elif cmd == SpeakEasyRequest.PLAY_START:
              self.loop()
 
     def get_staleness(self):
@@ -181,6 +195,7 @@ class soundtype:
             self.staleness = self.staleness + 1
         return self.staleness
 
+
 class soundplay:
     def stopdict(self,dict):
         for sound in dict.values():
@@ -193,55 +208,62 @@ class soundplay:
 
     def callback(self,data):
         if not self.initialized:
+            rospy.logerr("Speakeasy received sound request, but speakeasy node is not initialized.")
             return
         self.mutex.acquire()
         
         # Force only one sound at a time
         self.stopall()
         try:
-            if data.sound == SoundRequest.ALL and data.command == SoundRequest.PLAY_STOP:
+            if data.sound == SpeakEasyRequest.ALL and data.command == SpeakEasyRequest.PLAY_STOP:
                 self.stopall()
             else:
-                if data.sound == SoundRequest.PLAY_FILE:
+                if data.sound == SpeakEasyRequest.PLAY_FILE:
                     if not data.arg in self.filesounds.keys():
                         rospy.logdebug('command for uncached wave: "%s"'%data.arg)
                         try:
                             self.filesounds[data.arg] = soundtype(data.arg)
                         except:
                             print "Exception"
-                            rospy.logerr('Error setting up to play "%s". Does this file exist on the machine on which sound_play is running?'%data.arg)
+                            rospy.logerr('Error setting up to play "%s". Does this file exist on the machine on which speakeasy_node.py is running?'%data.arg)
                             return
                     else:
                         print "cached"
                         rospy.logdebug('command for cached wave: "%s"'%data.arg)
                     sound = self.filesounds[data.arg]
-                elif data.sound == SoundRequest.SAY:
-                    #******if not data.arg in self.voicesounds.keys():
-		    if True: # Caching does not work. It causes any cached sounds to
-		             # not be played until they are purged from the cache.
-			     # This takes several seconds.
-                        rospy.logdebug('command for uncached text: "%s"' % data.arg)
-                        txtfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.txt')
-                        wavfile = tempfile.NamedTemporaryFile(prefix='sound_play', suffix='.wav')
-                        txtfilename=txtfile.name
-                        wavfilename=wavfile.name
-                        voice = data.arg2
-                        try:
-                            txtfile.write(data.arg)
-                            txtfile.flush()
-                            os.system("text2wave -eval '("+voice+")' "+txtfilename+" -o "+wavfilename)
-                            try:
-                                if os.stat(wavfilename).st_size == 0:
-                                    raise OSError # So we hit the same catch block
-                            except OSError:
-                                rospy.logerr('Sound synthesis failed. Is festival installed? Is a festival voice installed? Try running "rosdep satisfy sound_play|sh". Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting')
-                                return
-                            self.voicesounds[data.arg] = soundtype(wavfilename)
-                        finally:
-                            txtfile.close()
-                            #wavfile.close()
+                elif data.sound == SpeakEasyRequest.SAY:
+                    # data.sound is the text of a text-to-speech request:
+                     
+                    # Original paysound_node.py had caching, but
+                    # caching does not work. It causes any cached sounds to
+                    # not be played until they are purged from the cache.
+                    # This takes several seconds. We deviate here from the original
+                    # soundplay_node.py code, and always re-generate the text-to-speech:
+                    rospy.logdebug('command for uncached text: "%s"' % data.arg)
+                    
+                    ttsEngine = None
+                    if len(data.text_to_speech_engine) == 0:
+                        data.text_to_speech_engine = "festival";
+                    if (data.text_to_speech_engine == "festival"):
+                        ttsEngine = Festival();
+                    elif (data.text_to_speech_engine == "cepstral"):
+                        ttsEngine = Cepstral();
                     else:
-                        rospy.logdebug('command for cached text: "%s"'%data.arg)
+                        rospy.logerr("Request for text-to-speech engine " + str(data.text_to_speech_engine) + ", which is unsupported.")
+                        return;
+                    
+                    voice = data.arg2
+                    text  = data.arg
+                    try:
+                        try:
+                            ttsEngine.runTextToSpeech(voice, text)
+                        except OSError as e:
+                            rospy.logerr(e.getMessage())
+                            return
+                        self.voicesounds[data.arg] = soundtype(ttsEngine.getWaveFileName());
+                    finally:
+                        if (ttsEngine is not None):
+                            ttsEngine.cleanup();
                     sound = self.voicesounds[data.arg]
                 else:
                     rospy.logdebug('command for builtin wave: %i'%data.sound)
@@ -249,7 +271,7 @@ class soundplay:
                         params = self.builtinsoundparams[data.sound]
                         self.builtinsounds[data.sound] = soundtype(params[0], params[1])
                     sound = self.builtinsounds[data.sound]
-                if sound.staleness != 0 and data.command != SoundRequest.PLAY_STOP:
+                if sound.staleness != 0 and data.command != SpeakEasyRequest.PLAY_STOP:
                     # This sound isn't counted in active_sounds
                     #print "activating %i %s"%(data.sound,data.arg)
                     self.active_sounds = self.active_sounds + 1
@@ -320,21 +342,29 @@ class soundplay:
             rospy.loginfo('Exception in diagnostics: %s'%str(e))
 
     def __init__(self):
-        rospy.init_node('sound_play')
+        rospy.init_node('speakeasy')
         self.diagnostic_pub = rospy.Publisher("/diagnostics", DiagnosticArray)
 
-        rootdir = os.path.join(os.path.dirname(__file__),'..','sounds')
+        # Path to where sound files are stored:
+        self.soundDir = os.path.join(os.path.dirname(__file__),'sounds')
         
         self.builtinsoundparams = {
-                SoundRequest.BACKINGUP              : (os.path.join(rootdir, 'BACKINGUP.ogg'), 0.1),
-                SoundRequest.NEEDS_UNPLUGGING       : (os.path.join(rootdir, 'NEEDS_UNPLUGGING.ogg'), 1),
-                SoundRequest.NEEDS_PLUGGING         : (os.path.join(rootdir, 'NEEDS_PLUGGING.ogg'), 1),
-                SoundRequest.NEEDS_UNPLUGGING_BADLY : (os.path.join(rootdir, 'NEEDS_UNPLUGGING_BADLY.ogg'), 1),
-                SoundRequest.NEEDS_PLUGGING_BADLY   : (os.path.join(rootdir, 'NEEDS_PLUGGING_BADLY.ogg'), 1),
+                SpeakEasyRequest.BACKINGUP              : (os.path.join(self.soundDir, 'BACKINGUP.ogg'), 0.1),
+                SpeakEasyRequest.NEEDS_UNPLUGGING       : (os.path.join(self.soundDir, 'NEEDS_UNPLUGGING.ogg'), 1),
+                SpeakEasyRequest.NEEDS_PLUGGING         : (os.path.join(self.soundDir, 'NEEDS_PLUGGING.ogg'), 1),
+                SpeakEasyRequest.NEEDS_UNPLUGGING_BADLY : (os.path.join(self.soundDir, 'NEEDS_UNPLUGGING_BADLY.ogg'), 1),
+                SpeakEasyRequest.NEEDS_PLUGGING_BADLY   : (os.path.join(self.soundDir, 'NEEDS_PLUGGING_BADLY.ogg'), 1),
                 }
+
+        # List of sound engines. Examples "festival", "cepstral":
+        self.soundEngines = [];
+        if (self.which("text2wave") is not None):
+            self.soundEngines.append("festival");
+        if (self.which("swift") is not None):
+            self.soundEngines.append("cepstral");
         
         self.mutex = threading.Lock()
-        sub = rospy.Subscriber("robotsound", SoundRequest, self.callback)
+        sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.callback)
         self.mutex.acquire()
         self.no_error = True
         self.initialized = False
@@ -367,11 +397,12 @@ class soundplay:
         self.voicesounds = {}
         self.hotlist = []
         if not self.initialized:
-            rospy.loginfo('sound_play node is ready to play sound')
+            rospy.loginfo('speakeasy node is ready to play sound')
             
     def sleep(self, duration):
         try:
-            rospy.sleep(duration)   
+            #rospy.sleep(duration)   
+            time.sleep(duration)
         except rospy.exceptions.ROSInterruptException:
             pass
     
@@ -386,6 +417,91 @@ class soundplay:
             self.cleanup()
         #print "idle_exiting"
 
+
+    def which(self, program):
+        '''
+        Implements the Unix 'which' shell command. 
+        @param program: Name of the executable with or without path
+        @type: string
+        @return: None if no executable found, else full path to executable.
+        '''
+        def is_exe(fpath):
+            return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+    
+        def ext_candidates(fpath):
+            yield fpath
+            for ext in os.environ.get("PATHEXT", "").split(os.pathsep):
+                yield fpath + ext
+    
+        fpath, fname = os.path.split(program)
+        if fpath:
+            if is_exe(program):
+                return program
+        else:
+            for path in os.environ["PATH"].split(os.pathsep):
+                exe_file = os.path.join(path, program)
+                for candidate in ext_candidates(exe_file):
+                    if is_exe(candidate):
+                        return candidate
+    
+        return None
+
+class TextToSpeechEngine(object):
+    
+    def __init__(self):
+        self.txtfile = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.txt')
+        self.wavfile = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')
+        self.txtfilename = self.txtfile.name
+        self.wavfilename = self.wavfile.name
+
+    def initTextFile(self, text):
+        # Just in case client calls getCommandString() twice on the same
+        # TTS instance:
+        self.txtfile.truncate();
+        
+    def runTextToSpeechHelper(self, text, commandLine, failureMsg):
+        try:
+            self.txtfile.write(text)
+            self.txtfile.flush()
+            os.system(commandLine);
+            if os.stat(self.wavfilename).st_size == 0:
+                raise OSError(failureMsg);
+        except Exception as e:
+            rospy.logerr(e.getMessage());
+            
+
+    def getWaveFileName(self):
+        return self.wavfilename;
+        
+    def cleanup(self):
+        self.txtfile.close();
+        #self.wavfile.close(); # Maybe race condition?
+        
+class Festival(TextToSpeechEngine):
+    
+    def __init__(self):
+        super(Festival, self).__init__()
+        
+    def runTextToSpeech(self, voice, text):
+        self.initTextFile(text)
+        failureMsg = "Sound synthesis failed. Is festival installed? Is a festival voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
+        self.runTextToSpeechHelper(text,
+                                   "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + self.wavfilename,
+                                   failureMsg);
+        return self.wavfilename
+    
+class Cepstral(TextToSpeechEngine):
+    
+    def __init__(self):
+        super(Cepstral, self).__init__()
+        
+    def runTextToSpeech(self, voice, text):
+        self.initTextFile(text)        
+        failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
+        self.runTextToSpeechHelper(text,
+                                   "swift -d " + str(voice) + " -f " + self.txtfilename + " -o " + self.wavfilename,
+                                   failureMsg);
+        return self.wavfilename
+
 if __name__ == '__main__':
     soundplay()
-

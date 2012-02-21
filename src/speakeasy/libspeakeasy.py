@@ -38,17 +38,17 @@
 
 import rospy
 import os, sys
-from sound_play.msg import SoundRequest
+from speakeasy.msg import SpeakEasyRequest
 
-## \brief Class that publishes messages to the sound_play node.
+## \brief Class that publishes messages to the speakeasy node.
 ##
-## This class is a helper class for communicating with the sound_play node
-## via the \ref sound_play.SoundRequest message. It has two ways of being used:
+## This class is a helper class for communicating with the speakeasy node
+## via the \ref speakeasy.SpeakEasyRequest message. It has two ways of being used:
 ##
 ## - It can create Sound classes that represent a particular sound which
 ##   can be played, repeated or stopped.
 ##
-## - It provides methods for each way in which the sound_play.SoundRequest
+## - It provides methods for each way in which the speakeasy.SpeakEasyRequest
 ##   message can be invoked.
 
 class Sound:
@@ -62,7 +62,7 @@ class Sound:
 ## This method causes the Sound to be played once.
 
     def play(self):
-        self.client.sendMsg(self.snd, SoundRequest.PLAY_ONCE, self.arg)
+        self.client.sendMsg(self.snd, SpeakEasyRequest.PLAY_ONCE, self.arg)
 
 ## \brief Play the Sound repeatedly.
 ##
@@ -70,22 +70,22 @@ class Sound:
 ## called.
     
     def repeat(self):
-       self.client.sendMsg(self.snd, SoundRequest.PLAY_START, self.arg)
+       self.client.sendMsg(self.snd, SpeakEasyRequest.PLAY_START, self.arg)
 
 ## \brief Stop Sound playback.
 ##
 ## This method causes the Sound to stop playing.
 
     def stop(self):
-        self.client.sendMsg(self.snd, SoundRequest.PLAY_STOP, self.arg)
+        self.client.sendMsg(self.snd, SpeakEasyRequest.PLAY_STOP, self.arg)
 
-## This class is a helper class for communicating with the sound_play node
-## via the \ref sound_play.SoundRequest message. There is a one-to-one mapping
-## between methods and invocations of the \ref sound_play.SoundRequest message.
+## This class is a helper class for communicating with the speakeasy node
+## via the \ref speakeasy.SpeakEasyRequest message. There is a one-to-one mapping
+## between methods and invocations of the \ref speakeasy.SpeakEasyRequest message.
 
 class SoundClient:
     def __init__(self):
-        self.pub = rospy.Publisher('robotsound', SoundRequest)
+        self.pub = rospy.Publisher('robotsound', SpeakEasyRequest)
 
 ## \brief Create a voice Sound.
 ##
@@ -94,19 +94,19 @@ class SoundClient:
 ## \param s Text to say
  
     def voiceSound(self, s):
-        return Sound(self, SoundRequest.SAY, s)
+        return Sound(self, SpeakEasyRequest.SAY, s)
 
 ## \brief Create a wave Sound.
 ##
 ## Creates a Sound corresponding to indicated file.
 ##
 ## \param s File to play. Should be an absolute path that exists on the
-## machine running the sound_play node.
+## machine running the speakeasy node.
     def waveSound(self, sound):
         if sound[0] != "/":
 	  rootdir = os.path.join(os.path.dirname(__file__),'../..','sounds')
           sound = rootdir + "/" + sound
-        return Sound(self, SoundRequest.PLAY_FILE, sound)
+        return Sound(self, SpeakEasyRequest.PLAY_FILE, sound)
     
 ## \brief Create a builtin Sound.
 ##
@@ -125,7 +125,7 @@ class SoundClient:
 ## \param text String to say
 
     def say(self,text, voice='voice_kal_diphone'):
-        self.sendMsg(SoundRequest.SAY, SoundRequest.PLAY_ONCE, text, voice)
+        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_ONCE, text, voice)
 
 ## \brief Say a string repeatedly
 ## 
@@ -134,7 +134,7 @@ class SoundClient:
 ## \param text String to say repeatedly
 
     def repeat(self,text):
-        self.sendMsg(SoundRequest.SAY, SoundRequest.PLAY_START, text)
+        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_START, text)
 
 ## \brief Stop saying a string
 ## 
@@ -144,7 +144,7 @@ class SoundClient:
 ## \param text Same string as in the say or repeat command
 
     def stopSaying(self,text):
-        self.sendMsg(SoundRequest.SAY, SoundRequest.PLAY_STOP, text)
+        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_STOP, text)
     
 ## \brief Plays a WAV or OGG file
 ## 
@@ -152,26 +152,26 @@ class SoundClient:
 ## stopAll.
 ## 
 ## \param sound Filename of the WAV or OGG file. Must be an absolute path valid
-## on the computer on which the sound_play node is running
+## on the computer on which the speakeasy node is running
 
     def playWave(self, sound):
         if sound[0] != "/":
 	  rootdir = os.path.join(os.path.dirname(__file__),'../..','sounds')
           sound = rootdir + "/" + sound
-        self.sendMsg(SoundRequest.PLAY_FILE, SoundRequest.PLAY_ONCE, sound)
+        self.sendMsg(SpeakEasyRequest.PLAY_FILE, SpeakEasyRequest.PLAY_ONCE, sound)
     
 ## \brief Plays a WAV or OGG file repeatedly
 ## 
 ## Plays a WAV or OGG file repeatedly until stopWave or stopAll is used.
 ## 
 ## \param sound Filename of the WAV or OGG file. Must be an absolute path valid
-## on the computer on which the sound_play node is running.
+## on the computer on which the speakeasy node is running.
 
     def startWave(self, sound):
         if sound[0] != "/":
 	  rootdir = os.path.join(os.path.dirname(__file__),'../..','sounds')
           sound = rootdir + "/" + sound
-        self.sendMsg(SoundRequest.PLAY_FILE, SoundRequest.PLAY_START, sound)
+        self.sendMsg(SpeakEasyRequest.PLAY_FILE, SpeakEasyRequest.PLAY_START, sound)
 
 ##  \brief Stop playing a WAV or OGG file
 ## 
@@ -184,27 +184,27 @@ class SoundClient:
         if sound[0] != "/":
 	  rootdir = os.path.join(os.path.dirname(__file__),'../..','sounds')
           sound = rootdir + "/" + sound
-        self.sendMsg(SoundRequest.PLAY_FILE, SoundRequest.PLAY_STOP, sound)
+        self.sendMsg(SpeakEasyRequest.PLAY_FILE, SpeakEasyRequest.PLAY_STOP, sound)
 
 ## \brief Play a buildin sound
 ##
 ## Starts playing one of the built-in sounds. built-ing sounds are documented
-## in \ref SoundRequest.msg. Playback can be stopped by stopall.
+## in \ref SpeakEasyRequest.msg. Playback can be stopped by stopall.
 ##
 ## \param sound Identifier of the sound to play.
 
     def play(self,sound):
-        self.sendMsg(sound, SoundRequest.PLAY_ONCE, "")
+        self.sendMsg(sound, SpeakEasyRequest.PLAY_ONCE, "")
 
 ## \brief Play a buildin sound repeatedly
 ##
 ## Starts playing one of the built-in sounds repeatedly until stop or
-## stopall is used. Built-in sounds are documented in \ref SoundRequest.msg.
+## stopall is used. Built-in sounds are documented in \ref SpeakEasyRequest.msg.
 ##
 ## \param sound Identifier of the sound to play.
     
     def start(self,sound):
-        self.sendMsg(sound, SoundRequest.PLAY_START, "")
+        self.sendMsg(sound, SpeakEasyRequest.PLAY_START, "")
 
 ## \brief Stop playing a built-in sound
 ##
@@ -213,17 +213,17 @@ class SoundClient:
 ## \param sound Same sound that was used to start playback
     
     def stop(self,sound):
-        self.sendMsg(sound, SoundRequest.PLAY_STOP, "")
+        self.sendMsg(sound, SpeakEasyRequest.PLAY_STOP, "")
 
 ## \brief Stop all currently playing sounds
 ##
 ## This method stops all speech, wave file, and built-in sound playback.
   
     def stopAll(self):
-        self.stop(SoundRequest.ALL)
+        self.stop(SpeakEasyRequest.ALL)
 
     def sendMsg(self, snd, cmd, s, arg2=""):
-        msg = SoundRequest()
+        msg = SpeakEasyRequest()
         msg.sound = snd
         msg.command = cmd
         msg.arg = s
