@@ -69,6 +69,10 @@
 #                  a stop-gap, I modified the 'if' to 'if True', thereby
 #                  forcing text conversion each time.
 #
+# NOTE: hardcoded Festival voice list to be ["kal_diphone"]. To fix: do the equivalent of
+#       entering festival on the command line, and typing (voice.list).
+#
+#
 # Andreas Paepcke: 
 
 import roslib; roslib.load_manifest('speakeasy')
@@ -80,9 +84,11 @@ import os
 import time
 import logging
 import sys
+import subprocess
 import traceback
 import tempfile
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue, DiagnosticArray
+from msg import Capabilities, TtsVoices
 
 try:
     import pygst
@@ -344,9 +350,10 @@ class soundplay:
     def __init__(self):
         rospy.init_node('speakeasy')
         self.diagnostic_pub = rospy.Publisher("/diagnostics", DiagnosticArray)
+        self.capabilities_pub = rospy.Publisher("/capabilities", Capabilities, latch=True)
 
-        # Path to where sound files are stored:
-        self.soundDir = os.path.join(os.path.dirname(__file__),'sounds')
+        # Path to where sound files are stored: In 'sounds' directory under package root dir:
+        self.soundDir = os.path.join(os.path.dirname(__file__),'../../sounds')
         
         self.builtinsoundparams = {
                 SpeakEasyRequest.BACKINGUP              : (os.path.join(self.soundDir, 'BACKINGUP.ogg'), 0.1),
@@ -358,10 +365,47 @@ class soundplay:
 
         # List of sound engines. Examples "festival", "cepstral":
         self.soundEngines = [];
-        if (self.which("text2wave") is not None):
+        
+        festivalPath = self.which("text2wave");
+        if (festivalPath is not None):
             self.soundEngines.append("festival");
-        if (self.which("swift") is not None):
+            festivalVoices = self.getFestivalVoices(festivalPath)
+            
+        cepstralSwiftPath = self.which("swift");
+        if (cepstralSwiftPath is not None):
             self.soundEngines.append("cepstral");
+            cepstralVoices = self.getCepstralVoices(cepstralSwiftPath);
+        
+        # Create an empty Capabilities message:
+        capabilitiesMsg = Capabilities();
+        # initialize the text-to-speech engines field:
+        capabilitiesMsg.ttsEngines = self.soundEngines;
+        
+        # Build ttsVoices structures for use in the Capabilities
+        # message's TtsVoices field:
+        
+        ttsFestivalVoices = TtsVoices()
+        ttsFestivalVoices.ttsEngine = "festival"
+        ttsFestivalVoices.voices = festivalVoices;
+        
+        ttsCepstralVoices = TtsVoices()
+        ttsCepstralVoices.ttsEngine = "cepstral"
+        ttsCepstralVoices.voices = cepstralVoices;
+        
+        capabilitiesMsg.voices = [ttsFestivalVoices, ttsCepstralVoices];
+        
+        # List of available sound files:
+        filesInSoundDir = os.listdir(self.soundDir);
+        self.soundFiles = [];
+        for soundFileName in filesInSoundDir:
+            fileExtension = os.path.splitext(soundFileName)[1][1:].strip() 
+            if (fileExtension == "wav") or (fileExtension == "ogg"):
+                self.soundFiles.append(soundFileName);
+        capabilitiesMsg.sounds = self.soundFiles;
+        
+        # Publish the capabilities message just once, latched:
+        self.capabilities_pub.publish(capabilitiesMsg);
+        
         
         self.mutex = threading.Lock()
         sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.callback)
@@ -445,6 +489,28 @@ class soundplay:
                         return candidate
     
         return None
+
+    def getCepstralVoices(self, absSwiftPath):
+        p = subprocess.Popen([absSwiftPath, "--voices"], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        tbl, errors = p.communicate()
+        lines = tbl.splitlines();
+        
+        # Throw out header lines:
+        for lineNum, line in enumerate(lines):
+            if not line.startswith("-"):
+                continue;
+            break
+        voiceNames = []
+        for voiceLine in lines[lineNum:]:
+            if not voiceLine.startswith("-"):
+                voiceNames.append(str(voiceLine.split()[0]))
+        return voiceNames    
+
+    def getFestivalVoices(self, absFestivalPath):
+        #TODO: run festival, and issue Scheme command (voice.list)
+        #      to get the real list of voices.
+        return ["kal_diphone"]
+
 
 class TextToSpeechEngine(object):
     
