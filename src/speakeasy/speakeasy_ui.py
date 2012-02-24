@@ -103,7 +103,7 @@ class DialogService(object):
         # Used by self.showErrorMsgByErrorCode(<errorCode>), 
         # or self.showErrorMsg(<string>).
         self.errorMsgPopup = QErrorMessage.qtHandler();
-        self.errorMsgPopup.setStyleSheet(SoundPlayGUI.stylesheetAppBG);
+        self.errorMsgPopup.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
 #        if parent is not None:
 #            self.errorMsgPopup.setParent(parent);
 
@@ -121,9 +121,9 @@ class DialogService(object):
         self.errorMsgPopup.showMessage(errMsg);
     
 
-#----------------------------------------------------  SoundPlayGUI Class ---------------------------
+#----------------------------------------------------  SpeakEasyGUI Class ---------------------------
 
-class SoundPlayGUI(QMainWindow):
+class SpeakEasyGUI(QMainWindow):
     '''
     One instance of this class builds the entire sound play UI.
     Instance variable that hold widgets of interest to controllers:
@@ -162,7 +162,7 @@ class SoundPlayGUI(QMainWindow):
     
     # ---------------------- Names for Voices ----------------------
     
-    voices = {'VOICE_1': 'voice_kal_diphone',
+    voices = {'VOICE_1': 'Male',
               'VOICE_2':'David'
               };
         
@@ -288,7 +288,7 @@ class SoundPlayGUI(QMainWindow):
         
     def __init__(self, parent=None, mirrored=True):
         
-        super(SoundPlayGUI, self).__init__(parent);
+        super(SpeakEasyGUI, self).__init__(parent);
         
         #self.setMaximumWidth(1360);
         #self.setMaximumHeight(760);
@@ -296,7 +296,7 @@ class SoundPlayGUI(QMainWindow):
             # Vertical box to hold all top level widget groups
         appLayout = QVBoxLayout();
         appWidget = QDialog();      
-        appWidget.setStyleSheet(SoundPlayGUI.defaultStylesheet);
+        appWidget.setStyleSheet(SpeakEasyGUI.defaultStylesheet);
         # Activate the window resize handle in the lower right corner
         # of the app window:
         appWidget.setSizeGripEnabled(True);
@@ -307,6 +307,10 @@ class SoundPlayGUI(QMainWindow):
         self.addTxtInputFld(appLayout);
         self.buildTapeRecorderButtons(appLayout);
         self.addOnceOrRepeat_And_VoiceRadioButtons(appLayout);
+        
+        #TODO: play repeatedly is not working:
+        self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].setDisabled(True)
+        
         self.buildHorizontalDivider(appLayout);
         self.buildProgramButtons(appLayout);
         self.buildSoundButtons(appLayout);
@@ -323,8 +327,8 @@ class SoundPlayGUI(QMainWindow):
     
 #    def connectSignalsToWidgets(self):
 #        self.commChannel = CommChannel();
-#        self.commChannel.hideButtonSignal.connect(SoundPlayGUI.hideButtonHandler);
-#        self.commChannel.showButtonSignal.connect(SoundPlayGUI.showButtonHandler);
+#        self.commChannel.hideButtonSignal.connect(SpeakEasyGUI.hideButtonHandler);
+#        self.commChannel.showButtonSignal.connect(SpeakEasyGUI.showButtonHandler);
 
 
     #----------------------------------
@@ -363,8 +367,8 @@ class SoundPlayGUI(QMainWindow):
         speechControlsLayout.addWidget(speechInputFldLabel);
         
         self.speechInputFld = TextPanel(numLines=5);
-        self.speechInputFld.setStyleSheet(SoundPlayGUI.inputFldStylesheet);
-        self.speechInputFld.setFontPointSize(SoundPlayGUI.EDIT_FIELD_TEXT_SIZE);
+        self.speechInputFld.setStyleSheet(SpeakEasyGUI.inputFldStylesheet);
+        self.speechInputFld.setFontPointSize(SpeakEasyGUI.EDIT_FIELD_TEXT_SIZE);
         
         speechControlsLayout.addWidget(self.speechInputFld);
         
@@ -393,28 +397,28 @@ class SoundPlayGUI(QMainWindow):
         hbox = QHBoxLayout();
 
         (self.onceOrRepeatGroup, onceOrRepeatButtonLayout, self.onceOrRepeatDict) =\
-            self.buildRadioButtons([SoundPlayGUI.interactionWidgets['PLAY_ONCE'], 
-                                    SoundPlayGUI.interactionWidgets['PLAY_REPEATEDLY']
+            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['PLAY_ONCE'], 
+                                    SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']
                                     ],
                                    Orientation.HORIZONTAL,
                                    Alignment.LEFT,
-                                   activeButton=SoundPlayGUI.interactionWidgets['PLAY_ONCE'],
+                                   activeButton=SpeakEasyGUI.interactionWidgets['PLAY_ONCE'],
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
         
         (self.voicesGroup, voicesButtonLayout, self.voicesRadioButtonsDict) =\
-            self.buildRadioButtons([SoundPlayGUI.interactionWidgets['VOICE_1'],
-                                    SoundPlayGUI.interactionWidgets['VOICE_2']
+            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['VOICE_1'],
+                                    SpeakEasyGUI.interactionWidgets['VOICE_2']
                                     ],
                                    Orientation.HORIZONTAL,
                                    Alignment.RIGHT,
-                                   activeButton=SoundPlayGUI.interactionWidgets['VOICE_1'],
+                                   activeButton=SpeakEasyGUI.interactionWidgets['VOICE_1'],
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
                                    
         # Style all the radio buttons:
         for playFreqButton in self.onceOrRepeatDict.values():
-            playFreqButton.setStyleSheet(SoundPlayGUI.playOnceRepeatButtonStylesheet); 
+            playFreqButton.setStyleSheet(SpeakEasyGUI.playOnceRepeatButtonStylesheet); 
         for playFreqButton in self.voicesRadioButtonsDict.values():
-            playFreqButton.setStyleSheet(SoundPlayGUI.voiceButtonStylesheet); 
+            playFreqButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
                                    
         hbox.addLayout(onceOrRepeatButtonLayout);
         hbox.addStretch(1);
@@ -440,14 +444,14 @@ class SoundPlayGUI(QMainWindow):
         '''
         
         (buttonGridLayout, self.recorderButtonDict) =\
-            self.buildButtonGrid([SoundPlayGUI.interactionWidgets['PLAY_TEXT'],
-                                  SoundPlayGUI.interactionWidgets['STOP'],
-                                  SoundPlayGUI.interactionWidgets['STOP_ALL']
+            self.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PLAY_TEXT'],
+                                  SpeakEasyGUI.interactionWidgets['STOP'],
+                                  SpeakEasyGUI.interactionWidgets['STOP_ALL']
                                   ],
                                  3); # Three columns
         for buttonObj in self.recorderButtonDict.values():
-            buttonObj.setStyleSheet(SoundPlayGUI.recorderButtonStylesheet);
-            buttonObj.setMinimumHeight(SoundPlayGUI.BUTTON_MIN_HEIGHT);
+            buttonObj.setStyleSheet(SpeakEasyGUI.recorderButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
         layout.addLayout(buttonGridLayout);                                 
          
     #----------------------------------
@@ -470,14 +474,14 @@ class SoundPlayGUI(QMainWindow):
         buttonLabelArr = [];
         for i in range(12):
             key = "SPEECH_" + str(i+1);
-            buttonLabelArr.append(SoundPlayGUI.interactionWidgets[key]);
+            buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
                     
         (buttonGridLayout, self.programButtonDict) =\
             self.buildButtonGrid(buttonLabelArr,
                                  4); # Four columns
         for buttonObj in self.programButtonDict.values():
-            buttonObj.setStyleSheet(SoundPlayGUI.programButtonStylesheet);
-            buttonObj.setMinimumHeight(SoundPlayGUI.BUTTON_MIN_HEIGHT);
+            buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
             
         layout.addLayout(buttonGridLayout);                                 
         
@@ -500,14 +504,14 @@ class SoundPlayGUI(QMainWindow):
         buttonLabelArr = [];
         for i in range(12):
             key = "SOUND_" + str(i+1);
-            buttonLabelArr.append(SoundPlayGUI.interactionWidgets[key]);
+            buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
         
         (buttonGridLayout, self.soundButtonDict) =\
             self.buildButtonGrid(buttonLabelArr,
                                  4); # Four columns
         for buttonObj in self.soundButtonDict.values():
-            buttonObj.setStyleSheet(SoundPlayGUI.soundButtonStylesheet);
-            buttonObj.setMinimumHeight(SoundPlayGUI.BUTTON_MIN_HEIGHT);
+            buttonObj.setStyleSheet(SpeakEasyGUI.soundButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
                         
         layout.addLayout(buttonGridLayout);                                 
         
@@ -667,7 +671,7 @@ class SoundPlayGUI(QMainWindow):
         '''
         prompt = "New label for this button:";
         dialogBox = QInputDialog(parent=self);
-        dialogBox.setStyleSheet(SoundPlayGUI.stylesheetAppBG);
+        dialogBox.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
         dialogBox.setLabelText(prompt);
         dialogBox.setCancelButtonText("Keep existing label");
         userChoice = dialogBox.exec_();
@@ -682,7 +686,7 @@ class SoundPlayGUI(QMainWindow):
     #--------------
 
     def playOnceChecked(self):
-        return self.onceOrRepeatDict[SoundPlayGUI.interactionWidgets['PLAY_ONCE']].isChecked();
+        return self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_ONCE']].isChecked();
     
     
     #----------------------------------
@@ -690,17 +694,17 @@ class SoundPlayGUI(QMainWindow):
     #--------------
 
     def playRepeatedlyChecked(self):
-        return self.onceOrRepeatDict[SoundPlayGUI.interactionWidgets['PLAY_REPEATEDLY']].isChecked();
+        return self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].isChecked();
     
     #----------------------------------
     # activeVoice
     #--------------
 
     def activeVoice(self):
-        if self.voicesRadioButtonsDict[SoundPlayGUI.interactionWidgets['VOICE_1']].isChecked():
-            return SoundPlayGUI.voices['VOICE_1'];
-        elif self.voicesRadioButtonsDict[SoundPlayGUI.interactionWidgets['VOICE_2']].isChecked():
-            return SoundPlayGUI.voices['VOICE_2'];
+        if self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets['VOICE_1']].isChecked():
+            return SpeakEasyGUI.voices['VOICE_1'];
+        elif self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets['VOICE_2']].isChecked():
+            return SpeakEasyGUI.voices['VOICE_2'];
     
     #----------------------------------
     # setButtonLabel 
@@ -734,17 +738,17 @@ class SoundPlayGUI(QMainWindow):
             self.showButtonSignal.emit(buttonObj);
         else:
             self.hideButtonSignal.emit(buttonObj);
-            self.buttonBlinkTimer = Timer(SoundPlayGUI.PROGRAM_BUTTON_LOOK_CHANGE_DURATION, partial(self.blinkButton, buttonObj, True));
+            self.buttonBlinkTimer = Timer(SpeakEasyGUI.PROGRAM_BUTTON_LOOK_CHANGE_DURATION, partial(self.blinkButton, buttonObj, True));
             self.buttonBlinkTimer.start();
     
 
 def alternateLookHandler(buttonObj):
     #buttonObj.hide();
-    buttonObj.setStyleSheet(SoundPlayGUI.programButtonModeTransitionStylesheet);
+    buttonObj.setStyleSheet(SpeakEasyGUI.programButtonModeTransitionStylesheet);
     
 def standardLookHandler(buttonObj):
     #buttonObj.show();
-    buttonObj.setStyleSheet(SoundPlayGUI.programButtonStylesheet);
+    buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
 
 if __name__ == "__main__":
 
@@ -759,7 +763,7 @@ if __name__ == "__main__":
     QApplication.setStyle(style);
     app = QApplication(sys.argv);
         
-    soundPlayGui = SoundPlayGUI();
+    soundPlayGui = SpeakEasyGUI();
     soundPlayGui.hideButtonSignal.connect(alternateLookHandler);
     soundPlayGui.showButtonSignal.connect(standardLookHandler);
     

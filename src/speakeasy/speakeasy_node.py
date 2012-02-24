@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 # TODO:
-#   - publish latched sound files
-#   - publish latched sound engines
-#   - test Cepstral
-#   - update GUI
+#   - Make sounds stoppable
+#   - Ability to save/load buttons
+#   - update GUI to include tts engine??? Maybe not.: Or: add 'Festival' and 'Cepstral' to the voice labels.
 
 
 #***********************************************************
@@ -69,7 +68,7 @@
 #                  a stop-gap, I modified the 'if' to 'if True', thereby
 #                  forcing text conversion each time.
 #
-# NOTE: hardcoded Festival voice list to be ["kal_diphone"]. To fix: do the equivalent of
+# NOTE: hardcoded Festival voice list to be ["voice_kal_diphone"]. To fix: do the equivalent of
 #       entering festival on the command line, and typing (voice.list).
 #
 #
@@ -223,20 +222,19 @@ class soundplay:
         try:
             if data.sound == SpeakEasyRequest.ALL and data.command == SpeakEasyRequest.PLAY_STOP:
                 self.stopall()
+            elif data.command == SpeakEasyRequest.PLAY_STOP:
+                pass
             else:
                 if data.sound == SpeakEasyRequest.PLAY_FILE:
-                    if not data.arg in self.filesounds.keys():
-                        rospy.logdebug('command for uncached wave: "%s"'%data.arg)
-                        try:
-                            self.filesounds[data.arg] = soundtype(data.arg)
-                        except:
-                            print "Exception"
-                            rospy.logerr('Error setting up to play "%s". Does this file exist on the machine on which speakeasy_node.py is running?'%data.arg)
-                            return
-                    else:
-                        print "cached"
-                        rospy.logdebug('command for cached wave: "%s"'%data.arg)
-                    sound = self.filesounds[data.arg]
+                    # Check whether the sound exists:
+                    try:
+                        self.soundFiles.index(data.arg);
+                    except ValueError:
+                        rospy.logerr('Error setting up to play "%s". Does this file exist on the machine on which speakeasy_node.py is running?'%data.arg);
+                        return;
+                    absPathToSoundFile = os.path.join(self.soundDir, data.arg);
+                    self.filesounds[data.arg] = soundtype(absPathToSoundFile);
+                    sound = soundtype(absPathToSoundFile);
                 elif data.sound == SpeakEasyRequest.SAY:
                     # data.sound is the text of a text-to-speech request:
                      
@@ -245,7 +243,7 @@ class soundplay:
                     # not be played until they are purged from the cache.
                     # This takes several seconds. We deviate here from the original
                     # soundplay_node.py code, and always re-generate the text-to-speech:
-                    rospy.logdebug('command for uncached text: "%s"' % data.arg)
+                    rospy.logdebug('Command for uncached text: "%s"' % data.arg)
                     
                     ttsEngine = None
                     if len(data.text_to_speech_engine) == 0:
@@ -255,10 +253,26 @@ class soundplay:
                     elif (data.text_to_speech_engine == "cepstral"):
                         ttsEngine = Cepstral();
                     else:
-                        rospy.logerr("Request for text-to-speech engine " + str(data.text_to_speech_engine) + ", which is unsupported.")
+                        rospy.logerr("Request for text-to-speech engine " +\
+                                     str(data.text_to_speech_engine) +\
+                                     ", which is unsupported.")
                         return;
                     
                     voice = data.arg2
+                    # Check whether voice exists for the requested tts engine:
+                    try:
+                        engineName = ttsEngine.getTextToSpeechEngineName();
+                        if (engineName == "festival"):
+                            self.festivalVoices.index(voice);
+                        elif (engineName == "cepstral"):
+                            self.cepstralVoices.index(voice);
+                    except ValueError:
+                        rospy.logerr("Unsupported voice " +\
+                                     str(voice) +\
+                                      " for text-to-speech engine " +\
+                                     ttsEngine.getTextToSpeechEngineName());
+                        return;
+                    
                     text  = data.arg
                     try:
                         try:
@@ -369,12 +383,12 @@ class soundplay:
         festivalPath = self.which("text2wave");
         if (festivalPath is not None):
             self.soundEngines.append("festival");
-            festivalVoices = self.getFestivalVoices(festivalPath)
+            self.festivalVoices = self.getFestivalVoices(festivalPath)
             
         cepstralSwiftPath = self.which("swift");
         if (cepstralSwiftPath is not None):
             self.soundEngines.append("cepstral");
-            cepstralVoices = self.getCepstralVoices(cepstralSwiftPath);
+            self.cepstralVoices = self.getCepstralVoices(cepstralSwiftPath);
         
         # Create an empty Capabilities message:
         capabilitiesMsg = Capabilities();
@@ -386,11 +400,11 @@ class soundplay:
         
         ttsFestivalVoices = TtsVoices()
         ttsFestivalVoices.ttsEngine = "festival"
-        ttsFestivalVoices.voices = festivalVoices;
+        ttsFestivalVoices.voices = self.festivalVoices;
         
         ttsCepstralVoices = TtsVoices()
         ttsCepstralVoices.ttsEngine = "cepstral"
-        ttsCepstralVoices.voices = cepstralVoices;
+        ttsCepstralVoices.voices = self.cepstralVoices;
         
         capabilitiesMsg.voices = [ttsFestivalVoices, ttsCepstralVoices];
         
@@ -509,7 +523,7 @@ class soundplay:
     def getFestivalVoices(self, absFestivalPath):
         #TODO: run festival, and issue Scheme command (voice.list)
         #      to get the real list of voices.
-        return ["kal_diphone"]
+        return ["voice_kal_diphone"]
 
 
 class TextToSpeechEngine(object):
@@ -519,6 +533,9 @@ class TextToSpeechEngine(object):
         self.wavfile = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')
         self.txtfilename = self.txtfile.name
         self.wavfilename = self.wavfile.name
+
+    def getTextToSpeechEngineName(self):
+        return self.ttsEngineName;
 
     def initTextFile(self, text):
         # Just in case client calls getCommandString() twice on the same
@@ -547,10 +564,11 @@ class Festival(TextToSpeechEngine):
     
     def __init__(self):
         super(Festival, self).__init__()
+        self.ttsEngineName = "festival";
         
     def runTextToSpeech(self, voice, text):
         self.initTextFile(text)
-        failureMsg = "Sound synthesis failed. Is festival installed? Is a festival voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
+        failureMsg = "Sound synthesis failed. Is the Festival engine installed? Is a festival voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
         self.runTextToSpeechHelper(text,
                                    "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + self.wavfilename,
                                    failureMsg);
@@ -560,12 +578,13 @@ class Cepstral(TextToSpeechEngine):
     
     def __init__(self):
         super(Cepstral, self).__init__()
+        self.ttsEngineName = "cepstral";
         
     def runTextToSpeech(self, voice, text):
         self.initTextFile(text)        
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
         self.runTextToSpeechHelper(text,
-                                   "swift -d " + str(voice) + " -f " + self.txtfilename + " -o " + self.wavfilename,
+                                   "swift -n " + str(voice) + " -f " + self.txtfilename + " -o " + self.wavfilename,
                                    failureMsg);
         return self.wavfilename
 

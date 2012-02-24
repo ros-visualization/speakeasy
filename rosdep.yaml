@@ -1,0 +1,7 @@
+festival:
+  ubuntu:
+    lucid: festival
+    maverick: festival
+    natty: festival
+    oneiric: festival
+

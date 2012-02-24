@@ -123,9 +123,8 @@ class SoundClient:
 ## stopped using stopSaying or stopAll.
 ## 
 ## \param text String to say
-
-    def say(self,text, voice='voice_kal_diphone'):
-        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_ONCE, text, voice)
+    def say(self,text, voice='voice_kal_diphone', ttsEngine="festival"):
+        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_ONCE, text, voice, ttsEngine=ttsEngine)
 
 ## \brief Say a string repeatedly
 ## 
@@ -133,8 +132,8 @@ class SoundClient:
 ## 
 ## \param text String to say repeatedly
 
-    def repeat(self,text):
-        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_START, text)
+    def repeat(self,text, voice="voice_kal_diphone", ttsEngine="festival"):
+        self.sendMsg(SpeakEasyRequest.SAY, SpeakEasyRequest.PLAY_START, text, voice, ttsEngine)
 
 ## \brief Stop saying a string
 ## 
@@ -222,12 +221,13 @@ class SoundClient:
     def stopAll(self):
         self.stop(SpeakEasyRequest.ALL)
 
-    def sendMsg(self, snd, cmd, s, arg2=""):
+    def sendMsg(self, snd, cmd, s, arg2="", ttsEngine="festival"):
         msg = SpeakEasyRequest()
         msg.sound = snd
         msg.command = cmd
         msg.arg = s
         msg.arg2 = arg2 
+        msg.text_to_speech_engine = ttsEngine
         self.pub.publish(msg)
         ## @todo this should be a warn once warns become visible on the console.
         if self.pub.get_num_connections() < 1:

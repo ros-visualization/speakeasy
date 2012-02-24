@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import roslib; roslib.load_manifest('sound_play_gui');
+import roslib; roslib.load_manifest('speakeasy');
 import rospy
 
 import sys
@@ -12,14 +12,14 @@ from threading import Timer;
 from PySide.QtCore import * #@UnusedWildImport
 from PySide.QtGui import * #@UnusedWildImport
 
-from sound_play_gui.sound_play_ui import SoundPlayGUI;
-from sound_play_gui.sound_play_ui import DialogService;
+from speakeasy_ui import SpeakEasyGUI;
+from speakeasy_ui import DialogService;
 
-from sound_play.libsoundplay import SoundClient;
-from sound_play.msg import SoundRequest
+from speakeasy.libspeakeasy import SoundClient;
+from speakeasy.msg import SpeakEasyRequest;
 
-from sound_play_ui import alternateLookHandler;
-from sound_play_ui import standardLookHandler;
+from speakeasy_ui import alternateLookHandler;
+from speakeasy_ui import standardLookHandler;
 
 
 # ----------------------------------------------- Class Program ------------------------------------
@@ -30,7 +30,7 @@ class ButtonProgram(object):
     # Initializer 
     #--------------
     
-    def __init__(self, buttonObj, textToSave, voice, playOnce=True):
+    def __init__(self, buttonObj, textToSave, voice, ttsEngine, playOnce=True):
         '''
         Create an object that holds the playback parameters for a 
         programmed button.
@@ -40,12 +40,15 @@ class ButtonProgram(object):
         @type  textToSave: string
         @param voice: The voice to use for the utterance
         @type  voice: string
+        @param ttsEngine: The text-to-speech engine to use. (e.g. "festival", or "cepstral"
+        @type string
         @param playOnce: Whether to play the utterance just once, or several times.
         @type  bool
         '''
         self.buttonLabel = buttonObj.text();
         self.textToSay   = textToSave;
         self.activeVoice = voice;
+        self.ttsEngine   = ttsEngine;
         self.playOnce    = playOnce;
         
     #----------------------------------
@@ -56,13 +59,12 @@ class ButtonProgram(object):
     def getText(self):
         return self.textToSay;
 
-# ----------------------------------------------- Class SoundPlayController ------------------------------------
+# ----------------------------------------------- Class SpeakEasyController ------------------------------------
 
-class SoundPlayController(object):
+class SpeakEasyController(object):
     '''
-    Control logic behind the sound_play GUI. Relies on 
-    libsoundplay.py in package audio_common/sound_play.
-    Primitives in that library are as follows.
+    Control logic behind the speakeasy GUI. Relies on 
+    libspeakeasy.py. Primitives in that library are as follows.
 
 	- C{voiceSound(str)}: create voice C{Sound} instance
 	- C{waveSound(abspath)}: create wave C{Sound} instance
@@ -80,34 +82,35 @@ class SoundPlayController(object):
 	- C{stopAll()} stop all voice, .wav, and built-in sounds
 	
 	Available voices:
-	1.  voice_kal_diphone (male)       
+	Festival: 1.  Usually voice_kal_diphone (male) on Ubuntu installations
+	Cepstral: Depends on your installation.       
             
-    Available built-in sounds:
-	- C{msg.SoundRequest.BACKINGUP}
-	- C{msg.SoundRequest.NEEDS_UNPLUGGING}
-	- C{msg.SoundRequest.NEEDS_PLUGGING}
-	- C{msg.SoundRequest.NEEDS_UNPLUGGING_BADLY}
-	- C{msg.SoundRequest.NEEDS_PLUGGING_BADLY}
+    Available built-in, hardwired sounds (legacy from original sound_play_node.py):
+	- C{msg.SpeakEasyRequest.BACKINGUP}
+	- C{msg.SpeakEasyRequest.NEEDS_UNPLUGGING}
+	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING}
+	- C{msg.SpeakEasyRequest.NEEDS_UNPLUGGING_BADLY}
+	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING_BADLY}
     '''
     
     soundPaths = {
-                  'SOUND_1' : 'sounds/rooster.wav',
-                  'SOUND_2': 'sounds/drill.wav',
-                  'SOUND_3' : 'sounds/bullCall.wav',
-                  'SOUND_4': 'sounds/clown_horn.wav',
-                  'SOUND_5': 'sounds/cashreg.wav',
-                  'SOUND_6': 'sounds/plateglass.wav',
-                  'SOUND_7': 'sounds/old_cell.wav',
-                  'SOUND_8': 'sounds/moo2.wav',
-                  'SOUND_9': 'sounds/abirdm.wav',
-                  'SOUND_10': 'sounds/bigtruck.wav', 
-                  'SOUND_11': 'sounds/seagulls_shore.wav', 
-                  'SOUND_12': 'sounds/hydrau_lift.wav' 
+                  'SOUND_1' : 'rooster.wav',
+                  'SOUND_2':  'drill.wav',
+                  'SOUND_3' : 'bullCall.wav',
+                  'SOUND_4':  'clown_horn.wav',
+                  'SOUND_5':  'cashreg.wav',
+                  'SOUND_6':  'plateglass.wav',
+                  'SOUND_7':  'old_cell.wav',
+                  'SOUND_8':  'moo2.wav',
+                  'SOUND_9':  'abirdm.wav',
+                  'SOUND_10': 'bigtruck.wav', 
+                  'SOUND_11': 'seagulls_shore.wav', 
+                  'SOUND_12': 'hydrau_lift.wav' 
                   }
     
     def __init__(self, dirpath):
         
-        self.gui = SoundPlayGUI();
+        self.gui = SpeakEasyGUI();
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
         self.gui.hideButtonSignal.connect(alternateLookHandler);
@@ -120,7 +123,7 @@ class SoundPlayController(object):
         
         # Allow multiple GUIs to run simultaneously. Therefore
         # the anonymous=True:
-        rospy.init_node('sound_play_gui', anonymous=True);
+        rospy.init_node('speakeasy_gui', anonymous=True);
         # No program button is being held down:
         self.programButtonPushedTime = None;
         # No speech buttons programmed yet:
@@ -145,12 +148,24 @@ class SoundPlayController(object):
     # sayText 
     #--------------
     
-    def sayText(self, text, voice, sayOnce=True):
+    def sayText(self, text, voice, ttsEngine="festival", sayOnce=True):
+        '''
+        Send message to SpeakEasy service to say text, with the
+        given voice, using the given text-to-speech engine.
+        @param text: Text to be uttered by the tts engine
+        @type  string
+        @param voice: Name of speaking voice to be used.
+        @type string
+        @param ttsEngine: Name of tts engine to use (e.g. "festival" (the default), "cepstral"
+        @type string
+        @param sayOnce: Whether repeat the utterance over and over, or just say it once.
+        @type bool
+        '''
         # Repeat over and over? Or say once?
         if sayOnce:
-            self.soundClient.say(text, voice=voice);
+            self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
         else:
-            self.soundClient.repeat(text);
+            self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine);
         return;
     
     #----------------------------------
@@ -175,7 +190,16 @@ class SoundPlayController(object):
             
             # Got text in input fld. Which of the voices is checked?
             voice = self.gui.activeVoice();
-            self.sayText(self.gui.speechInputFld.getText(), voice, self.gui.playOnceChecked());
+            if (voice == "Male"):
+                voice = "voice_kal_diphone"
+                ttsEngine = "festival"
+            # TODO: **************** Read from radio buttons!
+            elif voice == "David":
+                ttsEngine = "cepstral"
+            else:
+                raise ValueError("Unknown voice: " + str(voice));
+            # ****** end TODO
+            self.sayText(self.gui.speechInputFld.getText(), voice, ttsEngine, self.gui.playOnceChecked());
             return;
         
         # Stop button pushed?
@@ -201,7 +225,7 @@ class SoundPlayController(object):
         # Record press-down time:
         self.programButtonPushedTime = time.time(); # fractional seconds till beginning of epoch 
         # Schedule the button to blink when the programming mode hold delay is over:
-        self.buttonBlinkTimer = Timer(SoundPlayGUI.PROGRAM_BUTTON_HOLD_TIME, partial(self.gui.blinkButton, buttonObj, False));
+        self.buttonBlinkTimer = Timer(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME, partial(self.gui.blinkButton, buttonObj, False));
         self.buttonBlinkTimer.start();
 
     #----------------------------------
@@ -221,7 +245,7 @@ class SoundPlayController(object):
         self.programButtonPushedTime = None;
         
         # Held long enough to indicate intention to program?:
-        if holdTime >= SoundPlayGUI.PROGRAM_BUTTON_HOLD_TIME:
+        if holdTime >= SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME:
             self.programOneButton(buttonObj);
         else:
             self.playProgram(buttonObj);
@@ -241,7 +265,13 @@ class SoundPlayController(object):
             self.gui.setButtonLabel(buttonObj,newButtonLabel);
         
         textToSave = self.gui.speechInputFld.getText();
-        programObj = ButtonProgram(buttonObj, textToSave, self.gui.activeVoice(), self.gui.playOnceChecked());
+        #******** TODO!!!!
+        if self.gui.activeVoice() == "Male":
+            ttsEngine = "festival"
+        elif self.gui.activeVoice() == "David":
+            ttsEngine = "cepstral"
+        #******** End TODO
+        programObj = ButtonProgram(buttonObj, textToSave, self.gui.activeVoice(), ttsEngine, self.gui.playOnceChecked());
         
         self.programs[buttonObj] = programObj; 
         
@@ -256,15 +286,15 @@ class SoundPlayController(object):
             program = self.programs[buttonObj];
         except KeyError:
             self.dialogService.showErrorMsg("This button does not contain a program. Press-and-hold for " +\
-                                            str(int(SoundPlayGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
+                                            str(int(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
                                             " seconds to program.");
             return;
     
     
         onlyPlayOnce = program.playOnce;
         voice        = program.activeVoice;
-        
-        self.sayText(program.getText(), voice, onlyPlayOnce);
+        ttsEngine    = program.ttsEngine;
+        self.sayText(program.getText(), voice, ttsEngine, onlyPlayOnce);
              
     #----------------------------------
     # actionSoundButtons 
@@ -272,43 +302,35 @@ class SoundPlayController(object):
         
     def actionSoundButtons(self, buttonObj):
         if buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_1']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_1'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_1'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_2']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_2'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_2'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_3']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_3'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_3'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_4']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_4'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_4'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_5']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_5'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_5'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_6']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_6'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_6'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_7']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_7'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_7'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_8']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_8'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_8'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_9']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_9'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_9'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_10']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_10'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_10'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_11']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_11'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_11'];
         elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_12']]:
-            soundFile = SoundPlayController.soundPaths['SOUND_12'];
+            soundFile = SpeakEasyController.soundPaths['SOUND_12'];
         else:
             raise ValueError("Unknown widget passed to actionSoundButton() method: " + str(buttonObj));
 
-	fullFileName = "";
-	try:
-	  os.environ["ROS_MASTER_URI"].index("localhost")
-	  fullFileName = os.path.join(self.dirpath, soundFile);
-	except:
-	  fullFileName = "/u/takayama/local/audio_common/sound_play/" + soundFile;
-	print "Full file name: " + fullFileName
-        #self.soundClient.play(fullFileName);
-	self.soundClient.sendMsg(SoundRequest.PLAY_FILE,
-				 SoundRequest.PLAY_START,
-				 fullFileName)
+    	self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
+	                             SpeakEasyRequest.PLAY_START,
+				                 soundFile)
           
         
 if __name__ == "__main__":
@@ -318,7 +340,7 @@ if __name__ == "__main__":
     # To find the sounds, we need the absolute directory
     # path to this script:
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
-    soundPlayController = SoundPlayController(scriptDir);
+    speakeasyController = SpeakEasyController(scriptDir);
     # Enter Qt application main loop
     sys.exit(app.exec_());
         
