@@ -346,7 +346,7 @@ class SpeakEasyController(object):
         else:
             raise ValueError("Unknown widget passed to actionSoundButton() method: " + str(buttonObj));
 
-    	self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
+        self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
 	                             SpeakEasyRequest.PLAY_START,
 				                 soundFile)
           

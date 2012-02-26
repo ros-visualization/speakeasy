@@ -89,6 +89,8 @@ class ButtonSavior(object):
 
     @staticmethod
     def retrieveFromFile(fileName):
+        '''
+        '''
         try:
             fd = open(fileName, 'w');
         except Exception:

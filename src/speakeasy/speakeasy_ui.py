@@ -1,7 +1,5 @@
 import sys
 import os
-import time
-import random
 
 from functools import partial;
 from threading import Timer;
@@ -159,6 +157,8 @@ class SpeakEasyGUI(QMainWindow):
     RADIO_BUTTON_LABEL_FONT_SIZE = 16; # pixels
     
     EDIT_FIELD_TEXT_SIZE = 18; # pixels
+    
+    NUM_OF_PROGRAM_BUTTON_COLUMNS = 4;
     
     # ---------------------- Names for Voices ----------------------
     
@@ -444,11 +444,11 @@ class SpeakEasyGUI(QMainWindow):
         '''
         
         (buttonGridLayout, self.recorderButtonDict) =\
-            self.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PLAY_TEXT'],
-                                  SpeakEasyGUI.interactionWidgets['STOP'],
-                                  SpeakEasyGUI.interactionWidgets['STOP_ALL']
-                                  ],
-                                 3); # Three columns
+            SpeakEasyGUI.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PLAY_TEXT'],
+                                          SpeakEasyGUI.interactionWidgets['STOP'],
+                                          SpeakEasyGUI.interactionWidgets['STOP_ALL']
+                                          ],
+                                         3); # Three columns
         for buttonObj in self.recorderButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.recorderButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
@@ -477,8 +477,8 @@ class SpeakEasyGUI(QMainWindow):
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
                     
         (buttonGridLayout, self.programButtonDict) =\
-            self.buildButtonGrid(buttonLabelArr,
-                                 4); # Four columns
+            SpeakEasyGUI.buildButtonGrid(buttonLabelArr,
+                                         SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS);
         for buttonObj in self.programButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
@@ -507,8 +507,8 @@ class SpeakEasyGUI(QMainWindow):
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
         
         (buttonGridLayout, self.soundButtonDict) =\
-            self.buildButtonGrid(buttonLabelArr,
-                                 4); # Four columns
+            SpeakEasyGUI.buildButtonGrid(buttonLabelArr,
+                                         4); # Four columns
         for buttonObj in self.soundButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.soundButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
@@ -617,8 +617,8 @@ class SpeakEasyGUI(QMainWindow):
     # buildButtonGrid
     #--------------
 
-    def buildButtonGrid(self,
-                        labelTextArray, 
+    @staticmethod
+    def buildButtonGrid(labelTextArray, 
                         numColumns):
         '''
         Creates a grid of QPushButton widgets. They will be 
