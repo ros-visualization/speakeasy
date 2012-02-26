@@ -8,3 +8,6 @@ src/speakeasy/__init__.pyc
 src/speakeasy/libspeakeasy.pyc
 src/speakeasy/msg/
 *.pyc
+*~
+.project
+.classpath

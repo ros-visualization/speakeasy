@@ -13,6 +13,9 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/speakeasy</url>
 
+  <rosdep name="python-pyside"/>
+  <rosdep name="festival"/>
+
 </package>
 
 

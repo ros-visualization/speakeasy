@@ -4,4 +4,11 @@ festival:
     maverick: festival
     natty: festival
     oneiric: festival
+python-pyside:
+  ubuntu:
+    lucid: python-pyside
+    maverick: python-pyside
+    natty: python-pyside
+    oneiric: python-pyside
+
 

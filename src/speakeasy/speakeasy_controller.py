@@ -21,6 +21,8 @@ from speakeasy.msg import SpeakEasyRequest;
 from speakeasy_ui import alternateLookHandler;
 from speakeasy_ui import standardLookHandler;
 
+from speakeasy.speakeasy_persistence import ButtonSavior;
+
 
 # ----------------------------------------------- Class Program ------------------------------------
 
@@ -58,6 +60,22 @@ class ButtonProgram(object):
         
     def getText(self):
         return self.textToSay;
+
+    #----------------------------------
+    # toXML
+    #--------------
+
+    def toXML(self):
+        
+        domOneButtonProgramRoot = ButtonSavior.createXMLElement(ButtonSavior.BUTTON_PROGRAM_TAG);
+        
+        domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_LABEL_TAG, content=self.buttonLabel));
+        domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_TEXT_TO_SAY_TAG, content=self.textToSay));
+        domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_VOICE_TAG, content=self.activeVoice));
+        domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_TTS_ENGINE, content=self.ttsEngine));        
+        domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_PLAY_ONCE, content=str(self.playOnce)));                                       
+        return domOneButtonProgramRoot
+
 
 # ----------------------------------------------- Class SpeakEasyController ------------------------------------
 
