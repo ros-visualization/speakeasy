@@ -37,7 +37,7 @@ class ButtonSetPopupSelector(QDialog):
           </ul></li>
       <li>If the exec_() method returned 1, the caller may obtain an array with the
           ButtonProgram instances of the currently showing (and therefore accepted) buttons.
-          The array is obtained from the dialog instance via method getCurrentlyShowingSet(self).</li> 
+          The array is obtained from the dialog instance via method getCurrentlyShowingSetLabels(self).</li> 
     </ul>
     '''
     #------------------------------------------------------   Public  Methods ---------------------------
@@ -110,6 +110,20 @@ class ButtonSetPopupSelector(QDialog):
         '''
         return self.buttonProgramArrays[self.currentlyShowingSetIndex];
 
+    def getCurrentlyShowingSetLabels(self):
+        '''
+        Returns an array of labels of buttons that are currently showing on
+        the dialog, or were showing when the user clicked OK.
+        @return: Array of labels.
+        @returnt: [string]
+        '''
+        allLabels = [];
+        for buttonProgram in self.buttonProgramArrays[self.currentlyShowingSetIndex]:
+            allLabels.append(buttonProgram.getLabel()); 
+        return allLabels;
+
+
+
     #------------------------------------------------------   Private  Methods ---------------------------
     
     def offerNewButtonSet(self):
@@ -138,7 +152,7 @@ class ButtonSetPopupSelector(QDialog):
                 self.flipNextPrevDirection();
                 return;
             self.currentlyShowingSetIndex -= 1;
-            self.buildButtonSet(self.getCurrentlyShowingSet());
+            self.buildButtonSet(self.getCurrentlyShowingSetLabels());
             self.setNextPrevButtonsEnabledness();
             return;
         
@@ -187,7 +201,7 @@ class ButtonSetPopupSelector(QDialog):
             self.flipNextPrevDirection();
             return;
 
-        self.buildButtonSet(self.getCurrentlyShowingSet());
+        self.buildButtonSet(self.getCurrentlyShowingSetLabels());
         self.setNextPrevButtonsEnabledness();
 
         return;

@@ -352,7 +352,9 @@ class SpeakEasyGUI(QMainWindow):
         # Collect the buttons into a flat array:
         for row in range(gridLayout.rowCount()):
             for col in range(SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS):
-                programButtonArray.append(self.programButtonGridLayout.itemAtPosition(row, col).widget());
+                layoutItem = gridLayout.itemAtPosition(row, col);
+                if layoutItem is not None:
+                    programButtonArray.append(layoutItem.widget());
         return iter(programButtonArray);
 
     #----------------------------------
@@ -362,10 +364,13 @@ class SpeakEasyGUI(QMainWindow):
     def replaceProgramButtons(self, buttonProgramsArray):
         
         programButtonObjIt = self.programButtonIterator();
+        # Remove the existing program buttons from the application's
+        # layout, and mark them for deletion:
         try:
-            programButtonObj = programButtonObjIt.next();
-            self.programButtonGridLayout.removeWidget(programButtonObj);
-            programButtonObj.deleteLater();
+            while True:
+                programButtonObj = programButtonObjIt.next();
+                self.programButtonGridLayout.removeWidget(programButtonObj);
+                programButtonObj.deleteLater();
         except StopIteration:
             pass
         
@@ -388,7 +393,8 @@ class SpeakEasyGUI(QMainWindow):
         # original layout that is embedded in the application Dialog:
         newButtonsIt = self.programButtonIterator(gridLayout=newProgramButtonGridLayout);
         try:
-            self.programButtonGridLayout.addWidget(newButtonsIt.next());
+            while True:
+                self.programButtonGridLayout.addWidget(newButtonsIt.next());
         except StopIteration:
             pass;
     

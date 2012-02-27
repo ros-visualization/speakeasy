@@ -160,25 +160,25 @@ class ButtonSavior(object):
                 domButtonSetRootEl = domTreeIt.next();
                 domButtonSetTitleEl = domTreeIt.next();
                 programSetTitle = domButtonSetTitleEl.text;
-                
-                while True:
 
-                    # Get the program setting for One button (tag 'buttonSetting'):
-                    domProgramEl = domTreeIt.next();
-                    
-                    domButtonLabelEl = domProgramEl.find("label");
+                # Get all 'buttonSetting' elements as ElementObject instances:
+                domButtonSettingElArr = domButtonSetRootEl.findall("buttonSetting")
+
+                
+                for domButtonSettingEl in domButtonSettingElArr: 
+                    domButtonLabelEl = domButtonSettingEl.find("label");
                     label = domButtonLabelEl.text;
                     
-                    domTextEl = domProgramEl.find("text");
+                    domTextEl = domButtonSettingEl.find("text");
                     text = domTextEl.text;
                      
-                    domVoiceEl = domProgramEl.find("voice");
+                    domVoiceEl = domButtonSettingEl.find("voice");
                     voice = domVoiceEl.text;
                     
-                    domEngineEl = domProgramEl.find("engine");
+                    domEngineEl = domButtonSettingEl.find("engine");
                     engine = domEngineEl.text;
     
-                    domPlayOnceEl = domProgramEl.find("playOnce");
+                    domPlayOnceEl = domButtonSettingEl.find("playOnce");
                     playOnce = domPlayOnceEl.text;
                     if playOnce == "True":
                         playOnce = True;

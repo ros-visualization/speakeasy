@@ -6,6 +6,7 @@ import rospy
 import sys
 import os
 import time
+import shutil
 from functools import partial;
 from threading import Timer;
 
@@ -175,6 +176,7 @@ class SpeakEasyController(object):
         # No speech buttons programmed yet:
         self.programs = {};
         self.connectWidgetsToActions()
+        self.installDefaultSpeechSet();
 
     #----------------------------------
     # connectWidgetsToActions 
@@ -184,15 +186,19 @@ class SpeakEasyController(object):
         self.gui.speechInputFld
         for recorderButton in self.gui.recorderButtonDict.values():
             recorderButton.clicked.connect(partial(self.actionRecorderButtons, recorderButton));
-        for programButton in self.gui.programButtonDict.values():
-            programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
-            programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
+        self.connectProgramButtonsToActions();
         for soundButton in self.gui.soundButtonDict.values():
             soundButton.clicked.connect(partial(self.actionSoundButtons, soundButton));
         newSpeechSetButton = self.gui.speechSetButtonDict[SpeakEasyGUI.interactionWidgets['NEW_SPEECH_SET']];
         newSpeechSetButton.clicked.connect(self.actionNewSpeechSet);
         pickSpeechSetButton = self.gui.speechSetButtonDict[SpeakEasyGUI.interactionWidgets['PICK_SPEECH_SET']];
         pickSpeechSetButton.clicked.connect(self.actionPickSpeechSet);
+    
+
+    def connectProgramButtonsToActions(self):
+        for programButton in self.gui.programButtonDict.values():
+            programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
+            programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
     
     #----------------------------------
     # sayText 
@@ -411,6 +417,11 @@ class SpeakEasyController(object):
         # Save this array of programs as XML:
         fileName = self.getNewSpeechSetName();
         ButtonSavior.saveToFile(buttonProgramArray, fileName, title=os.path.basename(fileName));
+        try:
+            shutil.copy(fileName, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"));
+        except:
+            rospy.logerr("Could not copy new program XML file to default.xml.");
+
 
     def actionPickSpeechSet(self):
         
@@ -426,7 +437,8 @@ class SpeakEasyController(object):
         buttonProgramArrays = [];
         for xmlFileName in xmlFileNames:
             try:
-                buttonProgramArrays.append(ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram));
+                (buttonSettingTitle, buttonProgram) = ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram); 
+                buttonProgramArrays.append(buttonProgram);
             except ValueError as e:
                 # Bad XML:
                 rospy.logerr(e.toStr());
@@ -439,10 +451,33 @@ class SpeakEasyController(object):
         
         # Get the selected ButtonProgram array:
         buttonPrograms = buttonSetSelector.getCurrentlyShowingSet();
-        self.replaceButtons(buttonPrograms);
+        self.replaceProgramButtons(buttonPrograms);
+        
+        # Copy this new XML file into default.xml, so that it will be
+        # loaded next time the application starts:
+        
+        ButtonSavior.saveToFile(buttonPrograms, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"), title="default.xml");      
+        
+    def installDefaultSpeechSet(self):
+        defaultPath = os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml");
+        if not os.path.exists(defaultPath):
+            return;
+        (buttonSetTitle, buttonPrograms) =  ButtonSavior.retrieveFromFile(defaultPath, ButtonProgram);
+        self.replaceProgramButtons(buttonPrograms);
         
     def replaceProgramButtons(self, buttonProgramArray):
-        self.gui.replaceProgramButtons();
+        self.gui.replaceProgramButtons(buttonProgramArray);
+        self.connectProgramButtonsToActions();
+        # Update the button object --> ButtonProgram instance mapping:
+        self.programs = {};
+        buttonObjIt = self.gui.programButtonIterator();
+        for buttonProgram in buttonProgramArray:
+            try:
+                self.programs[buttonObjIt.next()] = buttonProgram;
+            except StopIteration:
+                # Should not happen:
+                raise ValueError("Fewer buttons than ButtonProgram instances.");
+            
 
         
     def getAllSpeechSetXMLFileNames(self):
