@@ -8,6 +8,11 @@ from PySide.QtCore import * #@UnusedWildImport
 from PySide.QtGui import * #@UnusedWildImport
 
 
+#TODO: From speakeasy_node's capabilities message, find all available sound files, and build sound buttons from those file names.
+#TODO: Play repeatedly.
+#TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
+
+
 class Option:
     YES = True;
     NO  = False;
@@ -159,6 +164,7 @@ class SpeakEasyGUI(QMainWindow):
     EDIT_FIELD_TEXT_SIZE = 18; # pixels
     
     NUM_OF_PROGRAM_BUTTON_COLUMNS = 4;
+    NUM_OF_SOUND_BUTTON_COLUMNS   = 4;
     
     # ---------------------- Names for Voices ----------------------
     
@@ -202,6 +208,9 @@ class SpeakEasyGUI(QMainWindow):
                           'SOUND_10' : 'Big truck',
                           'SOUND_11' : 'Seagulls',
                           'SOUND_12' : 'Lift',
+                          
+                          'NEW_SPEECH_SET' : 'Create new speech set',
+                          'PICK_SPEECH_SET' : 'Pick different speech set',
                           } 
         
     # ---------------------- Application Background styling --------------------     
@@ -322,6 +331,7 @@ class SpeakEasyGUI(QMainWindow):
         self.buildHorizontalDivider(appLayout);
         self.buildProgramButtons(appLayout);
         self.buildSoundButtons(appLayout);
+        self.buildButtonSetControls(appLayout);
         
         #self.connectSignalsToWidgets();        
         
@@ -329,6 +339,19 @@ class SpeakEasyGUI(QMainWindow):
         
         self.show();
 
+    #----------------------------------
+    # programButtonIterator 
+    #--------------
+
+    def programButtonIterator(self):
+        
+        programButtonArray = [];
+        # Collect the buttons into a flat array:
+        for row in range(self.programButtonGridLayout.rowCount()):
+            for col in range(SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS):
+                programButtonArray.append(self.programButtonGridLayout.item_at_position(row, col));
+        return iter(programButtonArray);
+    
     #----------------------------------
     # connectSignalsToWidgets 
     #--------------
@@ -484,14 +507,14 @@ class SpeakEasyGUI(QMainWindow):
             key = "SPEECH_" + str(i+1);
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
                     
-        (buttonGridLayout, self.programButtonDict) =\
+        (self.programButtonGridLayout, self.programButtonDict) =\
             SpeakEasyGUI.buildButtonGrid(buttonLabelArr,
                                          SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS);
         for buttonObj in self.programButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
             
-        layout.addLayout(buttonGridLayout);                                 
+        layout.addLayout(self.programButtonGridLayout);                                 
         
     #----------------------------------
     # buildSoundButtons
@@ -515,13 +538,26 @@ class SpeakEasyGUI(QMainWindow):
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
         
         (buttonGridLayout, self.soundButtonDict) =\
-            SpeakEasyGUI.buildButtonGrid(buttonLabelArr,
-                                         4); # Four columns
+            SpeakEasyGUI.buildButtonGrid(buttonLabelArr, SpeakEasyGUI.NUM_OF_SOUND_BUTTON_COLUMNS);
         for buttonObj in self.soundButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.soundButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
                         
         layout.addLayout(buttonGridLayout);                                 
+
+    #----------------------------------
+    # buildButtonSetControls
+    #--------------
+
+    def buildButtonSetControls(self, layout):
+        
+        buttonLabelArray = [self.interactionWidgets['NEW_SPEECH_SET'], self.interactionWidgets['PICK_SPEECH_SET']]; 
+        # Two columns of buttons:
+        (buttonGridLayout, self.speechSetButtonDict) = SpeakEasyGUI.buildButtonGrid(buttonLabelArray, 2);
+        for buttonObj in self.speechSetButtonDict.values():
+            buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
+        layout.addLayout(buttonGridLayout);
         
     #----------------------------------
     # buildHorizontalDivider 

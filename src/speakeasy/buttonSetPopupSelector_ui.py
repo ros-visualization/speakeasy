@@ -6,7 +6,6 @@ from PySide.QtCore import * #@UnusedWildImport
 from PySide.QtGui import * #@UnusedWildImport
 
 from speakeasy_ui import SpeakEasyGUI;
-from speakeasy_ui import DialogService;
 
 class NextPrev:
     NEXT     = 0;
@@ -15,15 +14,41 @@ class NextPrev:
 #----------------------------------------------------- ButtonSetPopupSelector Class -----------------------------  
 
 class ButtonSetPopupSelector(QDialog):
+    '''
+    An interactive dialog that displays successive sets of
+    buttons. When each set is displayed, user may ask for the
+    next available set, the previous. already seen set, or the
+    user may accept the currently displayed set. A cancel is 
+    available as well. 
+    </p>
+    The call and return protocol is as follows:
+    <ul>
+      <li>The caller creates a fresh dialog instance of this class,
+          passing an iterator. The iterator's next() method returns 
+          an array of button labels each time it is called. (When the
+          iterator is exhausted, the user is able to use a 'Previous'
+          button to view the previously seen sets again).</li>
+      <li>The caller invokes the exec_() method on the dialog instance.</li>
+      <li>The exec_() method returns:
+          <ul>
+              <li>-1, if the iterator yielded no button label arrays at all.</li>
+              <li>0, if the user canceled, and </li>
+              <li>1 if the user accepted one of the sets.
+          </ul></li>
+      <li>If the exec_() method returned 1, the caller may obtain an array with the
+          button labels of the currently showing (and therefore accepted) buttons.
+          The array is obtained from the dialog instance via method getCurrentlyShowingSet(self).</li> 
+    </ul>
+    '''
+    #------------------------------------------------------   Public  Methods ---------------------------
     
     def __init__(self, buttonNameArrayIterator):
         
         super(ButtonSetPopupSelector, self).__init__();
-        # For error message popups:
-        self.dialogService = DialogService();
-        
+
         self.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
         
+        self.programButtonDict = {};
         self.buttonLabelArrayIt = buttonNameArrayIterator;
         self.shownLabelArrays = [];
         self.currentlyShowingSetIndex = None;
@@ -63,14 +88,39 @@ class ButtonSetPopupSelector(QDialog):
     
     
     def exec_(self):
+        '''
+        If the prior initialization revealed that the caller does not
+        deliver any sets of button labels at all, then return -1, without
+        displaying any dialog.
+        @return: -1 if no button sets available. 1 if user accepted one of the button
+                 label sets as the one they want, or 0, if the user cancelled.
+        @returnt: int
+        '''
         if self.noAvailableSets:
             return -1;
         return super(ButtonSetPopupSelector, self).exec_();
-        
+
     def getCurrentlyShowingSet(self):
+        '''
+        Returns an array of button labels that are currently showing on
+        the dialog, or were showing when the user clicked OK.
+        @return: Array of button labels.
+        @returnt: [string]
+        '''
         return self.shownLabelArrays[self.currentlyShowingSetIndex];
 
+    #------------------------------------------------------   Private  Methods ---------------------------
+    
     def offerNewButtonSet(self):
+        '''
+        Responsible for displaying the next, or previous set of buttons.
+        During successive calls to this method, the method obtains new 
+        button label sets from the caller's iterator until the iterator
+        is exhausted. The sets are collected in <code>self.shownLabelArrays</code>.
+        The method is also responsible for showing previously shown sets again. 
+        The direction is controlled by the handlers of the Previous and Next buttons.
+        They set instance variable <code>currentNextPrevDirection</code>. 
+        '''
 
         # Make sure the 'No more button sets in this direction" 
         # message gets deleted:
@@ -134,6 +184,10 @@ class ButtonSetPopupSelector(QDialog):
         return;
         
     def flipNextPrevDirection(self):
+        '''
+        Called when no more button label sets are available
+        either in the next, or previous direction.
+        '''
 
         self.clearDialogPane();
         
@@ -155,6 +209,13 @@ class ButtonSetPopupSelector(QDialog):
         self.setLayout(self.rootLayout);
 
     def clearDialogPane(self):
+        '''
+        Cleans out the dialog's layout. Does not destroy
+        the control buttons (Next, Previous, Cancel, and OK),
+        but does trigger deletion of all the button objects
+        in the button grid. Attempts to None out references
+        to UI widgets to enable garbage collection.
+        '''
         if self.rootLayout is None:
             return;
         
@@ -178,6 +239,12 @@ class ButtonSetPopupSelector(QDialog):
         self.setLayout(self.rootLayout);
 
     def buildButtonSet(self, buttonLabelArray):
+        '''
+        Constructs one set of buttons, based on passed in 
+        button labels.
+        @param buttonLabelArray: Array of button labels.
+        @type: [string]
+        '''
 
         # If we never made the root layout, make it now:
         if self.rootLayout is None:
@@ -209,6 +276,11 @@ class ButtonSetPopupSelector(QDialog):
         self.setLayout(self.rootLayout);
         
     def addChoiceButtons(self, layout):
+        '''
+        Appends the existing Next/Previous/Cancel/OK buttons
+        into the passed-in layout.
+        @param layout:
+        '''
         choiceButtonRowLayout = QHBoxLayout();
         choiceButtonRowLayout.addWidget(self.nextButton);
         choiceButtonRowLayout.addWidget(self.prevButton);
@@ -217,6 +289,11 @@ class ButtonSetPopupSelector(QDialog):
         layout.addLayout(choiceButtonRowLayout);
 
     def setNextPrevButtonsEnabledness(self):
+        '''
+        Examines the instance variables <code>shownLabelArrays</code>
+        and </code>currentlyShowingSetIndex</code> to determine whether
+        the Next or Previous buttons should be enabled. Acts on the result.
+        '''
         if self.currentlyShowingSetIndex >= len(self.shownLabelArrays):
             # Can only go backwards:
             self.disableActionButton(self.nextButton);
@@ -238,11 +315,19 @@ class ButtonSetPopupSelector(QDialog):
         buttonObj.setStyleSheet(SpeakEasyGUI.recorderButtonDisabledStylesheet);
 
     def clickedNextButton(self):
+        '''
+        Handler for Next button clicks. Triggers show of next
+        button set in order.
+        '''
         if self.currentNextPrevDirection == NextPrev.PREVIOUS:
             self.currentNextPrevDirection = NextPrev.NEXT;
         self.offerNewButtonSet();
     
     def clickedPrevButton(self):
+        '''
+        Handler for Next button clicks. Triggers show of previous
+        button set in order.
+        '''
         if self.currentNextPrevDirection == NextPrev.NEXT:
             self.currentNextPrevDirection = NextPrev.PREVIOUS;
         self.offerNewButtonSet();
@@ -256,6 +341,11 @@ class ButtonSetPopupSelector(QDialog):
         self.done(1);
 
     def terminateWithWarning(self):
+        '''
+        Called when no button sets are available from the caller at all.
+        Records this event in instance variable <code>noAvailableSets</code>,
+        and returns.
+        '''
         # No buttons at all:
         self.clearDialogPane();
         self.noAvailableSets = True;
@@ -263,6 +353,10 @@ class ButtonSetPopupSelector(QDialog):
 #-----------------------------------------------------  Tester Class -----------------------------
           
 class Tester(QDialog):
+    '''
+    Testing class. Invoked from main() of this file. Shows different
+    button sets. Not automatic, must be run by hand.
+    '''
     
     def __init__(self):
         super(Tester, self).__init__();

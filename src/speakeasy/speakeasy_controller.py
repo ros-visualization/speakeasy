@@ -23,6 +23,8 @@ from speakeasy_ui import standardLookHandler;
 
 from speakeasy.speakeasy_persistence import ButtonSavior;
 
+from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
+
 
 # ----------------------------------------------- Class Program ------------------------------------
 
@@ -32,12 +34,15 @@ class ButtonProgram(object):
     # Initializer 
     #--------------
     
-    def __init__(self, buttonObj, textToSave, voice, ttsEngine, playOnce=True):
+    def __init__(self, buttonLabel, textToSave, voice, ttsEngine, playOnce=True):
         '''
         Create an object that holds the playback parameters for a 
-        programmed button.
-        @param buttonObj: The QPushButton instance of the button being programmed.
-        @type  buttonObj: QPushButton
+        programmed button. This initializer is used in two contexts. When the ui
+        is first built, and when a button program set is reconstituted from an
+        XML file.
+        
+        @param buttonLabel: The label on the button
+        @type  buttonLabel: string
         @param textToSave: Text to play back with this button.
         @type  textToSave: string
         @param voice: The voice to use for the utterance
@@ -46,8 +51,11 @@ class ButtonProgram(object):
         @type string
         @param playOnce: Whether to play the utterance just once, or several times.
         @type  bool
+        @param buttonLabel: Label visible on the button widget. If None, the label will be 
+                            extracted from the buttonObj.
+        @type string or None
         '''
-        self.buttonLabel = buttonObj.text();
+        self.buttonLabel = buttonLabel;
         self.textToSay   = textToSave;
         self.activeVoice = voice;
         self.ttsEngine   = ttsEngine;
@@ -61,6 +69,26 @@ class ButtonProgram(object):
     def getText(self):
         return self.textToSay;
 
+    #----------------------------------
+    # setText 
+    #--------------
+        
+    def setText(self, newText):
+        '''
+        Change the button program's utterance text to newText. 
+        @param newText: The new utterance.
+        @type  newText: string
+        '''
+        self.textToSay = newText;
+
+    #----------------------------------
+    # getLabel
+    #--------------
+        
+        
+    def getLabel(self):
+        return self.buttonLabel;
+    
     #----------------------------------
     # toXML
     #--------------
@@ -161,6 +189,10 @@ class SpeakEasyController(object):
             programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
         for soundButton in self.gui.soundButtonDict.values():
             soundButton.clicked.connect(partial(self.actionSoundButtons, soundButton));
+        newSpeechSetButton = self.gui.speechSetButtonDict[SpeakEasyGUI.interactionWidgets['NEW_SPEECH_SET']];
+        newSpeechSetButton.clicked.connect(self.actionNewSpeechSet);
+        pickSpeechSetButton = self.gui.speechSetButtonDict[SpeakEasyGUI.interactionWidgets['PICK_SPEECH_SET']];
+        pickSpeechSetButton.clicked.connect(self.actionPickSpeechSet);
     
     #----------------------------------
     # sayText 
@@ -289,7 +321,7 @@ class SpeakEasyController(object):
         elif self.gui.activeVoice() == "David":
             ttsEngine = "cepstral"
         #******** End TODO
-        programObj = ButtonProgram(buttonObj, textToSave, self.gui.activeVoice(), ttsEngine, self.gui.playOnceChecked());
+        programObj = ButtonProgram(buttonObj.text(), textToSave, self.gui.activeVoice(), ttsEngine, self.gui.playOnceChecked());
         
         self.programs[buttonObj] = programObj; 
         
@@ -349,6 +381,86 @@ class SpeakEasyController(object):
         self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
 	                             SpeakEasyRequest.PLAY_START,
 				                 soundFile)
+    def actionNewSpeechSet(self):
+
+        # Get an iterator over all the current program# button UI widgets:
+        programButtonIt = self.gui.programButtonIterator();
+        
+        # Get an array of ButtonProgram objects that are associated
+        # with those buttons:
+        buttonProgramArray = [];
+        for buttonObj in programButtonIt:
+            buttonProgramArray.append(self.programs[buttonObj]);
+        
+        # Save this array of programs as XML:
+        fileName = self.getNewSpeechSetName();
+        ButtonSavior.saveToFile(buttonProgramArray, fileName, fileName);
+
+    def actionPickSpeechSet(self):
+        
+        # Build an array of ButtonProgram instances for each
+        # of the XML files in the button set directory. Collect
+        # these arrays in buttonProgramArray:
+        
+        xmlFileNames = self.getAllSpeechSetXMLFileNames();
+        if xmlFileNames is None:
+            self.dialogService.showErrorMsg("No additional button sets are stored on your disk.");
+        
+        # Fill the following array with arrays of ButtonProgram:    
+        buttonProgramArrays = [];
+        for xmlFileName in xmlFileNames:
+            buttonProgramArrays.append(ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram));
+            
+        # We now need an iterator that feeds out arrays of button labels.
+        # Each array holds all labels for buttons in one program set:
+        buttonLabelSetsArray = [];
+        for buttonProgramArray in buttonProgramArrays:
+            buttonProgramIt = iter(buttonProgramArray);
+            oneButtonSetLabelArr = [];
+            try:
+                buttonProgram = buttonProgramIt.next();
+                oneButtonSetLabelArr.append(buttonProgram.getLabel();
+            except StopIteration:
+                pass
+            buttonLabelSetsArray.append(oneButtonSetLabelArr);
+        
+        buttonSetSelector = ButtonSetPopupSelector(iter(buttonLabelSetsArray));
+        buttonSetSelected = buttonSetSelector.exec_();
+        if buttonSetSelected != 1:
+            return;
+        
+        # Get the label array 
+        
+            
+        
+        
+    def getAllSpeechSetXMLFileNames(self):
+
+        if not os.path.exists(ButtonSavior.SPEECH_SET_DIR):
+            return None;
+        
+        xmlFileNames = []
+        for fileName in os.listdir(ButtonSavior.SPEECH_SET_DIR):
+            if fileName.endswith(".xml") or fileName.endswith(".XML"):
+                xmlFileNames.append(fileName);
+        if len(xmlFileNames) == 0:
+            return None;
+        
+        return xmlFileNames;
+         
+  
+    def getNewSpeechSetName(self):
+        
+        if not os.path.exists(ButtonSavior.SPEECH_SET_DIR):
+            os.makedirs(ButtonSavior.SPEECH_SET_DIR);
+        suffix = 1;
+        for filename in os.listdir(ButtonSavior.SPEECH_SET_DIR):
+            newFileName = "buttonProgram" + str(suffix) + ".xml";
+            if filename == newFileName:
+                suffix += 1;
+                continue;
+            break;
+        return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
           
         
 if __name__ == "__main__":
