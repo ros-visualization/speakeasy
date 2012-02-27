@@ -58,7 +58,14 @@ class ButtonSetPopupSelector(QDialog):
         self.endOfSetsLabel = QLabel("<b>No more button sets.</b>")
         self.noSetsLabel = QLabel("<b>No button sets available.</b>")
 
+        self.noAvailableSets = False;
         self.offerNewButtonSet();
+    
+    
+    def exec_(self):
+        if self.noAvailableSets:
+            return -1;
+        return super(ButtonSetPopupSelector, self).exec_();
         
     def getCurrentlyShowingSet(self):
         return self.shownLabelArrays[self.currentlyShowingSetIndex];
@@ -156,13 +163,18 @@ class ButtonSetPopupSelector(QDialog):
         self.rootLayout.removeWidget(self.nextButton);
         self.rootLayout.removeWidget(self.prevButton);
         self.rootLayout.removeItem(self.buttonGridLayout);
+
         self.buttonGritLayout = None;
+        
         for buttonObj in self.programButtonDict.values():
             if buttonObj is not None:
                 buttonObj.hide();
+                buttonObj.deleteLater()
+
         for key in self.programButtonDict.keys():
             self.programButtonDict[key] = None;
 
+        # Set this dialog's layout to the empty layout:
         self.setLayout(self.rootLayout);
 
     def buildButtonSet(self, buttonLabelArray):
@@ -246,13 +258,7 @@ class ButtonSetPopupSelector(QDialog):
     def terminateWithWarning(self):
         # No buttons at all:
         self.clearDialogPane();
-        
-        if self.rootLayout is None:
-            self.close();
-        self.rootLayout.addWidget(self.noSetsLabel);
-        # Show the 'Nothing available' label, and 
-        self.noSetsLabel.show();
-        self.disableActionButton(self.OKButton);
+        self.noAvailableSets = True;
 
 #-----------------------------------------------------  Tester Class -----------------------------
           
@@ -279,11 +285,11 @@ class Tester(QDialog):
         buttonSetChoiceDialog.show();
         choiceResult = buttonSetChoiceDialog.exec_();
         print "Choice result: " + str(choiceResult); 
-        buttonSetChoiceDialog = None;
+        buttonSetChoiceDialog.deleteLater();
         
         # Rewire the test button for the next text:
         self.testButton.setText("One button available");
-        self.testButton.clicked.disconnect();
+        self.testButton.clicked.disconnect(self.exactlyOneRow);
         self.testButton.clicked.connect(self.oneButtonAvailable);
         
     def oneButtonAvailable(self):
@@ -293,21 +299,23 @@ class Tester(QDialog):
         buttonSetChoiceDialog.show();
         choiceResult = buttonSetChoiceDialog.exec_();
         print "Choice result: " + str(choiceResult);
-        buttonSetChoiceDialog = None; 
+        buttonSetChoiceDialog.deleteLater();
 
         self.testButton.setText("No button set available");
+        self.testButton.clicked.disconnect(self.oneButtonAvailable);        
         self.testButton.clicked.connect(self.noSetAvailable);
         
     def noSetAvailable(self):
         testButtonSetArray = [];
         buttonSetChoiceDialog = ButtonSetPopupSelector(iter(testButtonSetArray));
-        buttonSetChoiceDialog.show();
+        #buttonSetChoiceDialog.show();
         choiceResult = buttonSetChoiceDialog.exec_();
         print "Choice result: " + str(choiceResult);
-        buttonSetChoiceDialog = None; 
+        buttonSetChoiceDialog.deleteLater();
         
         # Rewire the test button for the next text:
         self.testButton.setText("Exit");
+        self.testButton.clicked.disconnect(self.noSetAvailable);        
         self.testButton.clicked.connect(self.close);
         
     def exitApp(self):
