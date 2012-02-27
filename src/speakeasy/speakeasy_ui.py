@@ -228,6 +228,7 @@ class SpeakEasyGUI(QMainWindow):
     
     # Button color definitions:
     recorderButtonBGColor = QColor(176,220,245); # Light blue
+    recorderButtonDisabledBGColor = QColor(187,200,208); # Gray-blue
     recorderButtonTextColor = QColor(0,0,0);     # Black
     programButtonBGColor = QColor(117,150,169);  # Middle blue
     programButtonTextColor = QColor(251,247,247);# Off-white
@@ -240,6 +241,13 @@ class SpeakEasyGUI(QMainWindow):
         '; color: ' + recorderButtonTextColor.name() +\
         '; font-size: ' + str(BUTTON_LABEL_FONT_SIZE) + 'px' +\
         '}';
+        
+    recorderButtonDisabledStylesheet =\
+        'QPushButton {background-color: ' + recorderButtonDisabledBGColor.name() +\
+        '; color: ' + recorderButtonTextColor.name() +\
+        '; font-size: ' + str(BUTTON_LABEL_FONT_SIZE) + 'px' +\
+        '}';
+        
     programButtonStylesheet =\
         'QPushButton {background-color: ' + programButtonBGColor.name() +\
         '; color: ' + programButtonTextColor.name() +\
