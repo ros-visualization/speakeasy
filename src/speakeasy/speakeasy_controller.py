@@ -202,6 +202,10 @@ class SpeakEasyController(object):
         '''
         Send message to SpeakEasy service to say text, with the
         given voice, using the given text-to-speech engine.
+        </p>
+        If the voice parameter is the Festival voice 'Male' it is a special case in
+        that it refers to the Festival engine's "voice_kal_diphone". We convert this.
+        
         @param text: Text to be uttered by the tts engine
         @type  string
         @param voice: Name of speaking voice to be used.
@@ -211,6 +215,9 @@ class SpeakEasyController(object):
         @param sayOnce: Whether repeat the utterance over and over, or just say it once.
         @type bool
         '''
+        
+        if ttsEngine == "festival" and voice == "Male":
+            voice = "voice_kal_diphone";
         # Repeat over and over? Or say once?
         if sayOnce:
             self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
@@ -389,12 +396,21 @@ class SpeakEasyController(object):
         # Get an array of ButtonProgram objects that are associated
         # with those buttons:
         buttonProgramArray = [];
-        for buttonObj in programButtonIt:
-            buttonProgramArray.append(self.programs[buttonObj]);
+        while True:
+            try:
+                buttonObj = programButtonIt.next();
+                buttonLabel = buttonObj.text();
+                try:
+                    buttonProgramArray.append(self.programs[buttonObj]);
+                except KeyError:
+                    # Button was not programmed. Create an empty ButtonProgram:
+                    buttonProgramArray.append(ButtonProgram(buttonLabel, "", "Male", "festival"));
+            except StopIteration:
+                break;
         
         # Save this array of programs as XML:
         fileName = self.getNewSpeechSetName();
-        ButtonSavior.saveToFile(buttonProgramArray, fileName, fileName);
+        ButtonSavior.saveToFile(buttonProgramArray, fileName, title=os.path.basename(fileName));
 
     def actionPickSpeechSet(self):
         
@@ -409,30 +425,25 @@ class SpeakEasyController(object):
         # Fill the following array with arrays of ButtonProgram:    
         buttonProgramArrays = [];
         for xmlFileName in xmlFileNames:
-            buttonProgramArrays.append(ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram));
-            
-        # We now need an iterator that feeds out arrays of button labels.
-        # Each array holds all labels for buttons in one program set:
-        buttonLabelSetsArray = [];
-        for buttonProgramArray in buttonProgramArrays:
-            buttonProgramIt = iter(buttonProgramArray);
-            oneButtonSetLabelArr = [];
             try:
-                buttonProgram = buttonProgramIt.next();
-                oneButtonSetLabelArr.append(buttonProgram.getLabel();
-            except StopIteration:
-                pass
-            buttonLabelSetsArray.append(oneButtonSetLabelArr);
-        
-        buttonSetSelector = ButtonSetPopupSelector(iter(buttonLabelSetsArray));
+                buttonProgramArrays.append(ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram));
+            except ValueError as e:
+                # Bad XML:
+                rospy.logerr(e.toStr());
+                return;
+            
+        buttonSetSelector = ButtonSetPopupSelector(iter(buttonProgramArrays));
         buttonSetSelected = buttonSetSelector.exec_();
         if buttonSetSelected != 1:
             return;
         
-        # Get the label array 
+        # Get the selected ButtonProgram array:
+        buttonPrograms = buttonSetSelector.getCurrentlyShowingSet();
+        self.replaceButtons(buttonPrograms);
         
-            
-        
+    def replaceProgramButtons(self, buttonProgramArray):
+        self.gui.replaceProgramButtons();
+
         
     def getAllSpeechSetXMLFileNames(self):
 
@@ -454,10 +465,11 @@ class SpeakEasyController(object):
         if not os.path.exists(ButtonSavior.SPEECH_SET_DIR):
             os.makedirs(ButtonSavior.SPEECH_SET_DIR);
         suffix = 1;
+        newFileName = "buttonProgram1.xml";
         for filename in os.listdir(ButtonSavior.SPEECH_SET_DIR):
-            newFileName = "buttonProgram" + str(suffix) + ".xml";
             if filename == newFileName:
                 suffix += 1;
+                newFileName = "buttonProgram" + str(suffix) + ".xml";
                 continue;
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);

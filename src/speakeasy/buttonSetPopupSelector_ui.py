@@ -25,7 +25,7 @@ class ButtonSetPopupSelector(QDialog):
     <ul>
       <li>The caller creates a fresh dialog instance of this class,
           passing an iterator. The iterator's next() method returns 
-          an array of button labels each time it is called. (When the
+          an array of ButtonProgram instances each time it is called. (When the
           iterator is exhausted, the user is able to use a 'Previous'
           button to view the previously seen sets again).</li>
       <li>The caller invokes the exec_() method on the dialog instance.</li>
@@ -36,20 +36,21 @@ class ButtonSetPopupSelector(QDialog):
               <li>1 if the user accepted one of the sets.
           </ul></li>
       <li>If the exec_() method returned 1, the caller may obtain an array with the
-          button labels of the currently showing (and therefore accepted) buttons.
+          ButtonProgram instances of the currently showing (and therefore accepted) buttons.
           The array is obtained from the dialog instance via method getCurrentlyShowingSet(self).</li> 
     </ul>
     '''
     #------------------------------------------------------   Public  Methods ---------------------------
     
-    def __init__(self, buttonNameArrayIterator):
+    def __init__(self, buttonProgramArrayIterator):
         
         super(ButtonSetPopupSelector, self).__init__();
 
         self.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
         
         self.programButtonDict = {};
-        self.buttonLabelArrayIt = buttonNameArrayIterator;
+        self.buttonProgramArrayIt = buttonProgramArrayIterator;
+        self.buttonProgramArrays = []; # saved ButtonProgram arrays
         self.shownLabelArrays = [];
         self.currentlyShowingSetIndex = None;
         self.rootLayout = None;
@@ -102,12 +103,12 @@ class ButtonSetPopupSelector(QDialog):
 
     def getCurrentlyShowingSet(self):
         '''
-        Returns an array of button labels that are currently showing on
+        Returns an array of ButtonProgram instances that are currently showing on
         the dialog, or were showing when the user clicked OK.
-        @return: Array of button labels.
-        @returnt: [string]
+        @return: Array of ButtonProgram instances.
+        @returnt: [ButtonProgram]
         '''
-        return self.shownLabelArrays[self.currentlyShowingSetIndex];
+        return self.buttonProgramArrays[self.currentlyShowingSetIndex];
 
     #------------------------------------------------------   Private  Methods ---------------------------
     
@@ -143,8 +144,16 @@ class ButtonSetPopupSelector(QDialog):
         
         # Wants next button set. Is there one we haven't shown yet?:
         try:
-            # Get next set of button labels from caller:
-            buttonLabelArray = self.buttonLabelArrayIt.next();
+            # Get next set of ButtonProgram instances from caller:
+            buttonProgramArray = self.buttonProgramArrayIt.next();
+            # Save this ButtonProgram instance:
+            self.buttonProgramArrays.append(buttonProgramArray);
+            
+            # From the ButtonProgram objects array, create an
+            # array of just the button labels:
+            buttonLabelArray = [];
+            for buttonProgram in buttonProgramArray:
+                buttonLabelArray.append(buttonProgram.getLabel());
             
             # If this is the very first time we pull a button set
             # from the caller, then our current index will be None

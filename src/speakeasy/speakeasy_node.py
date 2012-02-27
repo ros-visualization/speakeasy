@@ -389,6 +389,8 @@ class soundplay:
         if (cepstralSwiftPath is not None):
             self.soundEngines.append("cepstral");
             self.cepstralVoices = self.getCepstralVoices(cepstralSwiftPath);
+        else:
+            self.cepstralVoices = [];
         
         # Create an empty Capabilities message:
         capabilitiesMsg = Capabilities();

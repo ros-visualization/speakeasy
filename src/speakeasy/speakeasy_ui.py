@@ -343,14 +343,54 @@ class SpeakEasyGUI(QMainWindow):
     # programButtonIterator 
     #--------------
 
-    def programButtonIterator(self):
+    def programButtonIterator(self, gridLayout=None):
+        
+        if gridLayout is None:
+            gridLayout = self.programButtonGridLayout;
         
         programButtonArray = [];
         # Collect the buttons into a flat array:
-        for row in range(self.programButtonGridLayout.rowCount()):
+        for row in range(gridLayout.rowCount()):
             for col in range(SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS):
-                programButtonArray.append(self.programButtonGridLayout.item_at_position(row, col));
+                programButtonArray.append(self.programButtonGridLayout.itemAtPosition(row, col).widget());
         return iter(programButtonArray);
+
+    #----------------------------------
+    # replaceProgramButtons
+    #--------------
+
+    def replaceProgramButtons(self, buttonProgramsArray):
+        
+        programButtonObjIt = self.programButtonIterator();
+        try:
+            programButtonObj = programButtonObjIt.next();
+            self.programButtonGridLayout.removeWidget(programButtonObj);
+            programButtonObj.deleteLater();
+        except StopIteration:
+            pass
+        
+        # Make an array of button labels from the ButtonProgram
+        # instances in buttonProgramsArray:
+        buttonLabelArr = [];
+        for buttonProgram in buttonProgramsArray:
+            buttonLabelArr.append(buttonProgram.getLabel());
+            
+        # No more program buttons present. Make 
+        # new ones, and add them to the grid layout:
+        (newProgramButtonGridLayout, self.programButtonDict) =\
+            SpeakEasyGUI.buildButtonGrid(buttonLabelArr,
+                                         SpeakEasyGUI.NUM_OF_PROGRAM_BUTTON_COLUMNS);
+        for buttonObj in self.programButtonDict.values():
+            buttonObj.setStyleSheet(SpeakEasyGUI.programButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
+
+        # Transfer the buttons from this new gridlayout object to the
+        # original layout that is embedded in the application Dialog:
+        newButtonsIt = self.programButtonIterator(gridLayout=newProgramButtonGridLayout);
+        try:
+            self.programButtonGridLayout.addWidget(newButtonsIt.next());
+        except StopIteration:
+            pass;
     
     #----------------------------------
     # connectSignalsToWidgets 

@@ -137,50 +137,63 @@ class ButtonSavior(object):
         @return: A tuple containing the title of the button set, and an array of instances of
                 the passed-in class.
         @returnt: (string, [ButtonProgram])
+        @raise ValueError: if XML is bad. 
         '''
         try:
-            fd = open(fileName, 'w');
+            absFileName = os.path.join(ButtonSavior.SPEECH_SET_DIR, fileName);
+            fd = open(absFileName, 'r');
         except Exception:
-            ButtonSavior.reportError("Cannot open file '" + str(fileName) + "' for saving button settings set.");
-            sys.exit(-1);
+            ButtonSavior.reportError("Cannot open file '" + str(absFileName) + "' for saving button settings set.");
+            return [];
         try:
             domTree = ElementTree.parse(fd);
         except Exception:
-            ButtonSavior.reportError("Cannot open file '" + str(fileName) + "' for retrieving button settings set.");
+            ButtonSavior.reportError("Cannot open file '" + str(absFileName) + "' for retrieving button settings set.");
+            return [];
     
         domTreeIt = domTree.iter();
         buttonProgramObjects = [];
         
         try:
-            domButtonSetTitleEl = domTreeIt.next();
-            programSetTitle = domButtonSetTitleEl.text;
-            while True:
-                # Get the program setting for One button:
-                domProgramEl = domTreeIt.next();
+            try:
+                # Get the root (outermost) element 'buttonProgramSet':
+                domButtonSetRootEl = domTreeIt.next();
+                domButtonSetTitleEl = domTreeIt.next();
+                programSetTitle = domButtonSetTitleEl.text;
                 
-                domButtonLabelEl = domProgramEl.find("label");
-                label = domButtonLabelEl.text;
-                
-                domTextEl = domProgramEl.find("text");
-                text = domTextEl.text;
-                 
-                domVoiceEl = domProgramEl.find("voice");
-                voice = domVoiceEl.text;
-                
-                domEngineEl = domProgramEl.find("engine");
-                engine = domEngineEl.text;
+                while True:
 
-                domPlayOnceEl = domProgramEl.find("playOnce");
-                playOnce = domPlayOnceEl.text;
-                if playOnce == "True":
-                    playOnce = True;
-                else:
-                    playOnce = False;
-                                 
-                buttonProgram = buttonProgramClass(label, text, voice, engine, playOnce);
-                buttonProgramObjects.append(buttonProgram);
-        except StopIteration:
-            pass;
+                    # Get the program setting for One button (tag 'buttonSetting'):
+                    domProgramEl = domTreeIt.next();
+                    
+                    domButtonLabelEl = domProgramEl.find("label");
+                    label = domButtonLabelEl.text;
+                    
+                    domTextEl = domProgramEl.find("text");
+                    text = domTextEl.text;
+                     
+                    domVoiceEl = domProgramEl.find("voice");
+                    voice = domVoiceEl.text;
+                    
+                    domEngineEl = domProgramEl.find("engine");
+                    engine = domEngineEl.text;
+    
+                    domPlayOnceEl = domProgramEl.find("playOnce");
+                    playOnce = domPlayOnceEl.text;
+                    if playOnce == "True":
+                        playOnce = True;
+                    else:
+                        playOnce = False;
+                    
+                    if text is None:
+                        text = "";       
+                    buttonProgram = buttonProgramClass(label, text, voice, engine, playOnce);
+                    buttonProgramObjects.append(buttonProgram);
+            except StopIteration:
+                pass;
+        except Exception:
+            # Bad XML:
+            raise ValueError("Bad XML in file " + fileName);
         
         return (programSetTitle, buttonProgramObjects);
         
@@ -208,7 +221,8 @@ class ButtonSavior(object):
     # reportError
     #--------------
 
-    def reportError(self, msg):
+    @staticmethod
+    def reportError(msg):
         rospy.logerr(msg);
         #print msg;
 
