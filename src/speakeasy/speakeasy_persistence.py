@@ -38,6 +38,63 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
+# ------------------------------------------------    Class ElementreeIterator --------------------------
+
+class Python2_7ElementTree(object):
+    '''
+    This facility is built in to Python 2.7's ElementTree as
+    element.iter(). Also built in with Python 2.7 is findall(tagName).
+    We need to use 2.6 for now, so we recreate the facilities 
+
+    '''
+    
+    def __init__(self, python2_6ElementTree):
+        '''
+        Pass in an element tree of the old kind.
+        @param python2_6ElementTree: ElementTree instance
+        @type python2_6ElementTree: ElementTree
+        '''
+        self.elTree = python2_6ElementTree;
+        self.iterIndx = None;
+        
+    def iter(self):
+        '''
+        Return an object that supports methods next(), hasNext(), and closeIter().
+        '''
+        if self.iterIndx is not None:
+            raise ValueError("Can only have one iterator going at a time. Call method closeIter() first.");
+        self.flatNodeList = self.elTree.getiterator();
+        self.iterIndx = -1;
+        return self;
+    
+    def next(self):
+        '''
+        Return next subelement in xml tree.
+        @raise ValueError: if no more elements are available. 
+        '''
+        if self.iterIndx is None:
+            raise ValueError("Iterator must first be started with call to method iter()");
+        self.iterIndx += 1;
+        return self.flatNodeList[self.iterIndx];
+    
+    def hasNext(self):
+        '''
+        Return True if at least one element has still not been 
+        retrieved via the next() method.
+        '''
+        if self.iterIndx is None:
+            raise ValueError("Iterator must first be started with call to method iter()");
+        return self.iterIndx < len(self.flatNodeList);
+        
+    def closeIter(self):
+        '''
+        Indicate that the iterator is no longer needed.
+        Only after calling this method can a new iterator
+        be obtained via iter().
+        '''
+        self.iterIndx = None;
+    
+
 # ------------------------------------------------    Class ButtonSavior --------------------------
 
 class ButtonSavior(object):
@@ -151,7 +208,8 @@ class ButtonSavior(object):
             ButtonSavior.reportError("Cannot open file '" + str(absFileName) + "' for retrieving button settings set.");
             return [];
     
-        domTreeIt = domTree.iter();
+        #domTreeIt = domTree.iter(); # Pythyon 2.7
+        domTreeIt = Python2_7ElementTree(domTree).iter();
         buttonProgramObjects = [];
         
         try:
@@ -226,5 +284,41 @@ class ButtonSavior(object):
         rospy.logerr(msg);
         #print msg;
 
+
+# ---------------------------------------------------------   Testing   --------------------------------
+
 if __name__ == "__main__":
-    pass
+    from speakeasy_controller import ButtonProgram;
+    import tempfile;
+    
+    buttonProgs = [
+                   ButtonProgram("Test Label 1", "Test text 1", "David", "Festival"),
+                   ButtonProgram("Test Label 2", "Test text 2", "Maria", "Cepstral"),
+                   ]
+    for buttonProg in buttonProgs:
+        print str(buttonProg);
+    tmpFile = tempfile.NamedTemporaryFile(delete=False);
+    buttonSavior = ButtonSavior();
+    buttonSavior.saveToFile(buttonProgs, tmpFile.name, "Title1");
+    (title, progs) = buttonSavior.retrieveFromFile(tmpFile.name, ButtonProgram);
+    tmpFile.close();
+    os.remove(tmpFile.name)
+
+    buttonProg = progs[0];
+    
+    if (buttonProg.getLabel() != "Test Label 1") or\
+        (buttonProg.getText() != "Test text 1") or\
+        (buttonProg.getVoice() != "David") or\
+        (buttonProg.getTtsEngine() != "Festival"):
+        raise ValueError("Button program 1 is incorrect: " +
+                         "Label is '%s', should be '%s'. " % (buttonProg.getLabel(), "Test Label 1") +
+                         "Text is '%s', should be '%s'. " % (buttonProg.getText(), "Test text 1") +
+                         "Voice is '%s', should be '%s'. " % (buttonProg.getVoice(), "David") +
+                         "TtsEngine is '%s', should be '%s'. " % (buttonProg.getTtsEngine(), "Festival"))
+        
+    buttonProg = progs[1];
+    if buttonProg.getLabel() != "Test Label 2" or buttonProg.getText() != "Test text 2" or buttonProg.getVoice() != "Maria" or buttonProg.getTtsEngine() != "Cepstral":
+        raise ValueError("Button program 2 is incorrect.");
+
+    print "SpeakEasy button program save/restore test successful."
+    

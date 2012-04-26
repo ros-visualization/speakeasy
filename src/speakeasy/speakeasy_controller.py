@@ -86,9 +86,22 @@ class ButtonProgram(object):
     # getLabel
     #--------------
         
-        
     def getLabel(self):
         return self.buttonLabel;
+    
+    #----------------------------------
+    # getTtsEngine
+    #--------------
+        
+    def getTtsEngine(self):
+        return self.ttsEngine;
+    
+    #----------------------------------
+    # getVoice
+    #--------------
+        
+    def getVoice(self):
+        return self.activeVoice;
     
     #----------------------------------
     # toXML
