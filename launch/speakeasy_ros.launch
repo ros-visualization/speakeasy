@@ -1,0 +1,4 @@
+<launch>
+	<include file="component_launch_files/speak_easy_service.launch" />
+	<include file="component_launch_files/speak_easy_gui.launch" />
+</launch>
