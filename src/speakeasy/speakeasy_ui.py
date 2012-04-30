@@ -1,11 +1,17 @@
 import sys
 import os
 
+import rospy
+from speakeasy.msg import SpeakEasyRequest;
+from speakeasy.msg import Capabilities;
+
 from functools import partial;
 from threading import Timer;
 
-from PySide.QtCore import * #@UnusedWildImport
-from PySide.QtGui import * #@UnusedWildImport
+import QtBindingHelper;
+from QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
+from QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog
+from QtCore import Signal
 
 
 #TODO: From speakeasy_node's capabilities message, find all available sound files, and build sound buttons from those file names.
@@ -303,9 +309,11 @@ class SpeakEasyGUI(QMainWindow):
     # Initializer 
     #--------------
         
-    def __init__(self, parent=None, mirrored=True):
+    def __init__(self, parent=None, mirrored=True, stand_alone=False):
         
         super(SpeakEasyGUI, self).__init__(parent);
+    
+        self.stand_alone = stand_alone;
         
         #self.setMaximumWidth(1360);
         #self.setMaximumHeight(760);
@@ -578,7 +586,7 @@ class SpeakEasyGUI(QMainWindow):
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
         '''
-        buttonLabelArr = [];
+        buttonLabelArr = self.getAvailableSoundEffectFileNames();
         for i in range(12):
             key = "SOUND_" + str(i+1);
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
@@ -612,7 +620,7 @@ class SpeakEasyGUI(QMainWindow):
     def buildHorizontalDivider(self, layout):
         frame = QFrame();
         frame.setFrameShape(QFrame.HLine);
-        frame.setFrameStyle(QFrame.Shadow.Sunken);
+        #*******frame.setFrameStyle(QFrame.Shadow.Sunken.value());
         frame.setLineWidth(3);
         frame.setMidLineWidth(3);
         layout.addWidget(frame);
@@ -830,6 +838,42 @@ class SpeakEasyGUI(QMainWindow):
             self.hideButtonSignal.emit(buttonObj);
             self.buttonBlinkTimer = Timer(SpeakEasyGUI.PROGRAM_BUTTON_LOOK_CHANGE_DURATION, partial(self.blinkButton, buttonObj, True));
             self.buttonBlinkTimer.start();
+    
+    # ---------------------   Manage Sound Effect Buttons -------------------
+          
+    #----------------------------------
+    # getAvailableSoundEffectFileNames
+    #--------------
+    
+    def getAvailableSoundEffectFileNames(self):
+        '''
+        Determine all the available sound effect files. If this process
+        operates stand-alone, the local 'sounds' subdirectory is searched.
+        Else, in a ROS environment, the available sound effect file names 
+        are obtained from the /capabilities message topic.
+        '''
+        
+        # Standalone files are local to this process:
+        if self.stand_alone:
+            return getAvailableLocalSoundEffectFiles();
+        
+        capabilitiesMsg = rospy.wait_for_message("/capabilities", Capabilities, 5);
+        return capabilitiesMsg.sounds;
+            
+        
+    #----------------------------------
+    # getAvailableLocalSoundEffectFileNames 
+    #--------------
+        
+    def getAvailableLocalSoundEffectFileNames(self):
+        
+        scriptDir = os.path.dirname(os.path.realpath(__file__));
+        soundDir = os.path.join(scriptDir, "../../sounds");
+        if not os.path.exists(soundDir):
+            raise ValueError("No sound files found.")
+        
+        fileList = os.listdir(soundDir);
+        return fileList;
     
 
 def alternateLookHandler(buttonObj):

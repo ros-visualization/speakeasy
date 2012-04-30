@@ -36,6 +36,9 @@
 
 # Author: Blaise Gassend
 
+# Andreas Paepcke: NOTE: this file is used only by speakeasy_node.py, not when speakeasy_controller.py
+#                        operates in stand-alone mode.
+
 import rospy
 import os, sys
 from speakeasy.msg import SpeakEasyRequest

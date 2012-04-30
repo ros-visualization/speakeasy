@@ -10,14 +10,13 @@ import shutil
 from functools import partial;
 from threading import Timer;
 
-from PySide.QtCore import * #@UnusedWildImport
-from PySide.QtGui import * #@UnusedWildImport
+import QtBindingHelper;
+from QtGui import QApplication
 
 from speakeasy_ui import SpeakEasyGUI;
 from speakeasy_ui import DialogService;
 
 from speakeasy.libspeakeasy import SoundClient;
-from speakeasy.msg import SpeakEasyRequest;
 
 from speakeasy_ui import alternateLookHandler;
 from speakeasy_ui import standardLookHandler;
@@ -25,6 +24,8 @@ from speakeasy_ui import standardLookHandler;
 from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
+
+from speakeasy.msg import Capabilities;
 
 
 # ----------------------------------------------- Class Program ------------------------------------
@@ -152,6 +153,10 @@ class SpeakEasyController(object):
 	- C{msg.SpeakEasyRequest.NEEDS_UNPLUGGING_BADLY}
 	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING_BADLY}
     '''
+    
+    # Whether application runs in a ROS context, or
+    # standalone:
+    STAND_ALONE = False; 
     
     soundPaths = {
                   'SOUND_1' : 'rooster.wav',
@@ -407,6 +412,16 @@ class SpeakEasyController(object):
         self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
 	                             SpeakEasyRequest.PLAY_START,
 				                 soundFile)
+        
+        
+        
+    # ------------------------- Changing and Adding Button Programs --------------
+        
+    #----------------------------------
+    #  actionNewSpeechSet
+    #--------------
+        
+        
     def actionNewSpeechSet(self):
 
         # Get an iterator over all the current program# button UI widgets:
@@ -435,6 +450,10 @@ class SpeakEasyController(object):
         except:
             rospy.logerr("Could not copy new program XML file to default.xml.");
 
+
+    #----------------------------------
+    # actionPickSpeechSet
+    #--------------
 
     def actionPickSpeechSet(self):
         
@@ -471,12 +490,20 @@ class SpeakEasyController(object):
         
         ButtonSavior.saveToFile(buttonPrograms, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"), title="default.xml");      
         
+    #----------------------------------
+    # installDefaultSpeechSet
+    #--------------
+                
     def installDefaultSpeechSet(self):
         defaultPath = os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml");
         if not os.path.exists(defaultPath):
             return;
         (buttonSetTitle, buttonPrograms) =  ButtonSavior.retrieveFromFile(defaultPath, ButtonProgram);
         self.replaceProgramButtons(buttonPrograms);
+        
+    #----------------------------------
+    #  replaceProgramButtons
+    #--------------
         
     def replaceProgramButtons(self, buttonProgramArray):
         self.gui.replaceProgramButtons(buttonProgramArray);
@@ -491,7 +518,9 @@ class SpeakEasyController(object):
                 # Should not happen:
                 raise ValueError("Fewer buttons than ButtonProgram instances.");
             
-
+    #----------------------------------
+    #  getAllSpeechSetXMLFileNames
+    #--------------
         
     def getAllSpeechSetXMLFileNames(self):
 
@@ -507,6 +536,9 @@ class SpeakEasyController(object):
         
         return xmlFileNames;
          
+    #----------------------------------
+    # getNewSpeechSetName
+    #--------------
   
     def getNewSpeechSetName(self):
         
@@ -521,7 +553,8 @@ class SpeakEasyController(object):
                 continue;
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
-          
+    
+        
         
 if __name__ == "__main__":
 
@@ -531,6 +564,9 @@ if __name__ == "__main__":
     # path to this script:
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
     speakeasyController = SpeakEasyController(scriptDir);
+    
+    files = speakeasyController.getAvailableLocalSoundEffectFileNames();
+    
     # Enter Qt application main loop
     sys.exit(app.exec_());
         

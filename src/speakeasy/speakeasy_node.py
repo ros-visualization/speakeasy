@@ -72,13 +72,15 @@
 #       entering festival on the command line, and typing (voice.list).
 #
 #
-# Andreas Paepcke: 
+# Andreas Paepcke: NOTE: this file is not used when speakeasy_controller.py
+#                        operates in stand-alone mode.
 
 import roslib; roslib.load_manifest('speakeasy')
 
 import rospy
 import threading
 from speakeasy.msg import SpeakEasyRequest
+from speakeasy.srv import SpeechCapabilitiesInquiry
 import os
 import time
 import logging
@@ -361,10 +363,40 @@ class soundplay:
         except Exception, e:
             rospy.loginfo('Exception in diagnostics: %s'%str(e))
 
+
+    def build_capabilities_msg(self):
+        # Create an empty Capabilities message:
+        capabilitiesMsg = Capabilities() # initialize the text-to-speech engines field:
+        capabilitiesMsg.ttsEngines = self.soundEngines
+        # Build ttsVoices structures for use in the Capabilities
+        # message's TtsVoices field:
+        ttsFestivalVoices = TtsVoices()
+        ttsFestivalVoices.ttsEngine = "festival"
+        ttsFestivalVoices.voices = self.festivalVoices
+        ttsCepstralVoices = TtsVoices()
+        ttsCepstralVoices.ttsEngine = "cepstral"
+        ttsCepstralVoices.voices = self.cepstralVoices
+        capabilitiesMsg.voices = [ttsFestivalVoices, ttsCepstralVoices]
+        # List of available sound files:
+        filesInSoundDir = os.listdir(self.soundDir)
+        self.soundFiles = []
+        for soundFileName in filesInSoundDir:
+            fileExtension = os.path.splitext(soundFileName)[1][1:].strip()
+            if (fileExtension == "wav") or (fileExtension == "ogg"):
+                self.soundFiles.append(soundFileName)
+        
+        capabilitiesMsg.sounds = self.soundFiles
+        return capabilitiesMsg
+
     def __init__(self):
         rospy.init_node('speakeasy')
         self.diagnostic_pub = rospy.Publisher("/diagnostics", DiagnosticArray)
-        self.capabilities_pub = rospy.Publisher("/capabilities", Capabilities, latch=True)
+        self.capabilities_pub = rospy.Publisher("/speech_capabilities", Capabilities, latch=True)
+        # Since the function wait_for_message() seems not to work 
+        # for latched messages, we also provide a service that returns
+        # the same message, except that the service will build the
+        # response message each time, making the info fresher:
+        rospy.Service('speech_capabilities_inquiry', SpeechCapabilitiesInquiry, self.handle_speech_capabilities_inquiry);
 
         # Path to where sound files are stored: In 'sounds' directory under package root dir:
         self.soundDir = os.path.join(os.path.dirname(__file__),'../../sounds')
@@ -392,36 +424,11 @@ class soundplay:
         else:
             self.cepstralVoices = [];
         
-        # Create an empty Capabilities message:
-        capabilitiesMsg = Capabilities();
-        # initialize the text-to-speech engines field:
-        capabilitiesMsg.ttsEngines = self.soundEngines;
-        
-        # Build ttsVoices structures for use in the Capabilities
-        # message's TtsVoices field:
-        
-        ttsFestivalVoices = TtsVoices()
-        ttsFestivalVoices.ttsEngine = "festival"
-        ttsFestivalVoices.voices = self.festivalVoices;
-        
-        ttsCepstralVoices = TtsVoices()
-        ttsCepstralVoices.ttsEngine = "cepstral"
-        ttsCepstralVoices.voices = self.cepstralVoices;
-        
-        capabilitiesMsg.voices = [ttsFestivalVoices, ttsCepstralVoices];
-        
-        # List of available sound files:
-        filesInSoundDir = os.listdir(self.soundDir);
-        self.soundFiles = [];
-        for soundFileName in filesInSoundDir:
-            fileExtension = os.path.splitext(soundFileName)[1][1:].strip() 
-            if (fileExtension == "wav") or (fileExtension == "ogg"):
-                self.soundFiles.append(soundFileName);
-        capabilitiesMsg.sounds = self.soundFiles;
+        # Build a message listing the speech capabilities (which engines, which sounds):
+        capabilitiesMsg = self.build_capabilities_msg()
         
         # Publish the capabilities message just once, latched:
         self.capabilities_pub.publish(capabilitiesMsg);
-        
         
         self.mutex = threading.Lock()
         sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.callback)
@@ -458,6 +465,11 @@ class soundplay:
         self.hotlist = []
         if not self.initialized:
             rospy.loginfo('speakeasy node is ready to play sound')
+
+    def handle_speech_capabilities_inquiry(self, request):
+        capabilitiesMsg = self.build_capabilities_msg();
+        #rospy.loginfo("Speech capability inquiry.")
+        return (capabilitiesMsg.ttsEngines,capabilitiesMsg.voices,capabilitiesMsg.sounds);
             
     def sleep(self, duration):
         try:

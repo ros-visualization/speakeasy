@@ -12,3 +12,5 @@ src/speakeasy/msg/
 .project
 .classpath
 buttonPrograms
+src/speakeasy/srv/
+srv_gen

@@ -2,10 +2,10 @@
 
 import sys
 
-from PySide.QtCore import * #@UnusedWildImport
-from PySide.QtGui import * #@UnusedWildImport
-
 from speakeasy_ui import SpeakEasyGUI;
+
+import QtBindingHelper;
+from QtGui import QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel, QPushButton, QStyleFactory, QApplication
 
 class NextPrev:
     NEXT     = 0;
