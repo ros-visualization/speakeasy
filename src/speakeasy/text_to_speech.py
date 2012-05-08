@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 
 import os
+import subprocess
 import tempfile
+
+from sound_player import SoundPlayer;
 
 class TextToSpeechProvider(object):
     
     def __init__(self):
         self.t2sEngines = {};
         self.defaultEngine = self.findAvailableTTSEngines();
+        
+    # -----------------------------------------------  Public Methods ---------------------------------
     
-    def sayToFile(self, text, voiceName=None, t2sEngineName=self.defaultEngine):
+    def sayToFile(self, text, voiceName=None, t2sEngineName=None, destFileName=None):
         '''
         Create a sound file with the result of turning the
         string passed in parameter 'text' too sound. The 
@@ -24,20 +29,27 @@ class TextToSpeechProvider(object):
         @raise ValueError: if given engine name does not correspond to any know text-to-speech engine. 
         '''
         try:
-            engine = self.t2sEngines[t2sEngineName];
+            if t2sEngineName is None:
+                engine = self.defaultEngine;
+            else:
+                engine = self.t2sEngines[str(t2sEngineName).lower()];
         except KeyError:
             raise ValueError("Unknown text-to-speech engine: " + str(t2sEngineName));
         
-        engine.sayToFile(text, voiceName);
+        return engine.sayToFile(text, voiceName, destFileName);
 
-    def say(self, text, voiceName=None, t2sEngineName=self.defaultEngine):
+    def say(self, text, voiceName=None, t2sEngineName=None):
+
         try:
-            engine = self.t2sEngines[t2sEngineName];
+            if t2sEngineName is None:
+                engine = self.defaultEngine;
+            else:
+                engine = self.t2sEngines[str(t2sEngineName).lower()];
         except KeyError:
             raise ValueError("Unknown text-to-speech engine: " + str(t2sEngineName));
         engine.say(text, voiceName);
 
-    
+    # -----------------------------------------------  Private Methods ---------------------------------
     def findAvailableTTSEngines(self):
         defaultEngine = None;
         if os.uname()[0].lower().find('linux') > -1:
@@ -163,7 +175,7 @@ class TextToSpeechProvider(object):
 class TextToSpeechEngine(object):
     
     def __init__(self):
-        self.defaultVoice = None;
+        pass
 
     def getEngineName(self):
         return self.ttsEngineName;
@@ -171,7 +183,7 @@ class TextToSpeechEngine(object):
     def getT2SDestFilename(self):
         return self.t2sDestFilename;
         
-    def checkVoiceValid(self, voice):
+    def checkVoiceValid(self, voice, defaultVoice):
         '''
         Called from subclasses. Given the name of a voice, check whether it is either None,
         or a voice that is supported by the sound engine. If voice is None, the name of the 
@@ -180,12 +192,12 @@ class TextToSpeechEngine(object):
         @type voice: {string | NoneType}
         '''
         if voice is None:
-            return self.defaultVoice;
+            return defaultVoice;
         else:
             try:
                 self.getVoiceList().index(voice);
             except ValueError:
-                raise ValueError("Voice engine %s does not support a voice named %s.") % (self.getEngineName(), str(voice));
+                raise ValueError("Voice engine %s does not support a voice named %s." % (self.getEngineName(), str(voice)));
             return voice;
         
         
@@ -193,8 +205,9 @@ class Festival(TextToSpeechEngine):
     
     def __init__(self):
         super(Festival, self).__init__()
-        self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')
         self.ttsEngineName = "festival";
+        self.voiceList = None;
+        self.getVoiceList();
         self.txtfile = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.txt')
         self.txtfilename = self.txtfile.name
 
@@ -203,19 +216,23 @@ class Festival(TextToSpeechEngine):
         commandLine = 'echo "' + str(text) + '" | festival --tts';
         os.system(commandLine);
         
-    def sayToFile(self, text, voice=None):
-        voice = self.checkVoiceValid(voice);
-                
-        self.initTextFile(text)
+    def sayToFile(self, text, voice=None, destFileName=None):
+        
+        voice = self.checkVoiceValid(voice, self.defaultVoice);
+        if destFileName is None:
+            (destFile, destFileName) = tempfile.mkstemp(prefix='speakeasy', suffix='.wav')
+        else:
+            destFile = os.open(destFileName, 'w')
+        
         failureMsg = "Sound synthesis failed. Is the Festival engine installed? Is a festival voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
         self.txtfile.write(text)
         self.txtfile.flush()
-        commandLine = "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + self.t2sDestFilename,        
+        commandLine = "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + str(destFileName);      
         os.system(commandLine);
         self.txtfile.close();
-        if os.stat(self.t2sDestFilename).st_size == 0:
+        if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
-        return self.t2sDestFilename
+        return destFileName;
     
     def getVoiceList(self):
         #TODO: run festival, and issue Scheme command (voice.list)
@@ -239,25 +256,33 @@ class Cepstral(TextToSpeechEngine):
     
     def __init__(self):
         super(Cepstral, self).__init__()
-        self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')        
+        self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')
+        self.voiceList = None;
+        self.getVoiceList();
         self.ttsEngineName = "cepstral";
 
     def say(self, text, voice=None):
-        voice = self.checkVoiceValid(voice);
+        voice = self.checkVoiceValid(voice, self.defaultVoice);
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = "swift -n " + str(voice) + " '" + str(text) + "'";
+        commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "'";
         os.system(commandLine);
         
         
-    def sayToFile(self, text, voice=None):
-        voice = self.checkVoiceValid(voice);
+    def sayToFile(self, text, voice=None, destFileName=None):
+        
+        voice = self.checkVoiceValid(voice, self.defaultVoice);
+        if destFileName is None:
+            (destFile, destFileName) = tempfile.mkstemp(prefix='speakeasy', suffix='.wav')
+        else:
+            destFile = os.open(destFileName, 'w')
         
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = 'swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + self.t2sDestFilename;
+        commandLine = 'padsp swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName);
         os.system(commandLine);
-        if os.stat(self.t2sDestFilename).st_size == 0:
+        os.close(destFile);
+        if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
-        return self.t2sDestFilename
+        return destFileName;
 
     def getVoiceList(self):
         
@@ -295,23 +320,31 @@ class MacTextToSpeech(TextToSpeechEngine):
     
     def __init__(self):
         super(MacTextToSpeech, self).__init__();
-        self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.aiff')        
+        self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.aiff')
+        self.voiceList = None;
+        self.getVoiceList();        
         self.ttsEngineName = "mact2s";
 
     def say(self, text, voice=None):
-        voice = self.checkVoiceValid(voice);
+        voice = self.checkVoiceValid(voice, self.defaultVoice);
         commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '"';
         os.system(commandLine); 
 
-    def sayToFile(self, text, voice=None):
-        voice = self.checkVoiceValid(voice);
+    def sayToFile(self, text, voice=None, destFileName=None):
+        
+        voice = self.checkVoiceValid(voice, self.defaultVoice);
+        if destFileName is None:
+            (destFile, destFileName) = tempfile.mkstemp(prefix='speakeasy', suffix='.wav')
+        else:
+            destFile = os.open(destFileName, 'w')
         
         #commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '"'; 
-        commandLine = 'say -v ' + str(voice) + '-o ' + self.t2sDestFilename + ' "' + str(text) + '"'; 
+        commandLine = 'say -v ' + str(voice) + '-o ' + str(destFileName) + ' "' + str(text) + '"'; 
         os.system(commandLine);
-        if os.stat(self.t2sDestFilename).st_size == 0:
+        os.close(destFile);
+        if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
-        return self.t2sDestFilename
+        return destFileName;
 
 
     def getVoiceList(self):
@@ -327,6 +360,27 @@ class MacTextToSpeech(TextToSpeechEngine):
 if __name__ == "__main__":
     
     tte = TextToSpeechProvider();
-    tte.say("This is a test.")
+#    tte.say("This is a test.")
+#    tte.say("This is a test.", voiceName='David');
+#    try:
+#        tte.say("This is a test.", voiceName='Alex');
+#    except ValueError:
+#        pass # Expected.
+#    
+#    tte.say("This is a test", t2sEngineName="festival");
+#    tte.say("This is a test", t2sEngineName="Festival");
+
+    soundPlayer = SoundPlayer();
+    
+#    fileName = tte.sayToFile("Testing Cepstral say to file.");
+#    print "Cepstral printed to: " + str(fileName);
+#    soundPlayer.play(fileName, blockTillDone=True);
+#    os.remove(fileName);
+
+    fileName = tte.sayToFile("Testing Festival say to file.", t2sEngineName="Festival");
+    print "Festival printed to: " + str(fileName);
+    soundPlayer.play(fileName, blockTillDone=True);
+    os.remove(fileName);
+
     print "Done";
 
