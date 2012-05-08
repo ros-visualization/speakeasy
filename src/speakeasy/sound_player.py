@@ -600,7 +600,7 @@ if __name__ == '__main__':
     
     player = SoundPlayer();
     print "Test one sound..."
-#    channel = player.play(testFileRooster, blockTillDone=True);
+    channel = player.play(testFileRooster, blockTillDone=True);
     print "Done test one sound..."
     
     # Test all-mixer pause: Play sound for 1 second, pause for 3 sec, play to completion:
