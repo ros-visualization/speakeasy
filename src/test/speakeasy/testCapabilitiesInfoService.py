@@ -9,7 +9,8 @@ def testSpeechCapabilitiesInquiry():
     print "Speech capabilities service online."    
     try:
         capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
-        capabilities = capabilitiesService("foo");
+        #capabilities = capabilitiesService("foo");
+        capabilities = capabilitiesService();
         print str(capabilities);
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e

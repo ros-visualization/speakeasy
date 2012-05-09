@@ -13,6 +13,9 @@ from threading import Timer;
 import QtBindingHelper;
 from QtGui import QApplication
 
+from speakeasy.msg import SpeakEasyRequest;
+from speakeasy.srv import SpeechCapabilitiesInquiry
+
 from speakeasy_ui import SpeakEasyGUI;
 from speakeasy_ui import DialogService;
 
@@ -24,9 +27,6 @@ from speakeasy_ui import standardLookHandler;
 from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
-
-from speakeasy.msg import Capabilities;
-
 
 # ----------------------------------------------- Class Program ------------------------------------
 
@@ -158,24 +158,24 @@ class SpeakEasyController(object):
     # standalone:
     STAND_ALONE = False; 
     
-    soundPaths = {
-                  'SOUND_1' : 'rooster.wav',
-                  'SOUND_2':  'drill.wav',
-                  'SOUND_3' : 'bullCall.wav',
-                  'SOUND_4':  'clown_horn.wav',
-                  'SOUND_5':  'cashreg.wav',
-                  'SOUND_6':  'plateglass.wav',
-                  'SOUND_7':  'old_cell.wav',
-                  'SOUND_8':  'moo2.wav',
-                  'SOUND_9':  'abirdm.wav',
-                  'SOUND_10': 'bigtruck.wav', 
-                  'SOUND_11': 'seagulls_shore.wav', 
-                  'SOUND_12': 'hydrau_lift.wav' 
-                  }
+    soundPaths = {}
     
-    def __init__(self, dirpath):
+    def __init__(self, dirpath, stand_alone=False):
         
-        self.gui = SpeakEasyGUI();
+        if not stand_alone:
+            rospy.loginfo("Wait for speech capabilities service...");
+            rospy.wait_for_service('speech_capabilities_inquiry')
+            rospy.loginfo("Speech capabilities service online.");    
+            capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
+            try:
+                capabilitiesReply = capabilitiesService();
+                self.sound_file_names = capabilitiesReply.sounds
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+
+        soundFileNames = self.getAvailableSoundEffectFileNames(stand_alone=stand_alone);
+        
+        self.gui = SpeakEasyGUI(stand_alone=stand_alone, sound_effect_labels=soundFileNames);
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
         self.gui.hideButtonSignal.connect(alternateLookHandler);
@@ -217,6 +217,54 @@ class SpeakEasyController(object):
         for programButton in self.gui.programButtonDict.values():
             programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
             programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
+    
+    
+    #----------------------------------
+    # getAvailableSoundEffectFileNames
+    #--------------
+    
+    def getAvailableSoundEffectFileNames(self, stand_alone=False):
+        '''
+        Determine all the available sound effect files. If this process
+        operates stand-alone, the local 'sounds' subdirectory is searched.
+        Else, in a ROS environment, the available sound effect file names 
+        are obtained from the 'speech_capabilities_inquiry' service call:
+        '''
+        
+        #********************
+        return self.getAvailableLocalSoundEffectFileNames();
+        
+        # Standalone files are local to this process:
+        if stand_alone:
+            return self.getAvailableLocalSoundEffectFileNames();
+
+        sound_file_basenames = [];
+        for (i, full_file_name) in enumerate(self.sound_file_names):
+            SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
+            sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0])
+        return sound_file_basenames; 
+        
+    #----------------------------------
+    # getAvailableLocalSoundEffectFileNames 
+    #--------------
+        
+    def getAvailableLocalSoundEffectFileNames(self):
+        
+        scriptDir = os.path.dirname(os.path.realpath(__file__));
+        soundDir = os.path.join(scriptDir, "../../sounds");
+        if not os.path.exists(soundDir):
+            raise ValueError("No sound files found.")
+        
+        fileList = os.listdir(soundDir);
+        sound_file_basenames = [];
+        for (i, full_file_name) in enumerate(fileList):
+            # Isolate the file extension:
+            fileExtension = os.path.splitext(full_file_name)[1][1:].strip()
+            if (fileExtension == "wav") or (fileExtension == "ogg"):
+                SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
+                sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0]);
+        return sound_file_basenames;
+    
     
     #----------------------------------
     # sayText 
@@ -382,38 +430,24 @@ class SpeakEasyController(object):
     #--------------
         
     def actionSoundButtons(self, buttonObj):
-        if buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_1']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_1'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_2']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_2'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_3']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_3'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_4']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_4'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_5']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_5'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_6']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_6'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_7']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_7'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_8']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_8'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_9']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_9'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_10']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_10'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_11']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_11'];
-        elif buttonObj ==  self.gui.soundButtonDict[self.gui.interactionWidgets['SOUND_12']]:
-            soundFile = SpeakEasyController.soundPaths['SOUND_12'];
-        else:
-            raise ValueError("Unknown widget passed to actionSoundButton() method: " + str(buttonObj));
+        
+        soundIndx = 0;
+        while True:
+            soundKey = "SOUND_" + str(soundIndx);
+            try:
+                soundLabel = self.gui.interactionWidgets[soundKey];
+                oneButtonObj  = self.gui.soundButtonDict[soundLabel];
+            except KeyError:
+                raise ValueError("Unknown widget passed to actionSoundButton() method: " + str(buttonObj));
+            if buttonObj == oneButtonObj:
+                 soundFile = SpeakEasyController.soundPaths[soundKey];
+                 break;
+            else:
+                soundIndx += 1;
 
         self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
 	                             SpeakEasyRequest.PLAY_START,
 				                 soundFile)
-        
-        
         
     # ------------------------- Changing and Adding Button Programs --------------
         
@@ -563,10 +597,8 @@ if __name__ == "__main__":
     # To find the sounds, we need the absolute directory
     # path to this script:
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
-    speakeasyController = SpeakEasyController(scriptDir);
-    
-    files = speakeasyController.getAvailableLocalSoundEffectFileNames();
-    
+    speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
+        
     # Enter Qt application main loop
     sys.exit(app.exec_());
         

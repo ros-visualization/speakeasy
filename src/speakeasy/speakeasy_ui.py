@@ -2,8 +2,6 @@ import sys
 import os
 
 import rospy
-from speakeasy.msg import SpeakEasyRequest;
-from speakeasy.msg import Capabilities;
 
 from functools import partial;
 from threading import Timer;
@@ -14,7 +12,6 @@ from QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog
 from QtCore import Signal
 
 
-#TODO: From speakeasy_node's capabilities message, find all available sound files, and build sound buttons from those file names.
 #TODO: Play repeatedly.
 #TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
 
@@ -309,11 +306,14 @@ class SpeakEasyGUI(QMainWindow):
     # Initializer 
     #--------------
         
-    def __init__(self, parent=None, mirrored=True, stand_alone=False):
+    def __init__(self, parent=None, mirrored=True, stand_alone=False, sound_effect_labels=None):
         
         super(SpeakEasyGUI, self).__init__(parent);
-    
+        
         self.stand_alone = stand_alone;
+        self.sound_effect_labels = sound_effect_labels;
+        if (sound_effect_labels is None):
+            raise ValueError("Must pass in non-null array of sound effect button labels.");
         
         #self.setMaximumWidth(1360);
         #self.setMaximumHeight(760);
@@ -586,13 +586,13 @@ class SpeakEasyGUI(QMainWindow):
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
         '''
-        buttonLabelArr = self.getAvailableSoundEffectFileNames();
-        for i in range(12):
-            key = "SOUND_" + str(i+1);
-            buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
+        
+        for i in range(len(self.sound_effect_labels)):
+            key = "SOUND_" + str(i);
+            SpeakEasyGUI.interactionWidgets[key] = self.sound_effect_labels[i];
         
         (buttonGridLayout, self.soundButtonDict) =\
-            SpeakEasyGUI.buildButtonGrid(buttonLabelArr, SpeakEasyGUI.NUM_OF_SOUND_BUTTON_COLUMNS);
+            SpeakEasyGUI.buildButtonGrid(self.sound_effect_labels, SpeakEasyGUI.NUM_OF_SOUND_BUTTON_COLUMNS);
         for buttonObj in self.soundButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.soundButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
@@ -841,40 +841,6 @@ class SpeakEasyGUI(QMainWindow):
     
     # ---------------------   Manage Sound Effect Buttons -------------------
           
-    #----------------------------------
-    # getAvailableSoundEffectFileNames
-    #--------------
-    
-    def getAvailableSoundEffectFileNames(self):
-        '''
-        Determine all the available sound effect files. If this process
-        operates stand-alone, the local 'sounds' subdirectory is searched.
-        Else, in a ROS environment, the available sound effect file names 
-        are obtained from the /capabilities message topic.
-        '''
-        
-        # Standalone files are local to this process:
-        if self.stand_alone:
-            return getAvailableLocalSoundEffectFiles();
-        
-        capabilitiesMsg = rospy.wait_for_message("/capabilities", Capabilities, 5);
-        return capabilitiesMsg.sounds;
-            
-        
-    #----------------------------------
-    # getAvailableLocalSoundEffectFileNames 
-    #--------------
-        
-    def getAvailableLocalSoundEffectFileNames(self):
-        
-        scriptDir = os.path.dirname(os.path.realpath(__file__));
-        soundDir = os.path.join(scriptDir, "../../sounds");
-        if not os.path.exists(soundDir):
-            raise ValueError("No sound files found.")
-        
-        fileList = os.listdir(soundDir);
-        return fileList;
-    
 
 def alternateLookHandler(buttonObj):
     #buttonObj.hide();

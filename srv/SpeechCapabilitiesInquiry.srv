@@ -1,4 +1,4 @@
-string str
+# No in-parameters
 ---
 #    - Text-to-speech engine names (e.g. ['festival', 'cepstral'])
 #    - Voices for each text-to-speech engine (e.g. ['David'])

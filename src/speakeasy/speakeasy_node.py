@@ -96,6 +96,9 @@ try:
     pygst.require('0.10')
     import gst
     import gobject
+    # Andreas: Added the following in hope of preventing
+    # the random quiet stopping of sound playing:
+    # gobject.threads_init() # Made no difference
 except:
     str="""
 **************************************************************
@@ -145,8 +148,23 @@ class soundtype:
                 self.stop()
             
             if self.state == self.STOPPED:
-              self.sound.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, 0)
-              self.sound.set_state(gst.STATE_PLAYING)
+              seek_ok = self.sound.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH, 0)  # Maybe sudden-death bug is here...
+              state_set_result = self.sound.set_state(gst.STATE_PLAYING)                 # or here
+              #-----------
+              rospy.loginfo("seek_ok: " + str(seek_ok))
+              rospy.loginfo("state_set_result: " + str(state_set_result))
+              if (state_set_result == gst.STATE_CHANGE_FAILURE):
+                  rospy.loginfo("State change FAILURE.")
+              elif (state_set_result == gst.STATE_CHANGE_SUCCESS):
+                  rospy.loginfo("State change SUCCESS.")
+              elif (state_set_result == gst.STATE_CHANGE_ASYNC):
+                  rospy.loginfo("State change ASYNC.")
+              elif (state_set_result == gst.STATE_CHANGE_NO_PREROLL):
+                  rospy.loginfo("State change NO_PREROLL.")
+              else:
+                  rospy.loginfo("State change return unknown value.")
+                  
+              #-----------
             
             self.state = self.LOOPING
         finally:
@@ -236,7 +254,7 @@ class soundplay:
                         return;
                     absPathToSoundFile = os.path.join(self.soundDir, data.arg);
                     self.filesounds[data.arg] = soundtype(absPathToSoundFile);
-                    sound = soundtype(absPathToSoundFile);
+                    sound = soundtype(absPathToSoundFile); # soundtype instance made twice: problem? ************
                 elif data.sound == SpeakEasyRequest.SAY:
                     # data.sound is the text of a text-to-speech request:
                      
