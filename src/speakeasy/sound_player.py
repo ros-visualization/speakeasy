@@ -3,7 +3,10 @@
 import pygame
 import time
 from operator import itemgetter
+import threading
 
+
+# Modify to allow more than 8 simultaneous sounds:
 NUM_SIMULTANEOUS_SOUNDS = 8;
 NUM_OF_CACHED_SOUNDS    = 500;
 
@@ -11,14 +14,61 @@ class SoundPlayer(object):
     '''
     Plays up to NUM_SIMULTANEOUS_SOUNDS .wav/.ogg files simultaneously. Allows pause/unpause on
     any of these sounds. (.ogg untested)
+    <p>
+    Theory of operation: The class uses the pygame module. This module involves Sound instances
+    and Channel instances. A Sound is created from a .wav or .ogg file, and can play on one or 
+    more Channel instances. 
+    <p>
+    All channels can simultaneously play, one Sound per channel. The
+	number of channels can be set via the module-global constant
+	NUM_SIMULTANEOUS_SOUNDS. Default is 8. Channels and Sounds are managed
+	by pygame.mixer. 
+	<p>
+	This class uses parameter polymorphism to unify all these concepts as
+	much as possible. The only public methods are
+	<code>play(), stop(), pause(), unpause(),set_volume(),
+	get_volume()</code>. Each of these methods takes either the path to
+	a sound file, a Sound instances, or a Channel instance. The
+	SoundPlayer takes care of creating Sound instances by loading them
+	from files, caching sounds, and tracking which Sounds are playing on
+	which Channel at any time. Callers of these methods need to deal only
+	with the sound file paths. These paths, when passed to, say, the
+	pause() method, will do the right thing; Sound instances are cached,
+	so they will not be loaded repeatedly.
+	<p>
+	Note that this wonderful collapsing of complex underlying pygame
+	concepts comes at a price in code ugliness.  Since Python does not
+	have parameter based polymorphism, methods must figure out incoming
+	parameter types via duck typing methods: Treat the parameters as some
+	type and see whether an error occurs. Terrible, but the 'pythonic' way.
+	<p>
+	
+	As background: The pygame API provides methods three entities:
+	Mixer, Channel, and Sound. The main methods are:
+	
+	<ul>
+	    <li>Mixer:
+	        stop(),pause(),unpause(),get_num_channels(),set_num_channels()</li>
+	    <li>Channel: play(),stop(),pause(),unpause()</li>
+	    <li>Sound: play(),stop(),pause(),unpause()</li>
+	</ul>
+	<p>   
     '''
+    
+    # Used to enforce Singleton pattern:
+    singletonInstanceRunning = False;    
     
     #--------------------------------
     # Initializer
     #---------------
     
     def __init__(self):
+        if SoundPlayer.singletonInstanceRunning:
+            raise RuntimeError("Must only instantiate SoundPlayer once; an instance is already running.")
+        else:
+            SoundPlayer.singletonInstanceRunning = True;
         pygame.mixer.init();
+        self.lock = threading.Lock(); 
         self.loadedSounds = {};    # Map filenames to Sound instances
         self.loadedFilenames = {}  # Map Sound instances to filenames
         self.soundChannelBindings = {};
@@ -48,38 +98,39 @@ class SoundPlayer(object):
         if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
             raise ValueError("Volume must be between 0.0 and 1.0"); 
 
-        self.cleanupSoundChannelBindings();
-                
-        try:
-            # Play a file?
-            (sound, channel) = self.playFile(whatToPlay, volume);
-            # Remember that this sound is now playing on that channel:
-            if channel is not None:
-                self.addSoundToChannelBinding(sound, channel);
-                self.lastUsedTime[sound] = time.time();
-        except TypeError:
-            # Nope, not a file, must be a Sound or Channel instance:
-            whatToPlay.play();
-            try: 
-                # Hypothesis: whatToPlay is a Sound instance:
-                channel = self.soundChannelBindings[whatToPlay];
-                # If this didn't bomb, whatToPlay is indeed a Sound instance:
-                sound   = whatToPlay; 
-                self.lastUsedTime[sound] = time.time(); 
-            except KeyError:
-                # whatToPlay must be a Channel instance:
-                channel = whatToPlay;
-                sound   = self.getSoundFromChannel(channel);
-                self.addSoundToChannelBinding(sound, channel);
-                self.lastUsedTime[sound] = time.time();                 
-
-        # At this point, sound and channel vars are correctly set.
-        # Caller wants to block till sound done?
-        if blockTillDone:
-            self.waitForSoundDone(channel)
+        with self.lock:
             self.cleanupSoundChannelBindings();
-            
-        return channel;
+                    
+            try:
+                # Play a file?
+                (sound, channel) = self.playFile(whatToPlay, volume);
+                # Remember that this sound is now playing on that channel:
+                if channel is not None:
+                    self.addSoundToChannelBinding(sound, channel);
+                    self.lastUsedTime[sound] = time.time();
+            except TypeError:
+                # Nope, not a file, must be a Sound or Channel instance:
+                whatToPlay.play();
+                try: 
+                    # Hypothesis: whatToPlay is a Sound instance:
+                    channel = self.soundChannelBindings[whatToPlay];
+                    # If this didn't bomb, whatToPlay is indeed a Sound instance:
+                    sound   = whatToPlay; 
+                    self.lastUsedTime[sound] = time.time(); 
+                except KeyError:
+                    # whatToPlay must be a Channel instance:
+                    channel = whatToPlay;
+                    sound   = self.getSoundFromChannel(channel);
+                    self.addSoundToChannelBinding(sound, channel);
+                    self.lastUsedTime[sound] = time.time();                 
+    
+            # At this point, sound and channel vars are correctly set.
+            # Caller wants to block till sound done?
+            if blockTillDone:
+                self.waitForSoundDone(channel)
+                self.cleanupSoundChannelBindings();
+                
+            return channel;
 
     #--------------------------------
     # stop
@@ -97,24 +148,25 @@ class SoundPlayer(object):
                            stop only whatever is currently playing on this channel. 
         @type whatToStop: {NoneType | string | Sound | Channel}
         '''
-        try:
-            if whatToStop is None:
-                pygame.mixer.stop();
-                return;
+        with self.lock:
             try:
-                self.stopFile(whatToStop);
-                return;
-            except TypeError:
-                pass
-            
-            # Must be a Sound or Channel instance, which
-            # support stop() (or something illegal):
-            try:
-                whatToStop.stop();
-            except:
-                raise TypeError("Parameter whatToStop must be a filename, Sound instance, or Channel instance.")
-        finally:
-            self.cleanupSoundChannelBindings();
+                if whatToStop is None:
+                    pygame.mixer.stop();
+                    return;
+                try:
+                    self.stopFile(whatToStop);
+                    return;
+                except TypeError:
+                    pass
+                
+                # Must be a Sound or Channel instance, which
+                # support stop() (or something illegal):
+                try:
+                    whatToStop.stop();
+                except:
+                    raise TypeError("Parameter whatToStop must be a filename, Sound instance, or Channel instance.")
+            finally:
+                self.cleanupSoundChannelBindings();
     
     #--------------------------------
     # pause
@@ -135,47 +187,48 @@ class SoundPlayer(object):
         @raise TypeError: if whatToPause is of illegal type.
         '''
         
-        self.cleanupSoundChannelBindings();        
-        
-        if whatToPause is None:
-            # Pause everything:
-            pygame.mixer.pause();
-            return
-
-        try:
-            # Pause by filename?
-            if self.pauseFile(whatToPause) is not None:
-                # whatToPause was a filename, but it wasn't
-                # playing, or Pause succeeded. Either way
-                # we're done. 
-                return;
-        except TypeError:
-            # whatToPause is not a filename:
-            pass;
-
-        # whatToPause is a Channel or Sound instance:
-        # Is it a Sound instance? 
-        channels = self.getChannelsFromSound(whatToPause);
-        if channels is None:
-            # No sound bound to whatToPause is playing on any channel.
-            # So maybe whatToUnPause is a channel or array of channels.
-            # Ensure that we have an array:
-            channels = whatToPause;
-            try:
-                len(channels)
-            except TypeError:
-                channels = [whatToPause];
+        with self.lock:
+            self.cleanupSoundChannelBindings();        
             
-        # Must be an array of channels at this point, or something illegal:
-        try:
-            for channel in channels:
-                if channel.get_busy():
-                    channel.pause();
-        except:
-            # The passed-in whatToPause is neither, string (i.e. filename),
-            # nor Sound instance, nor Channel instance. Chastise caller:
-            raise TypeError("Parameter whatToPause must be a filename, Sound instance, Channel instance, or iterable of channel instances.")
-        return;
+            if whatToPause is None:
+                # Pause everything:
+                pygame.mixer.pause();
+                return
+    
+            try:
+                # Pause by filename?
+                if self.pauseFile(whatToPause) is not None:
+                    # whatToPause was a filename, but it wasn't
+                    # playing, or Pause succeeded. Either way
+                    # we're done. 
+                    return;
+            except TypeError:
+                # whatToPause is not a filename:
+                pass;
+    
+            # whatToPause is a Channel or Sound instance:
+            # Is it a Sound instance? 
+            channels = self.getChannelsFromSound(whatToPause);
+            if channels is None:
+                # No sound bound to whatToPause is playing on any channel.
+                # So maybe whatToUnPause is a channel or array of channels.
+                # Ensure that we have an array:
+                channels = whatToPause;
+                try:
+                    len(channels)
+                except TypeError:
+                    channels = [whatToPause];
+                
+            # Must be an array of channels at this point, or something illegal:
+            try:
+                for channel in channels:
+                    if channel.get_busy():
+                        channel.pause();
+            except:
+                # The passed-in whatToPause is neither, string (i.e. filename),
+                # nor Sound instance, nor Channel instance. Chastise caller:
+                raise TypeError("Parameter whatToPause must be a filename, Sound instance, Channel instance, or iterable of channel instances.")
+            return;
 
     #--------------------------------
     # unpause
@@ -195,46 +248,47 @@ class SoundPlayer(object):
         @type whatToUnPause: {NoneType | string | Sound | Channel}
         '''
         
-        self.cleanupSoundChannelBindings();        
-        
-        if whatToUnPause is None:
-            # Unpause everything:
-            pygame.mixer.unpause();
-            return
-
-        try:
-            # Unpause by filename?
-            if self.unpauseFile(whatToUnPause) is not None:
-                # whatToUnPause was a filename, but it wasn't
-                # playing, or Pause succeeded. Either way
-                # we're done. 
-                return;
-        except TypeError:
-            # whatToUnPause is not a filename:
-            pass;
-
-        # whatToUnPause is a Channel or Sound instance:
-        # Is it a Sound? 
-        channels = self.getChannelsFromSound(whatToUnPause);
-        if channels is None:
-            # No sound that is whatToUnPause is playing on any channel.
-            # So maybe whatToUnPause is a Channel instance or array:
-            # Ensure that we have an array:
-            channels = whatToUnPause;
+        with self.lock():
+            self.cleanupSoundChannelBindings();        
+            
+            if whatToUnPause is None:
+                # Unpause everything:
+                pygame.mixer.unpause();
+                return
+    
             try:
-                len(channels)
+                # Unpause by filename?
+                if self.unpauseFile(whatToUnPause) is not None:
+                    # whatToUnPause was a filename, but it wasn't
+                    # playing, or Pause succeeded. Either way
+                    # we're done. 
+                    return;
             except TypeError:
-                channels = [whatToUnPause];
-
-        try:
-            for channel  in channels:
-                if channel.get_busy():
-                    channel.unpause();
-        except:
-            # The passed-in whatToUnPause is neither, string (i.e. filename),
-            # nor Sound instance, nor Channel instance. Chastise caller:
-            raise TypeError("Parameter whatToUnPause must be a filename, Sound instance, or Channel instance.")
-        return;
+                # whatToUnPause is not a filename:
+                pass;
+    
+            # whatToUnPause is a Channel or Sound instance:
+            # Is it a Sound? 
+            channels = self.getChannelsFromSound(whatToUnPause);
+            if channels is None:
+                # No sound that is whatToUnPause is playing on any channel.
+                # So maybe whatToUnPause is a Channel instance or array:
+                # Ensure that we have an array:
+                channels = whatToUnPause;
+                try:
+                    len(channels)
+                except TypeError:
+                    channels = [whatToUnPause];
+    
+            try:
+                for channel  in channels:
+                    if channel.get_busy():
+                        channel.unpause();
+            except:
+                # The passed-in whatToUnPause is neither, string (i.e. filename),
+                # nor Sound instance, nor Channel instance. Chastise caller:
+                raise TypeError("Parameter whatToUnPause must be a filename, Sound instance, or Channel instance.")
+            return;
 
     #--------------------------------
     # setSoundVolume
@@ -261,27 +315,28 @@ class SoundPlayer(object):
         if (volume < 0.0) or (volume > 1.0):
             raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
 
-        # If whatToSetVolFor is a Sound or Channel instance,
-        # a set_volume() method call will work:
-        try:
-            whatToSetVolFor.set_volume(volume);
-            return;
-        except:
-            # Was not a sound or channel instance
-            pass
-
-        # whatToSetVolFor must be a filename (or something illegal).
-        # Is this sound cached?
-        sound = self.getSoundFromFileName(whatToSetVolFor);
-        if sound is not None:
-            # Yep, set the Sound instance's volume:
-            sound.set_volume(volume);
-            return;
-        else:
-            # Try loading the sound. Will barf with OSError if file not found:
-            sound = self.loadSound(whatToSetVolFor);
-            sound.set_volume(volume);
-            return;
+        with self.lock:
+            # If whatToSetVolFor is a Sound or Channel instance,
+            # a set_volume() method call will work:
+            try:
+                whatToSetVolFor.set_volume(volume);
+                return;
+            except:
+                # Was not a sound or channel instance
+                pass
+    
+            # whatToSetVolFor must be a filename (or something illegal).
+            # Is this sound cached?
+            sound = self.getSoundFromFileName(whatToSetVolFor);
+            if sound is not None:
+                # Yep, set the Sound instance's volume:
+                sound.set_volume(volume);
+                return;
+            else:
+                # Try loading the sound. Will barf with OSError if file not found:
+                sound = self.loadSound(whatToSetVolFor);
+                sound.set_volume(volume);
+                return;
         
     #--------------------------------
     # getSoundVolume
@@ -304,22 +359,23 @@ class SoundPlayer(object):
         @type whatToSetVolFor: {NoneType | string | Sound | Channel}
         @raise OSError: if given filename that does not exist. 
         '''
-        
-        # If whatToGetVolFor is a Sound or Channel instance,
-        # a get_volume() method call will work:
-        try:
-            return whatToGetVolFor.get_volume();
-        except:
-            pass
 
-        # whatToGetVolFor must be a filename (or something illegal):
-        sound = self.getSoundFromFileName(whatToGetVolFor);
-        if sound is not None:
-            return sound.get_volume();
-        else:
-            # Try loading the sound. Will barf with OSError if file not found:
-            sound = self.loadSound(whatToGetVolFor);
-            return sound.get_volume();
+        with self.lock:        
+            # If whatToGetVolFor is a Sound or Channel instance,
+            # a get_volume() method call will work:
+            try:
+                return whatToGetVolFor.get_volume();
+            except:
+                pass
+    
+            # whatToGetVolFor must be a filename (or something illegal):
+            sound = self.getSoundFromFileName(whatToGetVolFor);
+            if sound is not None:
+                return sound.get_volume();
+            else:
+                # Try loading the sound. Will barf with OSError if file not found:
+                sound = self.loadSound(whatToGetVolFor);
+                return sound.get_volume();
 
     #--------------------------------
     # numChannels
@@ -338,6 +394,12 @@ class SoundPlayer(object):
     #---------------
     
     def loadSound(self, filename):
+        '''
+        Create a Sound instance from the given file. Cache the sound,
+        and initialize the LRU cache last-used time.
+        @param filename: Full path to sound file (.wav/.ogg)
+        @type filename: string
+        '''
         try:
             # Already loaded?
             return self.loadedSounds[filename];
@@ -358,6 +420,11 @@ class SoundPlayer(object):
     #---------------
     
     def checkCacheStatus(self):
+        '''
+        Ensures that number of cached sounds does not exceed
+        NUM_OF_CACHED_SOUNDS. If it does, half the cache is
+        emptied in order of least-recently-used first.
+        '''
         
         if len(self.loadedSounds.keys()) < NUM_OF_CACHED_SOUNDS:
             return;
@@ -381,6 +448,11 @@ class SoundPlayer(object):
     #---------------
     
     def unloadSound(self, sound):
+        '''
+        Remove Sound instance from cache and all other references. 
+        @param sound: Sound instance to remove
+        @type sound: Sound
+        '''
         
         soundFilename = None
         # If this sound playing on one or more channels, stop them all
@@ -423,6 +495,7 @@ class SoundPlayer(object):
 
     def playFile(self, filename, volume=None):
         '''
+        Private Method! Called by play();
         Given a filename, load it into a Sound instance, if it is not
         already cached. Set the volume, if given, and play. It is assumed
         that the volume value, if given, has been verified by the caller
@@ -431,6 +504,8 @@ class SoundPlayer(object):
         @type filename: string
         @param volume: Volume to play at: 0.0 to 1.0
         @type volume: float
+        @return: Sound and channel instances
+        @returnt: (Sound, Channel)
         @raise OSError: if file does not exist. 
         '''
         if not isinstance(filename, basestring):
@@ -449,6 +524,14 @@ class SoundPlayer(object):
     #---------------
     
     def stopFile(self, filename):
+        '''
+        Private Method! Called by stop();
+        Stops currently playing sound from the given filename.
+        Does nothing if this file is not currently playing.
+        @param filename: Filename from which the Sound instance to be stopped was created.
+        @type filename: string
+        @raise TypeError: filename is not a string.
+        '''
         
         if not isinstance(filename, basestring):
             raise TypeError("Filename must be a string.")
@@ -464,6 +547,15 @@ class SoundPlayer(object):
     #---------------
         
     def pauseFile(self, filename):
+        '''
+        Private Method! Called by pause();
+        Pauses currently playing sound from the given filename.
+        Does nothing if this file is not currently playing.
+        @param filename: Filename from which the Sound instance to be paused was created.
+        @type filename: string
+        @return: Sound instance
+        @raise TypeError: filename is not a string.
+        '''
         if not isinstance(filename, basestring):
             raise TypeError("Filename must be a string.")
         
@@ -488,6 +580,16 @@ class SoundPlayer(object):
     #---------------
 
     def unpauseFile(self, filename):
+        '''
+        Unpauses currently paused sound from the given filename.
+        Does nothing if this file is not currently playing or paused.
+        @param filename: Filename from which the Sound instance to be unpaused was created.
+        @type filename: string
+        @return: Sound instance
+        @returnt: Sound
+        @raise TypeError: filename is not a string.
+        '''
+        
         if not isinstance(filename, basestring):
             raise TypeError("Filename must be a string.")
         
@@ -509,6 +611,14 @@ class SoundPlayer(object):
     #---------------
 
     def getSoundFromFileName(self, filename):
+        '''
+        Given a sound file path name, return the corresponding
+        Sound instance, if the file was loaded. Else return None.
+        @param filename: Filename from which the Sound instance was created.
+        @type filename: string
+        @return: Sound instance created from the given file. None if file not yet loaded.
+        @returnt: {Sound | NoneType}
+        '''
         try:
             return self.loadedSounds[filename]
         except KeyError:
@@ -520,6 +630,14 @@ class SoundPlayer(object):
     #---------------
     
     def getSoundFromChannel(self, channel):
+        '''
+        Return Sound instance that is currently playing on the given Channel instance.
+        None if channel is inactive.
+        @param channel: Channel to be investigated.
+        @type channel: Channel
+        '''
+        if not channel.get_busy():
+            return None;
         return channel.get_sound();        
     
     #--------------------------------
@@ -527,6 +645,14 @@ class SoundPlayer(object):
     #---------------
     
     def getChannelsFromSound(self, sound):
+        '''
+        Return all channels on which the given Sound instance 
+        is currently playing.
+        @param sound: Sound instance to be hunted down.
+        @type sound: Sound
+        @return: Array of Channel instances, or None, if Sound is not currently playing on any channel.
+        @returnt: {[Channel] | NoneType}
+        '''
         self.cleanupSoundChannelBindings();
         try:
             return self.soundChannelBindings[sound];
@@ -538,6 +664,13 @@ class SoundPlayer(object):
     #---------------
 
     def addSoundToChannelBinding(self, sound, channel):
+        '''
+        Register that a Sound is beginning to play on a given Channel.  
+        @param sound: Sound to bind
+        @type sound: Sound
+        @param channel: Channel to bind to
+        @type channel: Channel
+        '''
         
         self.cleanupSoundChannelBindings();
         
@@ -555,6 +688,10 @@ class SoundPlayer(object):
     #---------------
 
     def cleanupSoundChannelBindings(self):
+        '''
+        Runs through the sound-to-channel bindings and removes
+        the entries of channels that are done playing.
+        '''
         maybePlayingSounds = self.soundChannelBindings.keys();
         for sound in maybePlayingSounds:
             # Get all the channels that are currently playing this sound:
@@ -574,6 +711,11 @@ class SoundPlayer(object):
     #---------------
     
     def waitForSoundDone(self, channel):
+        '''
+        Block until sound on given channel is finished playing.
+        @param channel: Channel to monitor
+        @type channel: Channel
+        '''
         while channel.get_busy():
             time.sleep(0.5);
             
@@ -602,24 +744,28 @@ if __name__ == '__main__':
     print "Test one sound..."
     channel = player.play(testFileRooster, blockTillDone=True);
     print "Done test one sound..."
+    print "---------------"
     
     # Test all-mixer pause: Play sound for 1 second, pause for 3 sec, play to completion:
     print "Test pause/unpause all channels. Expect 1sec sound, 3sec pause, 1 second sound, 3sec pause, rest of sound...";
 #    channel = player.play(testFileRooster, blockTillDone=False);
 #    playPauseUnpause(channel, None)
     print "Done pause/unpause all channels.";
+    print "---------------"
     
     print "Test pause/unpause by filename. Expect repeated cycles of 1sec sound, 3sec pause...";
 #    channel = player.play(testFileSeagulls, blockTillDone=False);
 #    playPauseUnpause(channel, testFileSeagulls);
     print "Done test pause/unpause by filename.";
+    print "---------------"
         
     print "Test two sounds after another: seagulls, then rooster..."
 #    channelSeagulls = player.play(testFileSeagulls, blockTillDone=True);
 #    channelRooster  = player.play(testFileRooster, blockTillDone=False);   
 #    while channelRooster.get_busy() or channelSeagulls.get_busy():
 #        time.sleep(0.5)
-    print "Test two sounds after another: seagulls, then rooster."
+    print "Done testing two sounds after another: seagulls, then rooster."
+    print "---------------"
     
 
     print "Test pause/unpause while another sound is running. Expect repeated cycles of 1sec rooster and seagull sounds, 3sec, both sounds again for 1 sec,...";
@@ -630,6 +776,7 @@ if __name__ == '__main__':
 #    while channelRooster.get_busy() or channelSeagulls.get_busy():
 #        time.sleep(0.5)
     print "Done test pause/unpause while another sound is running. Expect repeated cycles of 1sec rooster and seagull sounds, 3sec, both sounds again for 1 sec,...";        
+    print "---------------"
 
     print "Test attempt to play on more than 8 channels at once..."
 #    channel1 = player.play(testFileSeagulls, blockTillDone=False);
@@ -651,6 +798,7 @@ if __name__ == '__main__':
 #        print "Loaded sounds dict is: " + str(player.loadedSounds);
 #        print "SoundChannelBindings dict is: " + str(player.soundChannelBindings);
     print "Done test attempt to play on more than 8 channels at once."
+    print "---------------"
             
     print "Test pausing by filename when respective sound is playing on multiple channels..."
 #    channel1 = player.play(testFileRooster, blockTillDone=False);
@@ -709,6 +857,7 @@ if __name__ == '__main__':
 #    player.cleanupSoundChannelBindings()
 #    print "SoundChannelBindings dict after clean is: " + str(player.soundChannelBindings);    
     print "Done test pausing by filename when respective sound is playing on multiple channels..."
+    print "---------------"
     
     print "Test volume control. Hear rooster three times, once at full volume, then twice at the same lower volume"
 #    player.play(testFileRooster, blockTillDone=True, volume=1.0);
@@ -716,6 +865,7 @@ if __name__ == '__main__':
 #    # Sound should play at same low volume even without vol spec:
 #    player.play(testFileRooster, blockTillDone=True);
     print "Done test volume control. Hear rooster three times, once at full volume, then twice at the same lower volume"
+    print "---------------"
     
     print "Test sound cache management; three second delay is normal."
 #    player.loadSound(testFileRooster);
@@ -746,6 +896,16 @@ if __name__ == '__main__':
 #    #print "Keys lastUsedTime after cache reduction: " + str(player.lastUsedTime);
 #    
 #    NUM_OF_CACHED_SOUNDS = NUM_OF_CACHED_SOUNDS_SAVED
-    print "Done test sound cache management; three second delay is normal."                
+    print "Done test sound cache management; three second delay is normal."
+    print "---------------"
+    
+    print "Test singleton enforcement"
+    try:
+        player1 = SoundPlayer();
+        raise ValueError("Should have raised a RuntimeError.")
+    except RuntimeError:
+        pass;
+    print "Done testing singleton enforcement"    
+    print "---------------"
             
     print "All  done"

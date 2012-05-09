@@ -7,6 +7,13 @@ import tempfile
 from sound_player import SoundPlayer;
 
 class TextToSpeechProvider(object):
+    '''
+    Abstraction for interacting with text-to-speech engines on 
+    Ubuntu, Mac, and (unimplemented:) Windows. Detects Festival and
+    Cepstral engines on Ubuntu. Main public facilities: Speak an 
+    utterance immediately, given a string, and generate a .wav file
+    from the text-to-speech conversion.
+    '''
     
     def __init__(self):
         self.t2sEngines = {};
@@ -17,14 +24,21 @@ class TextToSpeechProvider(object):
     def sayToFile(self, text, voiceName=None, t2sEngineName=None, destFileName=None):
         '''
         Create a sound file with the result of turning the
-        string passed in parameter 'text' too sound. The 
-        given voice engine and voice are used.
+        string passed in parameter 'text' to sound. The 
+        given voice engine and voice are used. If no destination file
+        is provided, a temporary file is created, and its filename is
+        returned after the file is closed. The caller bears responsibility
+        for removing that temporary file.
+        
         @param text: String to convert into sound.
         @type text: string
         @param t2sEngineName: Name of text-to-speech engine: "festival", "cepstral", "mact2s"
         @type t2sEngineName: string
         @param voiceName: Name of voice to use. Must be a voice supported by the given t2s engine.
         @type voiceName: string
+        @param destFileName: Path into which the resulting sound should be directed. If not
+                             provided, a temp file is created.
+        @type destFileName: string 
         @raise NotImplementedError: if voice is not supported by the given engine.
         @raise ValueError: if given engine name does not correspond to any know text-to-speech engine. 
         '''
@@ -39,6 +53,18 @@ class TextToSpeechProvider(object):
         return engine.sayToFile(text, voiceName, destFileName);
 
     def say(self, text, voiceName=None, t2sEngineName=None):
+        '''
+        Immediately speak the given string with the given voice on the given engine.
+        If voice or engine are not provided, defaults are used.
+        @param text: String to speak
+        @type text: string
+        @param voiceName: Designation of the voice to use.
+        @type voiceName: string
+        @param t2sEngineName: Name of text-to-speech engine to use.
+        @type t2sEngineName: string
+        @raise ValueError: if unknown text-to-speech engine.
+        @raise OSError: if failure in running the text-to-speech command in underlying shell 
+        '''
 
         try:
             if t2sEngineName is None:
@@ -49,8 +75,19 @@ class TextToSpeechProvider(object):
             raise ValueError("Unknown text-to-speech engine: " + str(t2sEngineName));
         engine.say(text, voiceName);
 
+
+
+
+
     # -----------------------------------------------  Private Methods ---------------------------------
     def findAvailableTTSEngines(self):
+        '''
+        Try to sense the underlying OS. Then identify the available
+        text-to-speech engines. Return the default engine to be used.
+        @return: Default engine instance.
+        @returnt: TextToSpeechEngine subclass
+        @raise ValueError: if no speech engine is found. 
+        '''
         defaultEngine = None;
         if os.uname()[0].lower().find('linux') > -1:
             defaultEngine = self.linuxTTSEngines();
@@ -173,6 +210,9 @@ class TextToSpeechProvider(object):
 # ----------------------------------  Text to Speech Engine Classes and Subclasses ---------------
 
 class TextToSpeechEngine(object):
+    '''
+    Abstract class from which text-to-speech engine classes are derived.
+    '''
     
     def __init__(self):
         pass
@@ -202,6 +242,9 @@ class TextToSpeechEngine(object):
         
         
 class Festival(TextToSpeechEngine):
+    '''
+    Wrapper for the Linux Festival text-to-speech engine.
+    '''
     
     def __init__(self):
         super(Festival, self).__init__()
@@ -253,6 +296,9 @@ class Festival(TextToSpeechEngine):
     
     
 class Cepstral(TextToSpeechEngine):
+    '''
+    Wrapper for Cepstral text-to-speech engine.
+    '''
     
     def __init__(self):
         super(Cepstral, self).__init__()
@@ -360,27 +406,53 @@ class MacTextToSpeech(TextToSpeechEngine):
 if __name__ == "__main__":
     
     tte = TextToSpeechProvider();
-#    tte.say("This is a test.")
+    print "Test defaulting t2s engine and voice"
+    tte.say("This is a test.")
+    print "Done testing defaulting t2s engine and voice"
+    print "---------------"
+    
+    print "Test default t2s engine, ask for particular voice"
 #    tte.say("This is a test.", voiceName='David');
+    print "Done testing default t2s engine, ask for particular voice"
+    print "---------------"
+    
+
+    print "Test deliberate voice name-unknown error."
 #    try:
 #        tte.say("This is a test.", voiceName='Alex');
 #    except ValueError:
 #        pass # Expected.
-#    
+#
+    print "Done testing deliberate voice name-unknown error."
+    print "---------------"
+    
+    print "Test ask for specific t2s engine"    
 #    tte.say("This is a test", t2sEngineName="festival");
+    print "Done testing ask for specific t2s engine"    
+    print "---------------"
+
+    print "Test tolerance to wrong case in speech engine name:"
 #    tte.say("This is a test", t2sEngineName="Festival");
+    print "Done testing tolerance to wrong case in speech engine name:"
+    print "---------------"
 
     soundPlayer = SoundPlayer();
-    
+
+    print "Test say-to-file Cepstral"
 #    fileName = tte.sayToFile("Testing Cepstral say to file.");
 #    print "Cepstral printed to: " + str(fileName);
 #    soundPlayer.play(fileName, blockTillDone=True);
 #    os.remove(fileName);
+    print "Done testing say-to-file Cepstral"
+    print "---------------"
 
-    fileName = tte.sayToFile("Testing Festival say to file.", t2sEngineName="Festival");
-    print "Festival printed to: " + str(fileName);
-    soundPlayer.play(fileName, blockTillDone=True);
-    os.remove(fileName);
+    print "Test say-to-file Festival"
+#    fileName = tte.sayToFile("Testing Festival say to file.", t2sEngineName="Festival");
+#    print "Festival printed to: " + str(fileName);
+#    soundPlayer.play(fileName, blockTillDone=True);
+#    os.remove(fileName);
+    print "Done testing say-to-file Festival"
+    print "---------------"
 
     print "Done";
 
