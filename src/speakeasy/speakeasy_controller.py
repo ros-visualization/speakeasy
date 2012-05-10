@@ -10,8 +10,10 @@ import shutil
 from functools import partial;
 from threading import Timer;
 
-import QtBindingHelper;
-from QtGui import QApplication
+from PyQt4.QtGui import QApplication
+
+from sound_player import SoundPlayer;
+from text_to_speech import TextToSpeechProvider;
 
 from speakeasy.msg import SpeakEasyRequest;
 from speakeasy.srv import SpeechCapabilitiesInquiry
@@ -162,16 +164,11 @@ class SpeakEasyController(object):
     
     def __init__(self, dirpath, stand_alone=False):
         
-        if not stand_alone:
-            rospy.loginfo("Wait for speech capabilities service...");
-            rospy.wait_for_service('speech_capabilities_inquiry')
-            rospy.loginfo("Speech capabilities service online.");    
-            capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
-            try:
-                capabilitiesReply = capabilitiesService();
-                self.sound_file_names = capabilitiesReply.sounds
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
+        self.stand_alone = stand_alone;
+        if stand_alone:
+            self.initLocalOperation();
+        else:
+            self.initRobotOperation();
 
         soundFileNames = self.getAvailableSoundEffectFileNames(stand_alone=stand_alone);
         
@@ -186,15 +183,39 @@ class SpeakEasyController(object):
         self.soundClient = SoundClient();
         self.dirpath = dirpath;
         
-        # Allow multiple GUIs to run simultaneously. Therefore
-        # the anonymous=True:
-        rospy.init_node('speakeasy_gui', anonymous=True);
-        # No program button is being held down:
+        if not stand_alone:
+            # Allow multiple GUIs to run simultaneously. Therefore
+            # the anonymous=True:
+            rospy.init_node('speakeasy_gui', anonymous=True);
+            # No program button is being held down:
         self.programButtonPushedTime = None;
         # No speech buttons programmed yet:
         self.programs = {};
         self.connectWidgetsToActions()
         self.installDefaultSpeechSet();
+
+    #----------------------------------
+    # initLocalOperation 
+    #--------------
+    
+    def initLocalOperation(self):
+        self.soundPlayer = SoundPlayer();
+        self.textToSpeechPlayer = TextToSpeechProvider();
+
+    #----------------------------------
+    # initRobotOperation 
+    #--------------
+        
+    def initRobotOperation(self):
+        rospy.loginfo("Wait for speech capabilities service...");
+        rospy.wait_for_service('speech_capabilities_inquiry')
+        rospy.loginfo("Speech capabilities service online.");    
+        capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
+        try:
+            capabilitiesReply = capabilitiesService();
+            self.sound_file_names = capabilitiesReply.sounds
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
 
     #----------------------------------
     # connectWidgetsToActions 
@@ -444,10 +465,13 @@ class SpeakEasyController(object):
                  break;
             else:
                 soundIndx += 1;
-
-        self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
-	                             SpeakEasyRequest.PLAY_START,
-				                 soundFile)
+        
+        if self.stand_alone:
+            self.soundPlayer.play(soundFile);
+        else:
+            self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
+    	                             SpeakEasyRequest.PLAY_START,
+    				                 soundFile);
         
     # ------------------------- Changing and Adding Button Programs --------------
         
@@ -597,7 +621,8 @@ if __name__ == "__main__":
     # To find the sounds, we need the absolute directory
     # path to this script:
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
-    speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
+    #speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
+    speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
         
     # Enter Qt application main loop
     sys.exit(app.exec_());

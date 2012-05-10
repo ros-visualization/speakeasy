@@ -6,10 +6,10 @@ import rospy
 from functools import partial;
 from threading import Timer;
 
-import QtBindingHelper;
-from QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog
-from QtCore import Signal
+#import QtBindingHelper;
+from PyQt4.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
+from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog
+from PyQt4.QtCore import pyqtSignal
 
 
 #TODO: Play repeatedly.
@@ -214,6 +214,10 @@ class SpeakEasyGUI(QMainWindow):
                           
                           'NEW_SPEECH_SET' : 'Create new speech set',
                           'PICK_SPEECH_SET' : 'Pick different speech set',
+                          
+                          'PLAY_LOCALLY' : 'Play locally',
+                          'PLAY_AT_ROBOT' : 'Play at robot',
+                          'TEXT_COMPLETION' : 'Text completion', 
                           } 
         
     # ---------------------- Application Background styling --------------------     
@@ -290,17 +294,22 @@ class SpeakEasyGUI(QMainWindow):
     
     playOnceRepeatButtonStylesheet =\
      'font-size: ' + str(RADIO_BUTTON_LABEL_FONT_SIZE) + 'px' +\
-     '; background-color: ' + playOnceRepeatButtonBGColor.name();
+     '; color: ' + soundButtonTextColor.name() +\
+     '; background-color: ' + voicesButtonBGColor.name();
+
+#    voiceButtonStylesheet =\
+#     'font-size: ' + str(RADIO_BUTTON_LABEL_FONT_SIZE) + 'px' +\
+#     '; background-color: ' + voicesButtonBGColor.name();
 
     voiceButtonStylesheet =\
      'font-size: ' + str(RADIO_BUTTON_LABEL_FONT_SIZE) + 'px' +\
+     '; color: ' + soundButtonTextColor.name() +\
      '; background-color: ' + voicesButtonBGColor.name();
-
 
     # ---------------------- Signals -----------------
     
-    hideButtonSignal  	= Signal(QPushButton); # hide the given button
-    showButtonSignal  	= Signal(QPushButton); # show the hidden button
+    hideButtonSignal  	= pyqtSignal(QPushButton); # hide the given button
+    showButtonSignal  	= pyqtSignal(QPushButton); # show the hidden button
 
     #----------------------------------
     # Initializer 
@@ -340,6 +349,7 @@ class SpeakEasyGUI(QMainWindow):
         self.buildProgramButtons(appLayout);
         self.buildSoundButtons(appLayout);
         self.buildButtonSetControls(appLayout);
+        self.buildOptionsRadioButtons(appLayout);
         
         #self.connectSignalsToWidgets();        
         
@@ -487,7 +497,7 @@ class SpeakEasyGUI(QMainWindow):
                                     ],
                                    Orientation.HORIZONTAL,
                                    Alignment.LEFT,
-                                   activeButton=SpeakEasyGUI.interactionWidgets['PLAY_ONCE'],
+                                   activeButtons=[SpeakEasyGUI.interactionWidgets['PLAY_ONCE']],
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
         
         (self.voicesGroup, voicesButtonLayout, self.voicesRadioButtonsDict) =\
@@ -496,7 +506,7 @@ class SpeakEasyGUI(QMainWindow):
                                     ],
                                    Orientation.HORIZONTAL,
                                    Alignment.RIGHT,
-                                   activeButton=SpeakEasyGUI.interactionWidgets['VOICE_1'],
+                                   activeButtons=[SpeakEasyGUI.interactionWidgets['VOICE_1']],
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
                                    
         # Style all the radio buttons:
@@ -614,6 +624,40 @@ class SpeakEasyGUI(QMainWindow):
         layout.addLayout(buttonGridLayout);
         
     #----------------------------------
+    # buildOptionsRadioButtons 
+    #--------------
+        
+    def buildOptionsRadioButtons(self, layout):
+        hbox = QHBoxLayout();
+        (self.playLocalityGroup, playLocalityButtonLayout, self.playLocalityRadioButtonsDict) =\
+            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY'],
+                                    SpeakEasyGUI.interactionWidgets['PLAY_AT_ROBOT']
+                                    ],
+                                   Orientation.HORIZONTAL,
+                                   Alignment.LEFT,
+                                   activeButtons=[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY'],
+                                                  SpeakEasyGUI.interactionWidgets['PLAY_AT_ROBOT']],
+                                   behavior=CheckboxGroupBehavior.CHECKBOXES);
+                                   
+        (self.textCompleteGroup, textCompleteButtonLayout, self.textCompleteRadioButtonsDict) =\
+            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
+                                   Orientation.HORIZONTAL,
+                                   Alignment.LEFT,
+                                   activeButtons=[SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
+                                   behavior=CheckboxGroupBehavior.CHECKBOXES);
+                                   
+        # Style all the radio buttons:
+        for playLocalityButton in self.playLocalityRadioButtonsDict.values():
+            playLocalityButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
+        for textCompletionButton in self.textCompleteRadioButtonsDict.values():
+            textCompletionButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
+                                   
+        hbox.addLayout(playLocalityButtonLayout);
+        hbox.addStretch(1);
+        hbox.addLayout(textCompleteButtonLayout);
+        layout.addLayout(hbox);
+        
+    #----------------------------------
     # buildHorizontalDivider 
     #--------------
         
@@ -638,7 +682,7 @@ class SpeakEasyGUI(QMainWindow):
                           labelTextArray,
                           orientation,
                           alignment,
-                          activeButton=None, 
+                          activeButtons=None, 
                           behavior=CheckboxGroupBehavior.RADIO_BUTTONS):
         '''
         @param labelTextArray: Names of buttons
@@ -648,8 +692,8 @@ class SpeakEasyGUI(QMainWindow):
         @param alignment: whether buttons should be aligned Left/Center/Right for horizontal,
                           Top/Center/Bottom for vertical:/c
         @type  alignment: Alignment
-        @param activeButton: Name of the button that is to be checked initially. Or None.
-        @type activeButton: string
+        @param activeButtons: Name of the buttons that is to be checked initially. Or None.
+        @type activeButtons: [string]
         @param behavior: Indicates whether the button group is to behave like Radio Buttons, or like Checkboxes.
         @type behavior: CheckboxGroupBehavior
         @return 1. The button group that contains the related buttons. Caller: ensure that 
@@ -694,7 +738,7 @@ class SpeakEasyGUI(QMainWindow):
             buttonGroup.addButton(button);
             # Add the button to the visual group:
             buttonCompLayout.addWidget(button);
-            if label == activeButton:
+            if label in activeButtons:
                 button.setChecked(True);
 
         if orientation == Orientation.VERTICAL:
@@ -852,6 +896,8 @@ def standardLookHandler(buttonObj):
 
 if __name__ == "__main__":
 
+    from PyQt4.QtGui import QStyleFactory, QApplication;
+    
     # Create a Qt application
     
 #    style = QStyleFactory.create("Plastique");

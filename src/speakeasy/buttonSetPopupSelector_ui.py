@@ -4,8 +4,8 @@ import sys
 
 from speakeasy_ui import SpeakEasyGUI;
 
-import QtBindingHelper;
-from QtGui import QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel, QPushButton, QStyleFactory, QApplication
+#import QtBindingHelper;
+from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel, QPushButton, QStyleFactory, QApplication
 
 class NextPrev:
     NEXT     = 0;
