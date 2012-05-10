@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pygame
+import os
 import time
 from operator import itemgetter
 import threading
@@ -75,7 +76,6 @@ class SoundPlayer(object):
         self.lastUsedTime = {};
         pygame.mixer.set_num_channels(NUM_SIMULTANEOUS_SOUNDS);
         
-
     #--------------------------------
     # play
     #---------------
@@ -91,7 +91,7 @@ class SoundPlayer(object):
         @param blockTillDone: True to delay return until sound is done playing.
         @type blockTillDone: boolean
         @return: channel that was chosen to play the sound.
-        @raise OSError: if given sound file path that does not exist. 
+        @raise IOError: if given sound file path that does not exist. 
         @raise ValueError: if given volume is not between 0.0 and 1.0
         '''
 
@@ -399,11 +399,14 @@ class SoundPlayer(object):
         and initialize the LRU cache last-used time.
         @param filename: Full path to sound file (.wav/.ogg)
         @type filename: string
+        @raise IOError: if file does not exist. 
         '''
         try:
             # Already loaded?
             return self.loadedSounds[filename];
         except KeyError:
+            if not os.path.exists(filename):
+                raise IOError("Sound file " + str(filename) + " does not exist.");
             sound = pygame.mixer.Sound(filename);
             # See whether cache is full, (and make room if not):
             self.checkCacheStatus();

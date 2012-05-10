@@ -256,7 +256,7 @@ class Festival(TextToSpeechEngine):
 
     def say(self, text, voice=None):
         # Too complicated to set a voice for now. Ignore that parameter.
-        commandLine = 'echo "' + str(text) + '" | festival --tts';
+        commandLine = 'echo "' + str(text) + '" | padsp festival --tts';
         os.system(commandLine);
         
     def sayToFile(self, text, voice=None, destFileName=None):

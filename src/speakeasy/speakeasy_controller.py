@@ -20,6 +20,8 @@ from speakeasy.srv import SpeechCapabilitiesInquiry
 
 from speakeasy_ui import SpeakEasyGUI;
 from speakeasy_ui import DialogService;
+from speakeasy_ui import PlayLocation;
+from speakeasy_ui import DEFAULT_PLAY_LOCATION;
 
 from speakeasy.libspeakeasy import SoundClient;
 
@@ -156,23 +158,33 @@ class SpeakEasyController(object):
 	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING_BADLY}
     '''
     
-    # Whether application runs in a ROS context, or
-    # standalone:
-    STAND_ALONE = False; 
-    
+    # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
     soundPaths = {}
+    # Mapping sound file basenames to their full file names:
+    soundPathsFull = {};
     
-    def __init__(self, dirpath, stand_alone=False):
-        
-        self.stand_alone = stand_alone;
-        if stand_alone:
-            self.initLocalOperation();
-        else:
-            self.initRobotOperation();
+    def __init__(self, dirpath, stand_alone=None):
 
-        soundFileNames = self.getAvailableSoundEffectFileNames(stand_alone=stand_alone);
+        if stand_alone is None:
+            stand_alone = (DEFAULT_PLAY_LOCATION == 'PLAY_LOCALLY');
+         
+        self.stand_alone = stand_alone;
+        self.gui = None;
+        self.soundPlayer = None;
+        self.textToSpeechPlayer = None;
+        self.rosInitialized = False;
+              
+        if self.stand_alone:
+            initOK = self.initLocalOperation();
+        else: # Robot operation
+            initOK = self.initRobotOperation();
+            if not initOK:
+                # If robot init didn't work, fall back to local op:
+                self.stand_alone = True;
+                self.initLocalOperation();
         
-        self.gui = SpeakEasyGUI(stand_alone=stand_alone, sound_effect_labels=soundFileNames);
+
+        self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
         self.gui.hideButtonSignal.connect(alternateLookHandler);
@@ -180,15 +192,15 @@ class SpeakEasyController(object):
         self.gui.showButtonSignal.connect(standardLookHandler);
         
         self.dialogService = DialogService(self.gui);
-        self.soundClient = SoundClient();
+        # If we are to run sound on the robot, but the robot
+        # initialization failed, switch to local, and let user
+        # know: 
+        if not initOK and not self.stand_alone:
+            self.gui.setWhereToPlay(PlayLocation.LOCALLY);
+            self.dialogService.showErrorMsg("The robot server is not running. Switching to local operation.");
+            
         self.dirpath = dirpath;
         
-        if not stand_alone:
-            # Allow multiple GUIs to run simultaneously. Therefore
-            # the anonymous=True:
-            rospy.init_node('speakeasy_gui', anonymous=True);
-            # No program button is being held down:
-        self.programButtonPushedTime = None;
         # No speech buttons programmed yet:
         self.programs = {};
         self.connectWidgetsToActions()
@@ -199,23 +211,63 @@ class SpeakEasyController(object):
     #--------------
     
     def initLocalOperation(self):
-        self.soundPlayer = SoundPlayer();
-        self.textToSpeechPlayer = TextToSpeechProvider();
-
+        '''
+        Initialize for playing sound and text-to-speech locally. 
+        OK to call multiple times. Initializes
+        self.sound_file_names to a list of sound file names
+        for use with SoundPlayer instance.
+        @return: True if initialization succeeded, else False.
+        @returnt: boolean
+        '''
+        if self.soundPlayer is None:
+            self.soundPlayer = SoundPlayer();
+        if self.textToSpeechPlayer is None:
+            self.textToSpeechPlayer = TextToSpeechProvider();
+        self.sound_file_names = self.getAvailableSoundEffectFileNames(stand_alone=True);
+        return True;
+        
     #----------------------------------
     # initRobotOperation 
     #--------------
         
     def initRobotOperation(self):
-        rospy.loginfo("Wait for speech capabilities service...");
-        rospy.wait_for_service('speech_capabilities_inquiry')
+        '''
+        Initialize sound to play at the robot. Initializes
+        self.sound_file_names to a list of sound file names
+        for use with play-sound calls to the Robot via ROS.
+        @return: True if initialization went OK. Else False.
+        @returnt: boolean
+        '''
+        
+        self.sound_file_names = [];        
+        self.soundClient = SoundClient();
+
+        # Allow multiple GUIs to run simultaneously. Therefore
+        # the anonymous=True:
+        if not self.rosInitialized:
+            rospy.init_node('speakeasy_gui', anonymous=True);
+        
+        # Wait for Ros service for a limited time; there might be none:
+        waitTime = 4; # seconds
+        while waitTime > 0:
+            try:
+                rospy.loginfo("Wait for speech capabilities service for %d ..." % waitTime);
+                rospy.wait_for_service('speech_capabilities_inquiry', timeout=1); # seconds
+            except rospy.exceptions.ROSException:
+                waitTime -= 1;
+                if waitTime <= 0:
+                    rospy.loginfo("Speech capabilities service is offline, switching to local operations.");    
+                    return False;
+                
         rospy.loginfo("Speech capabilities service online.");    
         capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
         try:
             capabilitiesReply = capabilitiesService();
             self.sound_file_names = capabilitiesReply.sounds
+            return True;
         except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+            self.dialogService.showErrorMsg("Service call failed: %s"%e);
+            return False;
 
     #----------------------------------
     # connectWidgetsToActions 
@@ -244,16 +296,20 @@ class SpeakEasyController(object):
     # getAvailableSoundEffectFileNames
     #--------------
     
-    def getAvailableSoundEffectFileNames(self, stand_alone=False):
+    def getAvailableSoundEffectFileNames(self, stand_alone=None):
         '''
         Determine all the available sound effect files. If this process
-        operates stand-alone, the local 'sounds' subdirectory is searched.
+        operates stand-alone, the local '../../sounds' subdirectory is searched.
         Else, in a ROS environment, the available sound effect file names 
-        are obtained from the 'speech_capabilities_inquiry' service call:
+        are obtained from the 'speech_capabilities_inquiry' service call.
+        @param stand_alone: False if referenced sounds are to be from the ROS environment.
+        @type stand_alone: boolean
+        @return: array of sound file basenames without extensions. E.g.: [rooster, birds, elephant]
+        @returnt: [string]
         '''
-        
-        #********************
-        return self.getAvailableLocalSoundEffectFileNames();
+
+        if stand_alone is None:
+            stand_alone = self.stand_alone;
         
         # Standalone files are local to this process:
         if stand_alone:
@@ -262,7 +318,11 @@ class SpeakEasyController(object):
         sound_file_basenames = [];
         for (i, full_file_name) in enumerate(self.sound_file_names):
             SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
-            sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0])
+            baseName = os.path.basename(full_file_name);
+            # Chop extension off the basename (e.g. rooster.wav --> rooster):
+            sound_file_basenames.append(os.path.splitext(baseName)[0])
+            # Map basename (e.g. 'rooster.wav') to its full file name.
+            self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
         return sound_file_basenames; 
         
     #----------------------------------
@@ -279,11 +339,13 @@ class SpeakEasyController(object):
         fileList = os.listdir(soundDir);
         sound_file_basenames = [];
         for (i, full_file_name) in enumerate(fileList):
+            baseName = os.path.basename(full_file_name);
             # Isolate the file extension:
             fileExtension = os.path.splitext(full_file_name)[1][1:].strip()
             if (fileExtension == "wav") or (fileExtension == "ogg"):
                 SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
                 sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0]);
+                self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
         return sound_file_basenames;
     
     
@@ -291,7 +353,7 @@ class SpeakEasyController(object):
     # sayText 
     #--------------
     
-    def sayText(self, text, voice, ttsEngine="festival", sayOnce=True):
+    def sayText(self, text, voice, ttsEngine="festival", sayOnce=True, stand_alone=None):
         '''
         Send message to SpeakEasy service to say text, with the
         given voice, using the given text-to-speech engine.
@@ -309,13 +371,23 @@ class SpeakEasyController(object):
         @type bool
         '''
         
+        if stand_alone is None:
+            stand_alone = self.stand_alone;
+        
         if ttsEngine == "festival" and voice == "Male":
             voice = "voice_kal_diphone";
         # Repeat over and over? Or say once?
-        if sayOnce:
-            self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
+        if stand_alone:
+            if sayOnce:
+                self.textToSpeechPlayer.say(text, voice, ttsEngine);
+            else:
+                #TODO: repeated text-to-speech in text_to_speech.py
+                self.dialogService.showErrorMsg("Repeated text-to-speech not yet implemented.");
         else:
-            self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine);
+            if sayOnce:
+                self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
+            else:
+                self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine);
         return;
     
     #----------------------------------
@@ -467,7 +539,16 @@ class SpeakEasyController(object):
                 soundIndx += 1;
         
         if self.stand_alone:
-            self.soundPlayer.play(soundFile);
+            originalSoundFile = soundFile;
+            try:
+                if not os.path.exists(soundFile):
+                    try:
+                        soundFile = self.soundPathsFull[soundFile]
+                    except KeyError:
+                        self.dialogService.showErrorMsg("Sound file %s not found. Searched %s/../../sounds." % (originalSoundFile, __file__))
+                self.soundPlayer.play(soundFile);
+            except IOError as e:
+                self.dialogService.showErrorMsg(str(e));
         else:
             self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
     	                             SpeakEasyRequest.PLAY_START,
@@ -622,7 +703,8 @@ if __name__ == "__main__":
     # path to this script:
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
     #speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
-    speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
+    #speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
+    speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
         
     # Enter Qt application main loop
     sys.exit(app.exec_());

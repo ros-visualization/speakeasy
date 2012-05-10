@@ -16,6 +16,14 @@ from PyQt4.QtCore import pyqtSignal
 #TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
 
 
+# Whether the initial UI is started with the
+# Robot as play destination, or with Local as 
+# destination. This module variable may be
+# used by clients to prepare the environment
+# ahead of building the GUI (e.g. initialize
+# a ROS node, or local sound engine.):
+DEFAULT_PLAY_LOCATION = 'PLAY_AT_ROBOT' # Alternative: PLAY_LOCALLY
+
 class Option:
     YES = True;
     NO  = False;
@@ -41,6 +49,9 @@ class CheckboxGroupBehavior:
     RADIO_BUTTONS = 0;
     CHECKBOXES    = 1;
 
+class PlayLocation:
+    ROBOT   = 0;
+    LOCALLY = 1;
 
 #--------------------------------  TextPanel Class ---------------------------
 class TextPanel(QTextEdit):
@@ -73,7 +84,8 @@ class TextPanel(QTextEdit):
     def getText(self):
         # Get text field text as plain text, and convert
         # unicode to ascii, ignoring errors:
-        return self.toPlainText().encode('ascii', 'ignore');
+        #return self.toPlainText().encode('ascii', 'ignore');
+        return self.toPlainText().toAscii();
     
     #----------------------------------
     # isEmpty
@@ -635,9 +647,9 @@ class SpeakEasyGUI(QMainWindow):
                                     ],
                                    Orientation.HORIZONTAL,
                                    Alignment.LEFT,
-                                   activeButtons=[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY'],
-                                                  SpeakEasyGUI.interactionWidgets['PLAY_AT_ROBOT']],
-                                   behavior=CheckboxGroupBehavior.CHECKBOXES);
+                                   activeButtons=[SpeakEasyGUI.interactionWidgets[DEFAULT_PLAY_LOCATION]],
+                                   behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
+                                   #behavior=CheckboxGroupBehavior.CHECKBOXES);
                                    
         (self.textCompleteGroup, textCompleteButtonLayout, self.textCompleteRadioButtonsDict) =\
             self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
@@ -847,7 +859,37 @@ class SpeakEasyGUI(QMainWindow):
             return SpeakEasyGUI.voices['VOICE_1'];
         elif self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets['VOICE_2']].isChecked():
             return SpeakEasyGUI.voices['VOICE_2'];
+
+    #----------------------------------
+    # whereToPlay 
+    #--------------
     
+    def whereToPlay(self):
+        '''
+        Returns which of the play location options is selected: Locally or Robot.
+        @return: Selection of where sound and text-to-speech output is to occur.
+        @returnt: PlayLocation
+        '''
+        if self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].isChecked():
+            return PlayLocation.LOCALLY;
+        else:
+            return PlayLocation.ROBOT;
+    
+    #----------------------------------
+    # setWhereToPlay 
+    #--------------
+    
+    def setWhereToPlay(self, whereToPlay):
+        '''
+        Set the option radio button that determines where sound is produced,
+        locally, or at the robot.
+        @param whereToPlay: PlayLocation.LOCALLY, or PlayLocation.ROBOT
+        @type whereToPlay: PlayLocation
+        '''
+        if whereToPlay == PlayLocation.LOCALLY:
+            self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].setDown(True);
+        else:self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['ROBOT']].setDown(True);
+        
     #----------------------------------
     # setButtonLabel 
     #--------------
