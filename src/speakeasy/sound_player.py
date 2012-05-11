@@ -82,17 +82,18 @@ class SoundPlayer(object):
     
     def play(self, whatToPlay, blockTillDone=False, volume=None):
         '''
-        Player a file, or an already loaded Sound instance, or a Channel instance.
+        Player a file, or an already loaded Sound instance.
         Offers choice of blocking return until the sound is finished, or
         returning immediately. 
         
-        @param whatToPlay: Full path to .wav or .ogg file.
-        @type whatToPlay: {string | Sound | Channel}
+        @param whatToPlay: Full path to .wav or .ogg file, or Sound instance.
+        @type whatToPlay: {string | Sound}
         @param blockTillDone: True to delay return until sound is done playing.
         @type blockTillDone: boolean
-        @return: channel that was chosen to play the sound.
-        @raise IOError: if given sound file path that does not exist. 
+        @return: The sound instance.
+        @raise IOError: if given sound file path that does not exist, or some other playback error occurred. 
         @raise ValueError: if given volume is not between 0.0 and 1.0
+        @raise TypeError: if whatToPlay is not a filename (string), or Sound instance.
         '''
 
         if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
@@ -108,29 +109,27 @@ class SoundPlayer(object):
                 if channel is not None:
                     self.addSoundToChannelBinding(sound, channel);
                     self.lastUsedTime[sound] = time.time();
+                else:
+                    raise IOError("Could not play sound '" + str(whatToPlay) + "'");
             except TypeError:
-                # Nope, not a file, must be a Sound or Channel instance:
-                whatToPlay.play();
+                # Nope, not a file, must be a Sound instance or something illegal:
                 try: 
                     # Hypothesis: whatToPlay is a Sound instance:
-                    channel = self.soundChannelBindings[whatToPlay];
-                    # If this didn't bomb, whatToPlay is indeed a Sound instance:
-                    sound   = whatToPlay; 
+                    sound   = whatToPlay;
+                    channel = sound.play();
                     self.lastUsedTime[sound] = time.time(); 
-                except KeyError:
-                    # whatToPlay must be a Channel instance:
-                    channel = whatToPlay;
-                    sound   = self.getSoundFromChannel(channel);
-                    self.addSoundToChannelBinding(sound, channel);
-                    self.lastUsedTime[sound] = time.time();                 
+                except AttributeError:
+                    # whatToPlay is not a file path (i.e. string), nor a Sound instance:
+                    raise TypeError("Play method takes the path to a sound file, or a Sound instance. Instead received:" + 
+                                     str(whatToPlay));
     
             # At this point, sound and channel vars are correctly set.
             # Caller wants to block till sound done?
             if blockTillDone:
-                self.waitForSoundDone(channel)
+                self.waitForSoundDone(sound)
                 self.cleanupSoundChannelBindings();
                 
-            return channel;
+            return sound;
 
     #--------------------------------
     # stop
@@ -713,14 +712,20 @@ class SoundPlayer(object):
     # waitForSoundDone
     #---------------
     
-    def waitForSoundDone(self, channel):
+    def waitForSoundDone(self, sound):
         '''
-        Block until sound on given channel is finished playing.
-        @param channel: Channel to monitor
-        @type channel: Channel
+        Block until sound is done playing on all channels 
+        on which it is currently playing. 
+        @param sound: Sound to monitor
+        @type sound: Sound
         '''
-        while channel.get_busy():
-            time.sleep(0.5);
+        # Find all channels the Sound instance is currently playing on:
+        channels = self.getChannelsFromSound(sound);
+        if channels is None:
+            return;
+        for channel in channels:
+            while channel.get_busy():
+                time.sleep(0.3);
             
             
     # ---------------------------------------  Testing  -----------------------

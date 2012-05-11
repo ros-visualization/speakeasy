@@ -8,7 +8,7 @@ from threading import Timer;
 
 #import QtBindingHelper;
 from PyQt4.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog
+from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox
 from PyQt4.QtCore import pyqtSignal
 
 
@@ -192,6 +192,7 @@ class SpeakEasyGUI(QMainWindow):
     interactionWidgets = {
                           'PLAY_ONCE': 'Play once',
                           'PLAY_REPEATEDLY': 'Play repeatedly',
+                          'PLAY_REPEATEDLY_PERIOD': 'Pause between plays',
                           'VOICE_1': 'Male',
                           'VOICE_2': 'David',
                           'PLAY_TEXT': 'Play Text',
@@ -297,7 +298,7 @@ class SpeakEasyGUI(QMainWindow):
         '; font-size: ' + str(BUTTON_LABEL_FONT_SIZE) + 'px' +\
         '}';
 
-    # ---------------------- Radiobutton styling -----------------
+    # ---------------------- Radiobutton and Play Repeat Delay Spinbox styling -----------------
     
     # Radiobutton color definitions:
     playOnceRepeatButtonBGColor = QColor(121,229,230); # Very light cyan
@@ -305,6 +306,11 @@ class SpeakEasyGUI(QMainWindow):
 
     
     playOnceRepeatButtonStylesheet =\
+     'font-size: ' + str(RADIO_BUTTON_LABEL_FONT_SIZE) + 'px' +\
+     '; color: ' + soundButtonTextColor.name() +\
+     '; background-color: ' + voicesButtonBGColor.name();
+     
+    playRepeatSpinboxStylesheet =\
      'font-size: ' + str(RADIO_BUTTON_LABEL_FONT_SIZE) + 'px' +\
      '; color: ' + soundButtonTextColor.name() +\
      '; background-color: ' + voicesButtonBGColor.name();
@@ -353,9 +359,6 @@ class SpeakEasyGUI(QMainWindow):
         self.addTxtInputFld(appLayout);
         self.buildTapeRecorderButtons(appLayout);
         self.addOnceOrRepeat_And_VoiceRadioButtons(appLayout);
-        
-        #TODO: play repeatedly is not working:
-        self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].setDisabled(True)
         
         self.buildHorizontalDivider(appLayout);
         self.buildProgramButtons(appLayout);
@@ -511,6 +514,14 @@ class SpeakEasyGUI(QMainWindow):
                                    Alignment.LEFT,
                                    activeButtons=[SpeakEasyGUI.interactionWidgets['PLAY_ONCE']],
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
+
+        self.replayPeriodSpinBox = QDoubleSpinBox(self);
+        self.replayPeriodSpinBox.setRange(0.0, 99.9); # seconds
+        self.replayPeriodSpinBox.setSingleStep(0.5);
+        self.replayPeriodSpinBox.setDecimals(1);
+        onceOrRepeatButtonLayout.addWidget(self.replayPeriodSpinBox);
+        secondsLabel = QLabel("secs delay");
+        onceOrRepeatButtonLayout.addWidget(secondsLabel);
         
         (self.voicesGroup, voicesButtonLayout, self.voicesRadioButtonsDict) =\
             self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['VOICE_1'],
@@ -525,7 +536,10 @@ class SpeakEasyGUI(QMainWindow):
         for playFreqButton in self.onceOrRepeatDict.values():
             playFreqButton.setStyleSheet(SpeakEasyGUI.playOnceRepeatButtonStylesheet); 
         for playFreqButton in self.voicesRadioButtonsDict.values():
-            playFreqButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
+            playFreqButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet);
+        #...and the replay delay spinbox:
+        self.replayPeriodSpinBox.setStyleSheet(SpeakEasyGUI.playRepeatSpinboxStylesheet);
+        #****** replayPeriodSpinBox styling 
                                    
         hbox.addLayout(onceOrRepeatButtonLayout);
         hbox.addStretch(1);
@@ -553,9 +567,9 @@ class SpeakEasyGUI(QMainWindow):
         (buttonGridLayout, self.recorderButtonDict) =\
             SpeakEasyGUI.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PLAY_TEXT'],
                                           SpeakEasyGUI.interactionWidgets['STOP'],
-                                          SpeakEasyGUI.interactionWidgets['STOP_ALL']
+                                          #SpeakEasyGUI.interactionWidgets['STOP_ALL'] # Stop button already stops all.
                                           ],
-                                         3); # Three columns
+                                         2); # Two columns
         for buttonObj in self.recorderButtonDict.values():
             buttonObj.setStyleSheet(SpeakEasyGUI.recorderButtonStylesheet);
             buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
@@ -849,6 +863,13 @@ class SpeakEasyGUI(QMainWindow):
 
     def playRepeatedlyChecked(self):
         return self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].isChecked();
+
+    #----------------------------------
+    # playRepeatPeriod 
+    #--------------
+
+    def getPlayRepeatPeriod(self):
+        return self.replayPeriodSpinBox.value();
     
     #----------------------------------
     # activeVoice
@@ -887,8 +908,8 @@ class SpeakEasyGUI(QMainWindow):
         @type whereToPlay: PlayLocation
         '''
         if whereToPlay == PlayLocation.LOCALLY:
-            self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].setDown(True);
-        else:self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['ROBOT']].setDown(True);
+            self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].setChecked(True);
+        else:self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['ROBOT']].setChecked(True);
         
     #----------------------------------
     # setButtonLabel 

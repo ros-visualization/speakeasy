@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+# TODO:
+#   - No local repeat play for T2S
+#   - Repeated sounds won't stop with Stop button
+#   - Robot ops with new msg
+#   - Word completion 
+
 import roslib; roslib.load_manifest('speakeasy');
 import rospy
 
@@ -7,6 +13,7 @@ import sys
 import os
 import time
 import shutil
+import threading
 from functools import partial;
 from threading import Timer;
 
@@ -173,6 +180,8 @@ class SpeakEasyController(object):
         self.soundPlayer = None;
         self.textToSpeechPlayer = None;
         self.rosInitialized = False;
+        self.speechReplayDemon = None;
+        self.soundReplayDemon  = None;
               
         if self.stand_alone:
             initOK = self.initLocalOperation();
@@ -195,7 +204,7 @@ class SpeakEasyController(object):
         # If we are to run sound on the robot, but the robot
         # initialization failed, switch to local, and let user
         # know: 
-        if not initOK and not self.stand_alone:
+        if not initOK:
             self.gui.setWhereToPlay(PlayLocation.LOCALLY);
             self.dialogService.showErrorMsg("The robot server is not running. Switching to local operation.");
             
@@ -381,13 +390,16 @@ class SpeakEasyController(object):
             if sayOnce:
                 self.textToSpeechPlayer.say(text, voice, ttsEngine);
             else:
-                #TODO: repeated text-to-speech in text_to_speech.py
-                self.dialogService.showErrorMsg("Repeated text-to-speech not yet implemented.");
+                self.speechReplayDemon = SpeakEasyController.SpeechReplayDemon(text, 
+                                                                               voice, 
+                                                                               ttsEngine, 
+                                                                               self.gui.getPlayRepeatPeriod(),
+                                                                               self.textToSpeechPlayer).start();
         else:
             if sayOnce:
                 self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
             else:
-                self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine);
+                self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine, repeatPeriod=self.gui.getPlayRepeatPeriod());
         return;
     
     #----------------------------------
@@ -427,17 +439,33 @@ class SpeakEasyController(object):
         # Stop button pushed?
         buttonKey = self.gui.interactionWidgets['STOP'];
         if buttonObj == self.gui.recorderButtonDict[buttonKey]:
-            # If nothing in text input field, then we are not playing text:
-            if self.gui.speechInputFld.isEmpty():
-                self.dialogService.showErrorMsg("No text is playing.");
+            if self.stand_alone:
+                if self.textToSpeechPlayer.busy():
+                    if self.speechReplayDemon is not None:
+                        self.speechReplayDemon.stop();
+                        self.speechReplayDemon = None;
+                    if self.soundReplayDemon is not None:
+                        self.soundReplayDemon.stop();
+                        self.soundReplayDemon = None; 
+                    self.textToSpeechPlayer.stop();
+            else: # Robot op
+                # If nothing in text input field, then we are not playing text:
+                if not self.gui.speechInputFld.isEmpty():
+                    return;
+                self.soundClient.stopSaying(self.gui.speechInputFld.getText());
                 return;
-            self.soundClient.stopSaying(self.gui.speechInputFld.getText());
-            return;
         
         # Stop All button pushed?
         buttonKey = self.gui.interactionWidgets['STOP_ALL'];
-        self.soundClient.stopAll();
-
+        if self.stand_alone:
+            if self.soundReplayDemon is not None:
+                self.soundReplayDemon.stop();
+                self.soundReplayDemon = None;
+            self.soundPlayer.stop();
+            if self.textToSpeechPlayer.busy():
+                self.textToSpeechPlayer.stop()
+        else:
+            self.soundClient.stopAll();
 
     #----------------------------------
     # actionProgramButtons 
@@ -546,7 +574,9 @@ class SpeakEasyController(object):
                         soundFile = self.soundPathsFull[soundFile]
                     except KeyError:
                         self.dialogService.showErrorMsg("Sound file %s not found. Searched %s/../../sounds." % (originalSoundFile, __file__))
-                self.soundPlayer.play(soundFile);
+                soundInstance = self.soundPlayer.play(soundFile);
+                if self.gui.playRepeatedlyChecked():
+                    self.soundReplayDemon = SpeakEasyController.SoundReplayDemon(soundInstance,self.gui.getPlayRepeatPeriod(), self.soundPlayer).start();
             except IOError as e:
                 self.dialogService.showErrorMsg(str(e));
         else:
@@ -693,7 +723,54 @@ class SpeakEasyController(object):
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
     
+
+    # --------------------------------------------   Replay Demon -------------------------------
+    
+    class ReplayDemon(threading.Thread):
         
+        def __init__(self, repeatPeriod):
+            super(SpeakEasyController.ReplayDemon, self).__init__();
+            self.repeatPeriod = repeatPeriod;
+            self.stopped = True;
+            
+    class SoundReplayDemon(ReplayDemon):
+        
+        def __init__(self, soundInstance, repeatPeriod, soundPlayer):
+            super(SpeakEasyController.SoundReplayDemon, self).__init__(repeatPeriod);
+            self.soundInstance = soundInstance;
+            self.soundPlayer = soundPlayer;
+    
+        def run(self):
+            self.stopped = False;
+            self.soundPlayer.waitForSoundDone(self.soundInstance);
+            while not self.stopped:
+                time.sleep(self.repeatPeriod);
+                self.soundPlayer.play(self.soundInstance, blockTillDone=True);
+        
+        def stop(self):
+            self.stopped = True;
+            self.soundPlayer.stop(self.soundInstance);
+            
+    class SpeechReplayDemon(ReplayDemon):
+            
+        def __init__(self, text, voiceName, ttsEngine, repeatPeriod, textToSpeechPlayer):
+            super(SpeakEasyController.SpeechReplayDemon, self).__init__(repeatPeriod);
+            self.text = text;
+            self.ttsEngine = ttsEngine;
+            self.voiceName = voiceName;
+            self.textToSpeechPlayer = textToSpeechPlayer;
+            
+        
+        def run(self):
+            self.stopped = False;
+            self.textToSpeechPlayer.waitForSoundDone();
+            while not self.stopped:
+                time.sleep(self.repeatPeriod);
+                self.textToSpeechPlayer.say(self.text, self.voiceName, self.ttsEngine, blockTillDone=True);
+        
+        def stop(self):
+            self.stopped = True;
+            self.textToSpeechPlayer.stop();
         
 if __name__ == "__main__":
 

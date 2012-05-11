@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import time
 import subprocess
 import tempfile
 
@@ -18,6 +19,7 @@ class TextToSpeechProvider(object):
     def __init__(self):
         self.t2sEngines = {};
         self.defaultEngine = self.findAvailableTTSEngines();
+        self.lastUsedEngineObj = None;
         
     # -----------------------------------------------  Public Methods ---------------------------------
     
@@ -42,17 +44,10 @@ class TextToSpeechProvider(object):
         @raise NotImplementedError: if voice is not supported by the given engine.
         @raise ValueError: if given engine name does not correspond to any know text-to-speech engine. 
         '''
-        try:
-            if t2sEngineName is None:
-                engine = self.defaultEngine;
-            else:
-                engine = self.t2sEngines[str(t2sEngineName).lower()];
-        except KeyError:
-            raise ValueError("Unknown text-to-speech engine: " + str(t2sEngineName));
-        
-        return engine.sayToFile(text, voiceName, destFileName);
+        self.lastUsedEngineObj = self.getEngineObj(t2sEngineName)
+        return self.lastUsedEngineObj.sayToFile(text, voiceName, destFileName);
 
-    def say(self, text, voiceName=None, t2sEngineName=None):
+    def say(self, text, voiceName=None, t2sEngineName=None, blockTillDone=False):
         '''
         Immediately speak the given string with the given voice on the given engine.
         If voice or engine are not provided, defaults are used.
@@ -66,20 +61,51 @@ class TextToSpeechProvider(object):
         @raise OSError: if failure in running the text-to-speech command in underlying shell 
         '''
 
-        try:
-            if t2sEngineName is None:
-                engine = self.defaultEngine;
-            else:
-                engine = self.t2sEngines[str(t2sEngineName).lower()];
-        except KeyError:
-            raise ValueError("Unknown text-to-speech engine: " + str(t2sEngineName));
-        engine.say(text, voiceName);
+        self.lastUsedEngineObj = self.getEngineObj(t2sEngineName)
+        self.lastUsedEngineObj.say(text, voiceName);
+        # Caller wants to block till sound done?
+        if blockTillDone:
+            self.waitForSoundDone()
+        
 
+    def stop(self):
+        self.lastUsedEngineObj.stop();
 
+    def busy(self):
+        '''
+        Return True if any of the text-to-speech engines is currently
+        synthesizing. Else return False;
+        '''
+        if self.lastUsedEngineObj is None:
+            return False;
+        else:
+            return self.lastUsedEngineObj.busy;
 
-
+    def waitForSoundDone(self):
+        '''
+        Block until speech finished playing.
+        '''
+        while self.busy():
+            time.sleep(0.3);
 
     # -----------------------------------------------  Private Methods ---------------------------------
+    
+    def getEngineObj(self, engineName):
+        '''
+        From a text-to-speech engine name that may be None,
+        return an engine object.
+        @param engineName: Name of text-to-speech engine to use
+        @type engineName: string
+        @return: Subclass of TextToSpeechEngine
+        '''
+        try:
+            if engineName is None:
+                return self.defaultEngine;
+            else:
+                return self.t2sEngines[str(engineName).lower()];
+        except KeyError:
+            raise ValueError("Unknown text-to-speech engine: " + str(engineName));
+    
     def findAvailableTTSEngines(self):
         '''
         Try to sense the underlying OS. Then identify the available
@@ -215,7 +241,7 @@ class TextToSpeechEngine(object):
     '''
     
     def __init__(self):
-        pass
+        self.fullPathToExecutable = None;
 
     def getEngineName(self):
         return self.ttsEngineName;
@@ -249,6 +275,9 @@ class Festival(TextToSpeechEngine):
     def __init__(self):
         super(Festival, self).__init__()
         self.ttsEngineName = "festival";
+        self.fullPathToExecutable = TextToSpeechProvider.which("festival");
+        if self.fullPathToExecutable is None:
+            raise NotImplementedError("Festival text-to-speech engine is not implemented.")
         self.voiceList = None;
         self.getVoiceList();
         self.txtfile = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.txt')
@@ -256,7 +285,7 @@ class Festival(TextToSpeechEngine):
 
     def say(self, text, voice=None):
         # Too complicated to set a voice for now. Ignore that parameter.
-        commandLine = 'echo "' + str(text) + '" | padsp festival --tts';
+        commandLine = 'echo "' + str(text) + '" | padsp festival --tts &';
         os.system(commandLine);
         
     def sayToFile(self, text, voice=None, destFileName=None):
@@ -270,12 +299,21 @@ class Festival(TextToSpeechEngine):
         failureMsg = "Sound synthesis failed. Is the Festival engine installed? Is a festival voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
         self.txtfile.write(text)
         self.txtfile.flush()
-        commandLine = "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + str(destFileName);      
+        commandLine = "text2wave -eval '(" + str(voice) + ")' " + self.txtfilename + " -o " + str(destFileName) + " &";
         os.system(commandLine);
         self.txtfile.close();
         if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
         return destFileName;
+   
+    def stop(self):
+        os.system("killall " + str("audsp"));
+
+    def busy(self):
+        for line in os.popen("ps xa"):
+            if  line.find("festival") > -1:
+                return True;
+        return False;
     
     def getVoiceList(self):
         #TODO: run festival, and issue Scheme command (voice.list)
@@ -302,6 +340,11 @@ class Cepstral(TextToSpeechEngine):
     
     def __init__(self):
         super(Cepstral, self).__init__()
+        
+        self.fullPathToExecutable = TextToSpeechProvider.which("swift");
+        if self.fullPathToExecutable is None:
+            raise NotImplementedError("Cepstral text-to-speech engine is not implemented.")
+        
         self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.wav')
         self.voiceList = None;
         self.getVoiceList();
@@ -310,9 +353,11 @@ class Cepstral(TextToSpeechEngine):
     def say(self, text, voice=None):
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "'";
+        commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "' &";
         os.system(commandLine);
         
+    def stop(self):
+        os.system("killall --quiet " + str("swift.bin"));
         
     def sayToFile(self, text, voice=None, destFileName=None):
         
@@ -323,12 +368,18 @@ class Cepstral(TextToSpeechEngine):
             destFile = os.open(destFileName, 'w')
         
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = 'padsp swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName);
+        commandLine = 'padsp swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName) + " &";
         os.system(commandLine);
         os.close(destFile);
         if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
         return destFileName;
+
+    def busy(self):
+        for line in os.popen("ps xa"):
+            if  line.find("swift") > -1:
+                return True;
+        return False;
 
     def getVoiceList(self):
         
@@ -366,6 +417,11 @@ class MacTextToSpeech(TextToSpeechEngine):
     
     def __init__(self):
         super(MacTextToSpeech, self).__init__();
+        
+        self.fullPathToExecutable = TextToSpeechProvider.which("say");
+        if self.fullPathToExecutable is None:
+            raise NotImplementedError("Mac text-to-speech engine is not implemented/found.")
+        
         self.t2sDestFilename = tempfile.NamedTemporaryFile(prefix='speakeasy', suffix='.aiff')
         self.voiceList = None;
         self.getVoiceList();        
@@ -373,8 +429,8 @@ class MacTextToSpeech(TextToSpeechEngine):
 
     def say(self, text, voice=None):
         voice = self.checkVoiceValid(voice, self.defaultVoice);
-        commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '"';
-        os.system(commandLine); 
+        commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '" &';
+        os.system(commandLine);
 
     def sayToFile(self, text, voice=None, destFileName=None):
         
@@ -385,13 +441,21 @@ class MacTextToSpeech(TextToSpeechEngine):
             destFile = os.open(destFileName, 'w')
         
         #commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '"'; 
-        commandLine = 'say -v ' + str(voice) + '-o ' + str(destFileName) + ' "' + str(text) + '"'; 
+        commandLine = 'say -v ' + str(voice) + '-o ' + str(destFileName) + ' "' + str(text) + '" &';
         os.system(commandLine);
         os.close(destFile);
         if os.stat(destFileName).st_size == 0:
             raise OSError(failureMsg);
         return destFileName;
 
+    def stop(self):
+        os.system("killall --quiet " + str("say"))
+
+    def busy(self):
+        for line in os.popen("ps xa"):
+            if  line.find("say") > -1:
+                return True;
+        return False;
 
     def getVoiceList(self):
         #TODO: find all Mac voices automatically
