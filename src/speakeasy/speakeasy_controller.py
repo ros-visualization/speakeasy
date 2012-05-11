@@ -6,12 +6,12 @@
 #   - Robot ops with new msg
 #   - Word completion 
 
-import roslib; roslib.load_manifest('speakeasy');
-import rospy
 
 import sys
 import os
 import time
+import subprocess
+import re
 import shutil
 import threading
 from functools import partial;
@@ -39,6 +39,16 @@ from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
 
+# Try importing ROS related modules. Remember whether
+# that worked. In the SpeakEasyController __init__() method
+# we'll switch to local, and warn user if appropriate:
+try:
+    import roslib; roslib.load_manifest('speakeasy');
+    import rospy
+    ROS_IMPORT_OK = True;
+except ImportError:
+    # Ros not installed on this machine; run locally:
+    ROS_IMPORT_OK = False;
 # ----------------------------------------------- Class Program ------------------------------------
 
 class ButtonProgram(object):
@@ -172,6 +182,11 @@ class SpeakEasyController(object):
     
     def __init__(self, dirpath, stand_alone=None):
 
+        self.dialogService = DialogService(self.gui);
+        if not ROS_IMPORT_OK:
+            # Was running on robot the default?
+            
+
         if stand_alone is None:
             stand_alone = (DEFAULT_PLAY_LOCATION == 'PLAY_LOCALLY');
          
@@ -200,7 +215,6 @@ class SpeakEasyController(object):
         # Handler that makes program button look normal:
         self.gui.showButtonSignal.connect(standardLookHandler);
         
-        self.dialogService = DialogService(self.gui);
         # If we are to run sound on the robot, but the robot
         # initialization failed, switch to local, and let user
         # know: 
@@ -254,6 +268,12 @@ class SpeakEasyController(object):
         # Allow multiple GUIs to run simultaneously. Therefore
         # the anonymous=True:
         if not self.rosInitialized:
+            # init_node hangs indefinitely if roscore is not running.
+            # Therefore: check for that. If roscore isn't running,
+            # revert to local operation:
+            if not self.processRunning('roscore'):
+                self.dialogService.showErrorMsg("The roscore process is not running. Switching to local operation.")
+                return False; 
             rospy.init_node('speakeasy_gui', anonymous=True);
         
         # Wait for Ros service for a limited time; there might be none:
@@ -723,6 +743,31 @@ class SpeakEasyController(object):
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
     
+    #----------------------------------
+    # processExists
+    #--------------
+
+    def processRunning(self, proc_name):
+        '''
+        Returns true if process of given name is running. 
+        @param proc_name: Process name (no need for full path)
+        @type proc_name: string
+        @return: True if process is currently running, else false.
+        '''
+        ps = subprocess.Popen("ps ax -o pid= -o args= ", shell=True, stdout=subprocess.PIPE)
+        ps_pid = ps.pid
+        output = ps.stdout.read()
+        ps.stdout.close()
+        ps.wait()
+    
+        for line in output.split("\n"):
+            res = re.findall("(\d+) (.*)", line)
+            if res:
+                pid = int(res[0][0])
+                if proc_name in res[0][1] and pid != os.getpid() and pid != ps_pid:
+                    return True
+        return False
+
 
     # --------------------------------------------   Replay Demon -------------------------------
     
