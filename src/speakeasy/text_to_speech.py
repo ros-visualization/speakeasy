@@ -79,7 +79,7 @@ class TextToSpeechProvider(object):
         if self.lastUsedEngineObj is None:
             return False;
         else:
-            return self.lastUsedEngineObj.busy;
+            return self.lastUsedEngineObj.busy();
 
     def waitForSoundDone(self):
         '''

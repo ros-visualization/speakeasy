@@ -182,26 +182,35 @@ class SpeakEasyController(object):
     
     def __init__(self, dirpath, stand_alone=None):
 
-        self.dialogService = DialogService(self.gui);
         if not ROS_IMPORT_OK:
+            # Remember original default play location, so that
+            # we can warn user of the import error condition further
+            # down, when the GUI is up:
+            DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
             # Was running on robot the default?
-            
-
-        if stand_alone is None:
-            stand_alone = (DEFAULT_PLAY_LOCATION == 'PLAY_LOCALLY');
+            if DEFAULT_PLAY_LOCATION == PlayLocation.ROBOT:
+                stand_alone = True;
+        else:
+            if stand_alone is None:
+                stand_alone = (DEFAULT_PLAY_LOCATION == PlayLocation.LOCALLY);
          
         self.stand_alone = stand_alone;
         self.gui = None;
         self.soundPlayer = None;
         self.textToSpeechPlayer = None;
         self.rosInitialized = False;
-        self.speechReplayDemon = None;
-        self.soundReplayDemon  = None;
+        self.speechReplayDemons = [];
+        self.soundReplayDemons  = [];
               
         if self.stand_alone:
             initOK = self.initLocalOperation();
         else: # Robot operation
-            initOK = self.initRobotOperation();
+            # Try to initialize ROS. If it goes right, returns True,
+            # else raises IOError with an error message:
+            try:
+                initOK = self.initRobotOperation();
+            except IOError as rosInitFailed:
+                initOK = False;
             if not initOK:
                 # If robot init didn't work, fall back to local op:
                 self.stand_alone = True;
@@ -214,13 +223,25 @@ class SpeakEasyController(object):
         self.gui.hideButtonSignal.connect(alternateLookHandler);
         # Handler that makes program button look normal:
         self.gui.showButtonSignal.connect(standardLookHandler);
+        self.dialogService = DialogService(self.gui);
+
+        # Now that we have the GUI up, we can warn user
+        # if ROS couldn't be imported, yet this app was 
+        # set to control a Ros node:
+        if not ROS_IMPORT_OK and DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT:
+            self.dialogService.showErrorMsg("Application was set to control sound on robot, but ROS is not installed. Switching to local operation.");
         
-        # If we are to run sound on the robot, but the robot
-        # initialization failed, switch to local, and let user
-        # know: 
-        if not initOK:
-            self.gui.setWhereToPlay(PlayLocation.LOCALLY);
-            self.dialogService.showErrorMsg("The robot server is not running. Switching to local operation.");
+        
+        # If the app was set to run on robot, but the ROS init 
+        # failed, then rosInitFailed will hold an IOError instance.
+        # Use it to inform user. If not ROS init error occurred,
+        # then rosInitFailed with be unbound:
+        try:
+            if not initOK and rosInitFailed is not None:
+                self.gui.setWhereToPlay(PlayLocation.LOCALLY);
+                self.dialogService.showErrorMsg(str(rosInitFailed));
+        except NameError:
+            pass
             
         self.dirpath = dirpath;
         
@@ -259,7 +280,8 @@ class SpeakEasyController(object):
         self.sound_file_names to a list of sound file names
         for use with play-sound calls to the Robot via ROS.
         @return: True if initialization went OK. Else False.
-        @returnt: boolean
+        @returnt: True
+        @raise IOError: if ROS initialization failed. 
         '''
         
         self.sound_file_names = [];        
@@ -272,8 +294,7 @@ class SpeakEasyController(object):
             # Therefore: check for that. If roscore isn't running,
             # revert to local operation:
             if not self.processRunning('roscore'):
-                self.dialogService.showErrorMsg("The roscore process is not running. Switching to local operation.")
-                return False; 
+                raise IOError("The roscore process is not running. Switching to local operation.");
             rospy.init_node('speakeasy_gui', anonymous=True);
         
         # Wait for Ros service for a limited time; there might be none:
@@ -286,7 +307,7 @@ class SpeakEasyController(object):
                 waitTime -= 1;
                 if waitTime <= 0:
                     rospy.loginfo("Speech capabilities service is offline, switching to local operations.");    
-                    return False;
+                    raise IOError("Speech capabilities service is offline, switching to local operations.");
                 
         rospy.loginfo("Speech capabilities service online.");    
         capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
@@ -296,7 +317,7 @@ class SpeakEasyController(object):
             return True;
         except rospy.ServiceException, e:
             self.dialogService.showErrorMsg("Service call failed: %s"%e);
-            return False;
+            raise IOError("Service call failed: %s"%e);
 
     #----------------------------------
     # connectWidgetsToActions 
@@ -410,11 +431,12 @@ class SpeakEasyController(object):
             if sayOnce:
                 self.textToSpeechPlayer.say(text, voice, ttsEngine);
             else:
-                self.speechReplayDemon = SpeakEasyController.SpeechReplayDemon(text, 
-                                                                               voice, 
-                                                                               ttsEngine, 
-                                                                               self.gui.getPlayRepeatPeriod(),
-                                                                               self.textToSpeechPlayer).start();
+                self.speechReplayDemons.append(SpeakEasyController.SpeechReplayDemon(text, 
+                                                                                     voice, 
+                                                                                     ttsEngine, 
+                                                                                     self.gui.getPlayRepeatPeriod(),
+                                                                                     self.textToSpeechPlayer));
+                self.speechReplayDemons[-1].start();
         else:
             if sayOnce:
                 self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
@@ -461,13 +483,16 @@ class SpeakEasyController(object):
         if buttonObj == self.gui.recorderButtonDict[buttonKey]:
             if self.stand_alone:
                 if self.textToSpeechPlayer.busy():
-                    if self.speechReplayDemon is not None:
-                        self.speechReplayDemon.stop();
-                        self.speechReplayDemon = None;
-                    if self.soundReplayDemon is not None:
-                        self.soundReplayDemon.stop();
-                        self.soundReplayDemon = None; 
+                    if len(self.speechReplayDemons) > 0:
+                        for speechDemon in self.speechReplayDemons:
+                            speechDemon.stop();
+                        self.speechReplayDemons = [];
                     self.textToSpeechPlayer.stop();
+                if len(self.soundReplayDemons) > 0:
+                    for soundDemon in self.soundReplayDemons:
+                        soundDemon.stop();
+                    self.soundReplayDemons = []; 
+                self.soundPlayer.stop();
             else: # Robot op
                 # If nothing in text input field, then we are not playing text:
                 if not self.gui.speechInputFld.isEmpty():
@@ -475,18 +500,6 @@ class SpeakEasyController(object):
                 self.soundClient.stopSaying(self.gui.speechInputFld.getText());
                 return;
         
-        # Stop All button pushed?
-        buttonKey = self.gui.interactionWidgets['STOP_ALL'];
-        if self.stand_alone:
-            if self.soundReplayDemon is not None:
-                self.soundReplayDemon.stop();
-                self.soundReplayDemon = None;
-            self.soundPlayer.stop();
-            if self.textToSpeechPlayer.busy():
-                self.textToSpeechPlayer.stop()
-        else:
-            self.soundClient.stopAll();
-
     #----------------------------------
     # actionProgramButtons 
     #--------------
@@ -594,12 +607,16 @@ class SpeakEasyController(object):
                         soundFile = self.soundPathsFull[soundFile]
                     except KeyError:
                         self.dialogService.showErrorMsg("Sound file %s not found. Searched %s/../../sounds." % (originalSoundFile, __file__))
-                soundInstance = self.soundPlayer.play(soundFile);
+                        return;
+                    soundInstance = self.soundPlayer.play(soundFile);
                 if self.gui.playRepeatedlyChecked():
-                    self.soundReplayDemon = SpeakEasyController.SoundReplayDemon(soundInstance,self.gui.getPlayRepeatPeriod(), self.soundPlayer).start();
+                    self.soundReplayDemons.append(SpeakEasyController.SoundReplayDemon(soundInstance,self.gui.getPlayRepeatPeriod(), self.soundPlayer));
+                    self.soundReplayDemons[-1].start();
+
             except IOError as e:
                 self.dialogService.showErrorMsg(str(e));
-        else:
+                return
+        else: # Robot operation
             self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
     	                             SpeakEasyRequest.PLAY_START,
     				                 soundFile);

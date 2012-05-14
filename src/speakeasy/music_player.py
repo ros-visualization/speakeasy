@@ -1,0 +1,396 @@
+#!/usr/bin/env python
+
+import pygame
+import os
+import time
+from operator import itemgetter
+import threading
+
+# TODO:
+#    - play needs block option impl.
+
+class TimeReference:
+    RELATIVE = 0;
+    ABSOLUTE = 1;
+
+class PlayStatus:
+    STOPPED = 0;
+    PAUSED  = 1;
+    PLAYING = 2;
+
+
+class MusicPlayer(object):
+    '''
+    Plays music files, currently ogg and wav. In contrast to SoundPlayer,
+    which is optimized for dealing with lots of short sounds, this facility
+    is for longer files, which are streamed, rather than loaded. Also in
+    contrast to SoundPlayer, MusicPlayer can only play one song at a time.
+    <p> 
+    For ogg files the method setPlayhead() allows clients to move foward
+    and back within a song as it plays.
+    <p>
+    Public methods:
+    <ul>
+	    <li>play()</li>
+	    <li>pause()</li>
+	    <li>unpause()</li>
+	    <li>setSoundVolume()</li>
+	    <li>getSoundVolume()</li>
+	    <li>setPlayhead()</li>
+	    <li>getPlayheadPosition()</li>
+	    <li>getPlayStatus()</li>
+	</ul>
+	Requires pygame.    
+    '''
+    
+    # Used to enforce Singleton pattern:
+    singletonInstanceRunning = False;
+    
+    supportedFormats = ['ogg', 'wav'];    
+    
+    #--------------------------------
+    # Initializer
+    #---------------
+    
+    def __init__(self):
+        if MusicPlayer.singletonInstanceRunning:
+            raise RuntimeError("Must only instantiate MusicPlayer once; an instance is already running.")
+        else:
+            MusicPlayer.singletonInstanceRunning = True;
+        pygame.init();
+        self.lock = threading.Lock();
+        self.playStatus = PlayStatus.STOPPED;
+        
+        # Use the first available pygame user event number as 
+        # a 'play ended naturally or via stop()' event:
+        self.PLAY_ENDED_EVENT = pygame.USEREVENT; 
+        
+    #--------------------------------
+    # play
+    #---------------
+    
+    def play(self, whatToPlay, repeats=0, startTime=0.0, blockTillDone=False, volume=None):
+        '''
+        Play an .mp3 or .ogg file, or File class instance.
+        Offers choice of blocking return until the music is finished, or
+        returning immediately. 
+        
+        @param whatToPlay: Full path to .wav or .ogg file, or File instance.
+        @type whatToPlay: {string | File}
+        @param repeats: Number of times to repeat song after the first time. If -1: repeat forever, or until another song is played.
+        @type repeats: int
+        @param startTime: Time in seconds into the song to start the playback.
+        @type startTime: float
+        @param blockTillDone: True to delay return until music is done playing.
+        @type blockTillDone: boolean
+        @param volume: How loudly to play (0.0 to 1.0). None: current volume.
+        @type volume: float
+        @raise IOError: if given music file path does not exist, or some other playback error occurred. 
+        @raise ValueError: if given volume is not between 0.0 and 1.0
+        @raise TypeError: if whatToPlay is not a filename (string), or Sound instance.
+        @raise NotImplementedError: if startTime is other than 0.0, but the underlying music engine does not support start time control.
+        '''
+
+        if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
+            raise ValueError("Volume must be between 0.0 and 1.0");
+        
+        if not (isinstance(repeats, int) and (repeats >= -1)): 
+            raise TypeError("Number of repeats must be an integer greater or equal to -1");
+        
+        if not (isinstance(startTime, float) and (startTime >= 0.0)):
+            raise ValueError("Start time must be a float of value zero or greater."); 
+        
+        # Check type explicitly, b/c pygame's exceptions are 
+        # not useful for incorrect type errors:
+        if not (isinstance(whatToPlay, basestring) or isinstance(whatToPlay, file)):
+            raise TypeError("Song must be a string or a Python file object.")
+        
+        # Guaranteed that whatToPlay is string or file obj.
+        # Ensure existence of file:
+        try:
+            # Assume whatToPlay is a string:
+            if not os.path.exists(whatToPlay):
+                raise IOError("Music filename %s does not exist." % whatToPlay);
+            filename = whatToPlay;
+        except TypeError:
+            # Was a file object; check *it* for existence:
+            if not os.path.exists(whatToPlay.name):
+                raise IOError("Music filename %s does not exist." % whatToPlay.name);
+            filename = whatToPlay.name;
+
+        # Now filename has a legal file. Which audio format?
+        (fileBaseName, extension) = os.path.splitext(filename);
+        if extension.startswith("."):
+            extension = extension[1:]
+        if not extension in MusicPlayer.supportedFormats:
+            raise ValueError("Unsupported file format '%s'. Legal formats in order of feature power: %s." % (os.path.basename(filename), 
+                                                                                                             str(MusicPlayer.supportedFormats)));
+        with self.lock:
+            
+            self.currentAudioFormat = extension;
+            # Convert start time to msecs:
+            self.initialStartPos = startTime * 1000.0
+        
+            pygame.mixer.music.load(filename);
+            self.loadedFile = filename;
+            if volume is not None:
+                self.setSoundVolume(volume);
+                
+            # Clear the event queue of any old 'done playing'
+            # events:
+            pygame.event.clear(self.PLAY_ENDED_EVENT);
+            # Ensure that pygame will queue such an event
+            # when done:
+            pygame.mixer.music.set_endevent(self.PLAY_ENDED_EVENT);
+            
+            # Pygame play method wants total number of times
+            # to play the song; therefore: add 1: 
+            pygame.mixer.music.play(repeats+1, startTime);
+            self.playStatus = PlayStatus.PLAYING;
+
+        if blockTillDone:
+            self.waitForSongDone();
+
+    #--------------------------------
+    # stop
+    #---------------
+    
+    def stop(self):
+        '''
+        Stop music if any is playing.
+        '''
+        with self.lock:
+            pygame.mixer.music.stop();
+            self.playStatus = PlayStatus.STOPPED;
+    
+    #--------------------------------
+    # pause
+    #---------------
+
+    def pause(self):
+        '''
+        Pause either currently playing song, if any.
+        '''
+        
+        if self.playStatus != PlayStatus.PLAYING:
+            return;
+        with self.lock:
+            pygame.mixer.music.pause();
+            self.playStatus = PlayStatus.PAUSED;
+
+    #--------------------------------
+    # unpause
+    #---------------
+
+    def unpause(self):
+        '''
+        Unpause a paused song.
+        '''
+        
+        if self.playStatus != PlayStatus.PAUSED:
+            return;
+        with self.lock:
+            pygame.mixer.music.unpause();
+            self.playStatus = PlayStatus.PLAYING;
+
+    #--------------------------------
+    # setSoundVolume
+    #---------------
+
+    def setSoundVolume(self, volume):
+        '''
+        Set sound playback volume.
+        @param volume: Value between 0.0 and 1.0.
+        @type volume: float
+        @raise TypeError: if volume is not a float.
+        @raise ValueError: if volume is not between 0.0 and 1.0
+        '''
+        if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
+            raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
+
+        with self.lock:
+            pygame.mixer.music.set_volume(volume);
+        
+    #--------------------------------
+    # getSoundVolume
+    #---------------
+        
+    def getSoundVolume(self):
+        '''
+        Get currently set sound volume.
+        @return: Volume number between 0.0 and 1.0
+        @returnt: float
+        '''
+
+        with self.lock:
+            return pygame.mixer.music.get_volume();
+            
+    #--------------------------------
+    # setPlayhead
+    #---------------
+
+    def setPlayhead(self, secs, timeReference=TimeReference.ABSOLUTE):
+        '''
+        Set playhead to 'secs' seconds into the currently playing song. If nothing is being
+        played, this method has no effect. If a song is currently paused, the song will
+        be unpaused, continuing to play at the new playhead position.
+        @param secs: number of (possibly fractional) seconds to start into the song.
+        @type secs: float
+        @param timeReference: whether to interpret the secs parameter as absolute from the song start, or relative from current position.
+                              Options are TimeRerence.ABSOLUTE and TimeRerence.RELATIVE
+        @type interpretation: TimeReference
+        @raise NotImplementedError: if called while playing song whose format does not support playhead setting in pygame. 
+        '''
+
+        if self.currentAudioFormat != 'ogg':
+            raise NotImplementedError("Playhead setting is currently implemented only for the ogg format. Format of currently playing file: " + 
+                                      str(self.currentAudioFormat));
+                                      
+        if self.playStatus == PlayStatus.STOPPED:
+            return;
+        
+        if (timeReference == TimeReference.ABSOLUTE) and (secs < 0.0):
+            raise ValueError("For absolute playhead positioning, the playhead position must be a positive float. Instead it was: " + str(secs));
+                        
+        with self.lock:
+            currentlyAt = self.getPlayheadPosition(); # fractional seconds
+            if timeReference == TimeReference.RELATIVE:
+                newAbsolutePlayheadPos = currentlyAt + secs;
+            else:
+                newAbsolutePlayheadPos = secs;
+                
+            # New 'initial play position' is the target playhead position:
+            self.initialStartPos = newAbsolutePlayheadPos * 1000.0;
+            
+        pygame.mixer.music.stop();
+        self.play(self.loadedFile, startTime=newAbsolutePlayheadPos);
+    
+    #--------------------------------
+    # getPlayheadPosition 
+    #---------------
+
+    def getPlayheadPosition(self):
+        '''
+        Return number of (possibly fractional) seconds to where the current
+        song is currently playing. If currently playing nothing, return 0.0.
+        @return: number of fractional seconds where virtual playhead is positioned.
+        @returnt: float
+        '''
+        if pygame.mixer.music.get_busy() != 1:
+            return 0.0;
+        
+        # Get time played so far in msecs. Returns only time played,
+        # not considering start offset:
+        timePlayedSinceStart = pygame.mixer.music.get_pos()
+        # Add the start position (also kept in msgecs):
+        trueTimePlayed = timePlayedSinceStart + self.initialStartPos
+        
+        # return seconds:
+        return trueTimePlayed / 1000.0;
+        
+    #--------------------------------
+    # currentlyPlaying() 
+    #---------------
+        
+    def getPlayStatus(self):
+        '''
+        Return one of PlayStatus.STOPPED, PlayStatus.PLAYING, PlayStatus.PAUSED to
+        reflect what the player is currently doing.
+        '''
+        if pygame.mixer.music.get_busy() != 1:
+            self.playStatus = PlayStatus.STOPPED;
+        return self.playStatus;
+
+    # -----------------------------------   Private Methods ----------------------------
+    
+
+    #--------------------------------
+    # waitForSoundDone
+    #---------------
+    
+    def waitForSongDone(self):
+        '''
+        Block until song is done playing. Used in play() method.
+        '''
+        if self.getPlayStatus() == PlayStatus.STOPPED:
+            return;
+        while (pygame.mixer.music.get_busy() == 1) and pygame.mixer.music.get_endevent() != self.PLAY_ENDED_EVENT:
+            time.sleep(0.3);
+            
+    # ---------------------------------------  Testing  -----------------------
+if __name__ == '__main__':
+    
+    import os
+    
+    def playPauseUnpause():
+        while player.getPlayStatus() != PlayStatus.STOPPED:
+            time.sleep(2);
+            print "First pause...";
+            player.pause();
+            time.sleep(3);
+            player.unpause();
+            time.sleep(2);
+            print "Second pause...";
+            player.pause();
+            time.sleep(3);
+            player.unpause();
+            print "Stopping playback."
+            player.stop();
+            
+    
+    def testPlayheadMove():
+        while player.getPlayStatus() != PlayStatus.STOPPED:
+            time.sleep(3.0);
+            player.pause();
+            print "Playhead position after 3 seconds: " + str(player.getPlayheadPosition());
+            time.sleep(2.0);
+            print "Set Playhead position to 10 seconds and play...";
+            player.setPlayhead(10.0);
+            time.sleep(3.0); # Play from 10sec mark on for 3secs
+            print "Set Playhead position back to 10 seconds without pausing...";
+            player.setPlayhead(10.0);
+            time.sleep(3.0);
+            player.pause();
+            print "Playhead position: " + str(player.getPlayheadPosition());
+            time.sleep(2.0);
+            print "set playhead position to -3, which should be 10 again...";
+            player.setPlayhead(-3.0, TimeReference.RELATIVE);
+            print "Playhead position after relative setting back to 10: " + str(player.getPlayheadPosition());
+            time.sleep(3.0);
+            print "Stopping."
+            player.stop();
+            
+    
+    #testFileCottonFields = os.path.join(os.path.dirname(__file__), "../../sounds/music/cottonFields.wav");
+    testFileCottonFields = os.path.join(os.path.dirname(__file__), "../../sounds/music/cottonFields.ogg");
+    testFileRooster = os.path.join(os.path.dirname(__file__), "../../sounds/rooster.wav");
+    
+    player = MusicPlayer();
+    print "Test existing song."
+#    player.play(testFileCottonFields, blockTillDone=True);
+#    time.sleep(10);
+#    player.stop();
+    print "Done test existing song..."
+    print "---------------"
+
+    print "Test pause/unpause";
+#    player.play(testFileCottonFields, blockTillDone=False);
+#    playPauseUnpause();
+    print "Done testing pause/unpause";
+    
+    print "Test playhead settings. Expect: Play from start for 3sec, play from 10 for 3sec, play from 10 again for 3sec. Stop."
+#    player.play(testFileCottonFields);
+#    testPlayheadMove();
+    print "Done testing playhead settings."
+    
+    print "Test waitForSongDone()"
+    print "Immediate return when stopped:..."
+    player.waitForSongDone();
+    print "Immediate return when stopped OK."
+    player.play(testFileRooster);
+    print "Return when rooster done..."
+    player.waitForSongDone();
+    print "Return when rooster done OK."
+    print "Done testing waitForSongDone()"
+    
+    print "All  done"

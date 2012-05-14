@@ -15,15 +15,6 @@ from PyQt4.QtCore import pyqtSignal
 #TODO: Play repeatedly.
 #TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
 
-
-# Whether the initial UI is started with the
-# Robot as play destination, or with Local as 
-# destination. This module variable may be
-# used by clients to prepare the environment
-# ahead of building the GUI (e.g. initialize
-# a ROS node, or local sound engine.):
-DEFAULT_PLAY_LOCATION = 'PLAY_AT_ROBOT' # Alternative: PLAY_LOCALLY
-
 class Option:
     YES = True;
     NO  = False;
@@ -50,8 +41,18 @@ class CheckboxGroupBehavior:
     CHECKBOXES    = 1;
 
 class PlayLocation:
-    ROBOT   = 0;
-    LOCALLY = 1;
+    ROBOT   = 'PLAY_AT_ROBOT';
+    LOCALLY = 'PLAY_LOCALLY';
+
+# Whether the initial UI is started with the
+# Robot as play destination, or with Local as 
+# destination. This module variable may be
+# used by clients to prepare the environment
+# ahead of building the GUI (e.g. initialize
+# a ROS node, or local sound engine.):
+
+DEFAULT_PLAY_LOCATION = PlayLocation.ROBOT;
+
 
 #--------------------------------  TextPanel Class ---------------------------
 class TextPanel(QTextEdit):
@@ -671,6 +672,9 @@ class SpeakEasyGUI(QMainWindow):
                                    Alignment.LEFT,
                                    activeButtons=[SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
                                    behavior=CheckboxGroupBehavior.CHECKBOXES);
+        # TODO: implement text completion:
+        self.textCompleteRadioButtonsDict[SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']].setEnabled(False)
+
                                    
         # Style all the radio buttons:
         for playLocalityButton in self.playLocalityRadioButtonsDict.values():
@@ -907,9 +911,7 @@ class SpeakEasyGUI(QMainWindow):
         @param whereToPlay: PlayLocation.LOCALLY, or PlayLocation.ROBOT
         @type whereToPlay: PlayLocation
         '''
-        if whereToPlay == PlayLocation.LOCALLY:
-            self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].setChecked(True);
-        else:self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['ROBOT']].setChecked(True);
+        self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets[whereToPlay]].setChecked(True);
         
     #----------------------------------
     # setButtonLabel 

@@ -82,7 +82,7 @@ class SoundPlayer(object):
     
     def play(self, whatToPlay, blockTillDone=False, volume=None):
         '''
-        Player a file, or an already loaded Sound instance.
+        Play a file, or an already loaded Sound instance.
         Offers choice of blocking return until the sound is finished, or
         returning immediately. 
         
@@ -90,8 +90,10 @@ class SoundPlayer(object):
         @type whatToPlay: {string | Sound}
         @param blockTillDone: True to delay return until sound is done playing.
         @type blockTillDone: boolean
+        @param volume: Volume to play at. Float between 0.0 and 1.0. None: use current volume.
+        @type volume: float
         @return: The sound instance.
-        @raise IOError: if given sound file path that does not exist, or some other playback error occurred. 
+        @raise IOError: if given sound file path does not exist, or some other playback error occurred. 
         @raise ValueError: if given volume is not between 0.0 and 1.0
         @raise TypeError: if whatToPlay is not a filename (string), or Sound instance.
         '''
@@ -117,19 +119,22 @@ class SoundPlayer(object):
                     # Hypothesis: whatToPlay is a Sound instance:
                     sound   = whatToPlay;
                     channel = sound.play();
+                    self.addSoundToChannelBinding(sound, channel);
                     self.lastUsedTime[sound] = time.time(); 
                 except AttributeError:
                     # whatToPlay is not a file path (i.e. string), nor a Sound instance:
                     raise TypeError("Play method takes the path to a sound file, or a Sound instance. Instead received:" + 
                                      str(whatToPlay));
     
-            # At this point, sound and channel vars are correctly set.
-            # Caller wants to block till sound done?
-            if blockTillDone:
-                self.waitForSoundDone(sound)
+        # At this point, sound and channel vars are correctly set.
+        # Caller wants to block till sound done? If so, we release
+        # the lock (exit the 'with' block), and hang out:
+        if blockTillDone:
+            self.waitForSoundDone(sound)
+            with self.lock:
+                # Protect the sound-channel binding data structure: 
                 self.cleanupSoundChannelBindings();
-                
-            return sound;
+        return sound;
 
     #--------------------------------
     # stop
@@ -311,7 +316,8 @@ class SoundPlayer(object):
         @type volume: float
         @raise OSError: if given filename that does not exist. 
         '''
-        if (volume < 0.0) or (volume > 1.0):
+
+        if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
             raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
 
         with self.lock:
