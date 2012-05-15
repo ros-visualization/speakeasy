@@ -249,9 +249,12 @@ class MusicPlayer(object):
         if self.playStatus == PlayStatus.STOPPED:
             return;
         
+        if not isinstance(secs, float):
+            raise ValueError("The playhead position must be a positive float. Instead it was: " + str(secs));
+        
         if (timeReference == TimeReference.ABSOLUTE) and (secs < 0.0):
             raise ValueError("For absolute playhead positioning, the playhead position must be a positive float. Instead it was: " + str(secs));
-                        
+        
         with self.lock:
             currentlyAt = self.getPlayheadPosition(); # fractional seconds
             if timeReference == TimeReference.RELATIVE:
