@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Tapper</class>
+ <widget class="QWidget" name="Tapper">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>475</width>
+    <height>134</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="outerWidgetPickSong" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>471</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <widget class="QComboBox" name="pickSongList">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>330</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="stepNumber">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>1</y>
+      <width>471</width>
+      <height>57</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>36</pointsize>
+     </font>
+    </property>
+    <property name="toolTip">
+     <string>Select a song in which you wish to explore a beat.</string>
+    </property>
+    <property name="text">
+     <string>Step 1: Pick a Song</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

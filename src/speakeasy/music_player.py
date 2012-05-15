@@ -316,6 +316,30 @@ class MusicPlayer(object):
             return;
         while (pygame.mixer.music.get_busy() == 1) and pygame.mixer.music.get_endevent() != self.PLAY_ENDED_EVENT:
             time.sleep(0.3);
+           
+    #--------------------------------
+    # formatSupported
+    #---------------
+    
+    def formatSupported(self, fileExtension):
+        '''
+        Checks whether the given file extension implies a supported
+        sound format.
+        @param fileExtension: file extension with or without leading period. Example: ".ogg"
+        @type fileExtension: string
+        @return: True if the format is supported, else False.
+        @returnt: boolean
+        @raise ValueError: if fileExtension is anything other than a string with length > 0. 
+        '''
+        if (fileExtension is None) or (not isinstance(fileExtension, basestring)) or (len(fileExtension) == 0):
+            raise ValueError("File format specification must be the format's file extension string.");
+        if fileExtension[0] == '.':
+            fileExtension = fileExtension[1:];
+        return fileExtension in MusicPlayer.supportedFormats;
+            
+        
+        return fileExtension in MusicPlayer.supportedFormats;
+           
             
     # ---------------------------------------  Testing  -----------------------
 if __name__ == '__main__':

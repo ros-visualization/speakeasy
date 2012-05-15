@@ -28,6 +28,7 @@
 
   <rosdep name="python-qt4"/>
   <rosdep name="festival"/>
+   <depend package="python_qt_binding"/>
 
 </package>
 
