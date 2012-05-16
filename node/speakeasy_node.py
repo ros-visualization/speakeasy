@@ -13,15 +13,17 @@ import time
 import sys
 import tempfile
 
-from speakeasy.msg import SpeakEasyStatus, SpeakEasyMusicPlay, SpeakEasyPlayhead, SpeakEasySoundPlay, SpeakEasyTextToSpeech;
+from speakeasy.msg import SpeakEasyStatus, SpeakEasyMusic, SpeakEasyPlayhead, SpeakEasySound, SpeakEasyTextToSpeech;
 from speakeasy.msg import  TtsVoices;
-from speakeasy.srv import SpeechStatusInquiry;
 from speakeasy.sound_player import SoundPlayer;
 from speakeasy.text_to_speech import TextToSpeechProvider; 
 from speakeasy.music_player import MusicPlayer;
 from speakeasy.music_player import PlayStatus;
 
 class SpeakEasyServer(object):
+
+    STATUS_PUBLICATION_PERIOD   = 1.0; # seconds
+    PLAYHEAD_PUBLICATION_PERIOD = 0.1; # seconds: Playhead time counter while playing
 
     SAY = 0;
     STOP= 1;
@@ -39,25 +41,13 @@ class SpeakEasyServer(object):
         rospy.init_node('speakeasy')
         
         # We publish a latched message with this SpeakEasy node's speech, sound, and music capabilities:
-        self.status_pub = rospy.Publisher("/speakeasy_status", SpeakEasyStatus, latch=True)
+        self.status_pub = rospy.Publisher("/speakeasy_status", SpeakEasyStatus, latch=False)
         # During music playback we also publish the playhead time position every 1/10 second:
         self.playhead_pub = rospy.Publisher("/speakeasy_playhead", SpeakEasyPlayhead);
         
-        # Since the function wait_for_message() seems not to work 
-        # for latched messages, we also provide a service that returns
-        # the same message, except that the service will build the
-        # response message each time, making the info fresher:
-        
-        rospy.Service('speakeasy_status_inquiry',
-                      SpeakEasyStatusInquiry, 
-                      self.handleSpeakEasyStatusInquiry);
-
-        # 
-
-
         # Paths to where sound and music files are stored: In/below 'sounds' directory 
         # under package root dir:
-        self.soundDir = os.path.join(os.path.dirname(__file__),'../../sounds')
+        self.soundDir = os.path.join(os.path.dirname(__file__),'../sounds')
         self.musicDir = os.path.join(self.soundDir, 'music');
         
         self.lock = threading.Lock();
@@ -66,17 +56,14 @@ class SpeakEasyServer(object):
         self.soundPlayer = SoundPlayer();
         self.musicPlayer = MusicPlayer();
         
-        sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.handleSpeakEasyRequest)
         self.subscriberStatusReq = rospy.Subscriber("speakeasy_status_req", SpeakEasyStatus, self.handleSpeakEasyStatusInquiry);
         self.subscriberMusicReq  = rospy.Subscriber("speakeasy_music_req", SpeakEasyMusic, self.handleMusicRequest);
         self.subscriberSoundReq  = rospy.Subscriber("speakeasy_sound_req", SpeakEasySound, self.handleSoundRequest);
         self.subscriberTTSReq    = rospy.Subscriber("speakeasy_text_to_speech_req", SpeakEasyTextToSpeech, self.handleTextToSpeechRequest)
 
-        #  Thread used during music playback to publish playhead position:
-        self.playheadPublisherThread = PlayheadPublisher(self.musicPlayer)        
-
-        self.publishStatus();
-        
+        # Thread used during music playback to publish playhead position, and 
+        # at less frequent period publish general status:
+        self.playheadPublisherThread = PlayheadPublisher(self.musicPlayer, self.publishStatus).start();        
         
     def publishStatus(self):
         # Build a message listing the speech status (which engines, which sounds):
@@ -106,6 +93,10 @@ class SpeakEasyServer(object):
         if soundCmd == SpeakEasyServer.PLAY:
             soundName = req.sound_name;
             volume    = req.volume;
+            # Default volume?:
+            if volume == -1.0:
+                volume = None;
+            
             try:
                 self.soundPlayer.play(soundName, blockTillDone=False, volume=volume);
             except:
@@ -148,11 +139,11 @@ class SpeakEasyServer(object):
             repeates  = req.repeats;
             startTime = req.time;
             volume    = req.volume;
+            # Default volume?:
+            if volume == -1.0:
+                volume = None;
             try:
                 self.musicPlayer.play(songName, repeats=repeats, startTime=startTime, blockTillDone=False, volume=volume);
-                # Start publishing playhead position. Thread will die when
-                # playback stops:
-                self.playheadPublisherThread.start();
             except:
                 rospy.logerr("Error while calling music player command 'play': " + str(sys.exc_info()[0]));
         elif musicCmd == SpeakEasyServer.STOP:
@@ -168,9 +159,6 @@ class SpeakEasyServer(object):
         elif musicCmd == SpeakEasyServer.UNPAUSE:
             try:
                 self.musicPlayer.unpause();
-                # Start publishing playhead position. Thread will die when
-                # playback stops:
-                self.playheadPublisherThread.start();
             except:
                 rospy.logerr("Error while calling music player command 'unpause': " + str(sys.exc_info()[0]));
         elif musicCmd == SpeakEasyServer.SET_VOL:
@@ -238,6 +226,7 @@ class SpeakEasyServer(object):
         statusMsg.sounds = self.musicFiles
         
         statusMsg.numSoundChannels = self.soundPlayer.numChannels();
+        statusMsg.musicStatus = self.musicPlayer.getPlayStatus();
         statusMsg.soundVolume = self.soundPlayer.getSoundVolume(None) #**** Refine this
         statusMsg.musicVolume = self.musicPlayer.getSoundVolume()
         
@@ -252,24 +241,40 @@ class SpeakEasyServer(object):
 class PlayheadPublisher(threading.Thread):
     '''
     Thread to publish playhead position while songs play.
-    Rate is 1/10 sec. The thread should be started whenever
-    play starts, or is unpaused. The thread terminates on
-    its own whenever the music player stops playing.
+    Rate is SpeakEasyServer.PLAYHEAD_PUBLICATION_PERIOD secs. 
+    Additionally, thread publishes SpeakEasy status message
+    every SpeakEasyServer.STATUS_PUBLICATION_PERIOD seconds.
     '''
     
-    def __init__(self, musicPlayer):
+    def __init__(self, musicPlayer, statusMsgSendMethod):
         super(PlayheadPublisher, self).__init__();
         self.musicPlayer = musicPlayer;
+        self.statusMsgSendMethod = statusMsgSendMethod;
         self.playheadMsg = SpeakEasyPlayhead();
+        self.stopped     = False;
                     
     def run(self):
-        while self.musicPlayer.getPlayStatus() == PlayStatus.PLAYING:
-            self.playheadMsg.playhead_time = self.musicPlayer.getPlayheadPosition();
-            try:
-                self.playhead_pub.publish(self.playheadMsg);
-            except:
-                pass;
-            time.sleep(0.1);
+        lastStatusPublish = rospy.Time.now();
+        while not self.stopped:
+            # Time to publish a general status message?
+            if (rospy.Time.now() - lastStatusPublish).secs >= SpeakEasyServer.STATUS_PUBLICATION_PERIOD:
+                self.statusMsgSendMethod();
+                lastStatusPublish = rospy.Time.now();
+            
+            while self.musicPlayer.getPlayStatus() == PlayStatus.PLAYING:
+                self.playheadMsg.playhead_time = self.musicPlayer.getPlayheadPosition();
+                try:
+                    self.playhead_pub.publish(self.playheadMsg);
+                except:
+                    pass;
+                time.sleep(PLAYHEAD_PUBLICATION_PERIOD);
+                # Time to publish a general status message?
+                if (rospy.Time.now() - lastStatusPublish).secs >= SpeakEasyServer.STATUS_PUBLICATION_PERIOD:
+                    self.statusMsgSendMethod();
+                    lastStatusPublish = rospy.Time.now();
+                    
+    def stop(self):
+        self.stopped = True;
             
 if __name__ == '__main__':
     speakEasyServer = SpeakEasyServer();
