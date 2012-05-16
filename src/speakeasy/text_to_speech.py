@@ -88,6 +88,41 @@ class TextToSpeechProvider(object):
         while self.busy():
             time.sleep(0.3);
 
+    def availableTextToSpeechEngines(self):
+        '''
+        Returns an array of text-to-speech engine names that
+        are available on the current machine. Exampele: ['festival', 'cepstral']
+        @return: Array of text-to-speech engine names as appropriate for ROS t2s messages.
+                 Order within the array is not necessarily the same between calls.
+        @ret
+                 
+        '''
+        return self.t2sEngines.keys();
+
+    def availableVoices(self):
+        '''
+        Returns a dictionary of all available voices for each 
+        text-to-speech engine. Keys are the engine names. Example:
+            Cepstral : ['David', 'Anna']
+            Festival : ['voice_kal_diphone']
+        The default voice for each engine is guaranteed to be the
+        first in the voice lists. Order of the remaining voices is 
+        arbitrary.
+        @return: Dictionary mapping text-to-speech engine names to lists of voice names.
+        @returnt: {string : [string]} 
+        '''
+        voiceListDict = {};
+        for ttsEngineObj in self.t2sEngines.values():
+            voiceList = [ttsEngineObj.getDefaultVoice()];
+            thisEngVoices = ttsEngineObj.getVoiceList();
+            for voice in thisEngVoices:
+                if voice == voiceList[0]:
+                    continue;
+                else:
+                    voiceList.append(voice);
+            voiceListDict[ttsEngineObj.getEngineName()] = voiceList
+        return voiceListDict;
+
     # -----------------------------------------------  Private Methods ---------------------------------
     
     def getEngineObj(self, engineName):
@@ -242,9 +277,14 @@ class TextToSpeechEngine(object):
     
     def __init__(self):
         self.fullPathToExecutable = None;
+        # Subclasses must overrided the following instance var:
+        self.defaultVoice = None;
 
     def getEngineName(self):
         return self.ttsEngineName;
+
+    def getDefaultVoice(self):
+        return self.defaultVoice;
 
     def getT2SDestFilename(self):
         return self.t2sDestFilename;
@@ -471,7 +511,7 @@ if __name__ == "__main__":
     
     tte = TextToSpeechProvider();
     print "Test defaulting t2s engine and voice"
-    tte.say("This is a test.")
+#    tte.say("This is a test.")
     print "Done testing defaulting t2s engine and voice"
     print "---------------"
     
@@ -516,6 +556,16 @@ if __name__ == "__main__":
 #    soundPlayer.play(fileName, blockTillDone=True);
 #    os.remove(fileName);
     print "Done testing say-to-file Festival"
+    print "---------------"
+    
+    print "Test getting list of available t2s engines..."    
+    print str(tte.availableTextToSpeechEngines());
+    print "Done testing getting list of available t2s engines."
+    print "---------------"
+    
+    print "Test getting dict of available voices..."
+    print str(tte.availableVoices());
+    print "Done testing getting dict of available voices."
     print "---------------"
 
     print "Done";
