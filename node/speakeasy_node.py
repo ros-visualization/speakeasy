@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 # TODO:
-#   - Status message: get sound volume correct: in play msg: set instance var with effective message.
-#   - Subscribe to the request messages.
+
 
 import roslib; roslib.load_manifest('speakeasy')
 import rospy
@@ -67,16 +66,25 @@ class SpeakEasyServer(object):
         self.soundPlayer = SoundPlayer();
         self.musicPlayer = MusicPlayer();
         
+        sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.handleSpeakEasyRequest)
+        self.subscriberStatusReq = rospy.Subscriber("speakeasy_status_req", SpeakEasyStatus, self.handleSpeakEasyStatusInquiry);
+        self.subscriberMusicReq  = rospy.Subscriber("speakeasy_music_req", SpeakEasyMusic, self.handleMusicRequest);
+        self.subscriberSoundReq  = rospy.Subscriber("speakeasy_sound_req", SpeakEasySound, self.handleSoundRequest);
+        self.subscriberTTSReq    = rospy.Subscriber("speakeasy_text_to_speech_req", SpeakEasyTextToSpeech, self.handleTextToSpeechRequest)
+
+        #  Thread used during music playback to publish playhead position:
+        self.playheadPublisherThread = PlayheadPublisher(self.musicPlayer)        
+
+        self.publishStatus();
+        
+        
+    def publishStatus(self):
         # Build a message listing the speech status (which engines, which sounds):
         statusMsg = self.buildStatusMsg()
         # Publish the status message just once, latched:
         self.status_pub.publish(statusMsg);
         
-        #  Thread used during music playback to publish playhead position:
-        self.playheadPublisherThread = PlayheadPublisher(self.musicPlayer)        
         
-        sub = rospy.Subscriber("robotsound", SpeakEasyRequest, self.handleSpeakEasyRequest)
-
     def handleTextToSpeechRequest(self, req):
         
         ttsCmd = req.command;
@@ -125,6 +133,8 @@ class SpeakEasyServer(object):
             soundName = req.sound_name;
             try:
                 self.soundPlayer.setSoundVolume(volume, soundName);
+                # Update latched status message to reflect this new volume:
+                self.publishStatus();
             except:
                 rospy.logerr("Error while calling sound player command 'setSoundVolume': " + str(sys.exc_info()[0]));
         else:
@@ -167,6 +177,8 @@ class SpeakEasyServer(object):
             volume = req.volume;
             try:
                 self.musicPlayer.setVol(volume);
+                # Update latched status message to reflect this new volume:
+                self.publishStatus();
             except:
                 rospy.logerr("Error while calling music player command 'setVol': " + str(sys.exc_info()[0]));
         elif musicCmd == SpeakEasyServer.SET_PLAYHEAD:
