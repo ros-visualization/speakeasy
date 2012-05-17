@@ -24,14 +24,15 @@ class SpeakEasyTester(object):
     
     def __init__(self):
         
-        self.soundReqPub  = rospy.Publisher('sound_test', SpeakEasySound);
-        self.musicReqPub  = rospy.Publisher('music_test', SpeakEasyMusic);
-        self.ttsReqPub    = rospy.Publisher('tts_test', SpeakEasyTextToSpeech);
-        
-        #***** Test service request for status
-        #self.statusReqPub = rospy.Publisher('sound_test', SpeakEasySound);
+        self.soundReqPub  = rospy.Publisher('speakeasy_sound_req', SpeakEasySound);
+        self.musicReqPub  = rospy.Publisher('speakeasy_music_req', SpeakEasyMusic);
+        self.ttsReqPub    = rospy.Publisher('speakeasy_text_to_speech_req', SpeakEasyTextToSpeech);
         
         rospy.init_node('speakeasy_tester', anonymous=True);
+        
+        statusMsg = self.getSpeakEasyStatus();
+        rospy.loginfo("SpeakEasy status message in idle state:")
+        rospy.loginfo(str(statusMsg));
         
     
     def testSoundPlay(self):
@@ -44,16 +45,13 @@ class SpeakEasyTester(object):
        # Make rooster sound:
        msg = self.createSoundMsg(Commands.PLAY, "rooster")
        self.soundReqPub.publish(msg);
-       statusMsg = self.getSpeakEasyStatus();
-       rospy.loginfo(str(statusMsg));
        
     def createSoundMsg(self, command, soundName=None, volume=None):
         if soundName is None:
             soundName = "";
         if volume is None:
             volume = -1;
-        #****msg = SpeakEasySound(command=command, sound_name=soundName, volume=volume);
-        msg = SpeakEasySound(0, 'rooster', 0.6);
+        msg = SpeakEasySound(command=command, sound_name=soundName, volume=volume);
         return msg;
        
        
@@ -73,14 +71,14 @@ class SpeakEasyTester(object):
         if timeout is None:
             while True:
                 try:
-                    return rospy.wait_for_message('SpeakEasyStatus', SpeakEasyStatus, reportToUserPeriod);
-                except:
+                    return rospy.wait_for_message('speakeasy_status', SpeakEasyStatus, reportToUserPeriod);
+                except rospy.ROSException:
                     rospy.loginfo("Waiting for SpeakEasy node to begin publishing status messages...");
         else:
             for waitLoop in range(math.ceil(timeout/reportToUserPeriod)):
                 try:
-                    return rospy.wait_for_message('SpeakEasyStatus', SpeakEasyStatus, reportToUserPeriod);
-                except:
+                    return rospy.wait_for_message('speakeasy_status', SpeakEasyStatus, reportToUserPeriod);
+                except rospy.ROSException:
                     rospy.loginfo("Waiting for SpeakEasy node to begin publishing status messages...");
         
         
@@ -89,4 +87,4 @@ if __name__ == "__main__":
     tester = SpeakEasyTester();
     tester.testSoundPlay();
     
-    rospy.spin();
+    #rospy.spin();

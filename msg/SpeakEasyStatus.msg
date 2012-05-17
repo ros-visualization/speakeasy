@@ -18,7 +18,7 @@ int8   PLAYING = 2
 string[]    ttsEngines
 TtsVoices[] voices
 string[]    sounds
-string[]    songs
+string[]    music
 int8	 	numSoundChannels
 int8        musicStatus
 float32     soundVolume
