@@ -75,6 +75,7 @@ class Tapper(QWidget):
         self.toolStack.addTab(self.pickSongWidget, "Pick a song");
         self.toolStack.addTab(self.tapBeatWidget, "Tap the beat");
         self.toolStack.addTab(self.beatChooserWidget, "Use the beat");
+        self.toolStack.addTab(self.speechWidget, "Robot says...");
         
         self.tapeRecWidget.setParent(self.tapBeatWidget.recorderContainerWidget);
 
@@ -92,6 +93,12 @@ class Tapper(QWidget):
         self.stopButton = self.tapeRecWidget.stopButton;
         self.incrementalMoveTimeSpinBox = self.tapeRecWidget.smallMoveTimeSpinBox;
         self.songPositionSpinBox = self.tapeRecWidget.songPositionSpinbox;
+        self.speechText = self.speechWidget.speechTextBox;
+        self.speechPlayButton = self.speechWidget.playButton;
+        self.speechStopButton = self.speechWidget.stopButton;
+        self.speechDavidVoice = self.speechWidget.davidVoiceRadioButton;
+        self.speechComputerVoice = self.speechWidget.davidVoiceRadioButton;
+        self.speechInsertButton = self.speechWidget.speechInsertButton;
 
         self.connectWidgets()
         
@@ -110,6 +117,7 @@ class Tapper(QWidget):
         self.pickSongWidget    = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "pickSong/pickSong.ui"));
         self.tapBeatWidget     = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "tapBeat/tapBeat.ui"));
         self.beatChooserWidget = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "beatChooser/beatChooser.ui"));
+        self.speechWidget      = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "saySomething/saySomething.ui"));
         self.tapeRecWidget     = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "tapeRecorder/tapeRecorder.ui"));
 
 
@@ -141,9 +149,12 @@ class Tapper(QWidget):
             for filename in filenames:
                 # From /foo/bar/blue.txt, get (blue, .txt):
                 (fileBaseName, extension) = os.path.splitext(filename);
-                if self.musicPlayer.formatSupported(extension):
+                try:
+                    self.musicPlayer.formatSupported(extension);
                     # Map file name without extension (i.e. song name) to full path: 
                     self.allSongs[fileBaseName] = os.path.join(SONG_DIRECTORY,filename);
+                except ValueError:
+                    continue;
             if (len(self.allSongs) == 0):
                 comboBoxToPopulate.addItem(Tapper.EMPTY_SONG_LIST_TEXT);
             else:
