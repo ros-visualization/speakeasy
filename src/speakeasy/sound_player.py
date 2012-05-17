@@ -74,6 +74,7 @@ class SoundPlayer(object):
         self.loadedFilenames = {}  # Map Sound instances to filenames
         self.soundChannelBindings = {};
         self.lastUsedTime = {};
+        self.globalVolume = 0.99;
         pygame.mixer.set_num_channels(NUM_SIMULTANEOUS_SOUNDS);
         
     #--------------------------------
@@ -98,8 +99,10 @@ class SoundPlayer(object):
         @raise TypeError: if whatToPlay is not a filename (string), or Sound instance.
         '''
 
-        if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
-            raise ValueError("Volume must be between 0.0 and 1.0"); 
+        if volume is None:
+            volume = self.globalVolume;
+        elif (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
+            raise ValueError("Volume must be between 0.0 and 1.0");
 
         with self.lock:
             self.cleanupSoundChannelBindings();
@@ -298,7 +301,7 @@ class SoundPlayer(object):
     # setSoundVolume
     #---------------
 
-    def setSoundVolume(self, whatToSetVolFor, volume):
+    def setSoundVolume(self, volume, whatToSetVolFor=None):
         '''
         Set sound volume for a particular sound or channel.
         The entity for which to set the volume (i.e. whatToSetVolFor) 
@@ -310,10 +313,12 @@ class SoundPlayer(object):
     		  channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
     	Passing in a filename will load the file, and set the volume of the 
     	corresponding Sound.
-        @param whatToSetVolFor: The soundfile, Sound, or Channel instance whose volume to set. 
-        @type whatToSetVolFor: {NoneType | string | Sound | Channel}
         @param volume: Value between 0.0 and 1.0.
         @type volume: float
+        @param whatToSetVolFor: The soundfile, Sound, or Channel instance whose volume to set.
+                                If None, sets volume for all sounds. (This setting is overridden
+                                by volume settings provided in calls to the play() method.
+        @type whatToSetVolFor: {NoneType | string | Sound | Channel}
         @raise OSError: if given filename that does not exist. 
         '''
 
@@ -321,6 +326,10 @@ class SoundPlayer(object):
             raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
 
         with self.lock:
+            
+            if whatToSetVolFor is None:
+                self.globalVolume = volume;
+                
             # If whatToSetVolFor is a Sound or Channel instance,
             # a set_volume() method call will work:
             try:
@@ -347,7 +356,7 @@ class SoundPlayer(object):
     # getSoundVolume
     #---------------
         
-    def getSoundVolume(self, whatToGetVolFor):
+    def getSoundVolume(self, whatToGetVolFor=None):
         '''
         Get sound volume for a particular sound or channel.
         The entity for which to get the volume for (i.e. whatToSetVolFor) 
@@ -360,12 +369,18 @@ class SoundPlayer(object):
     	Passing in a filename will load the file, and get the volume of the 
     	corresponding Sound.
     	
-        @param whatToSetVolFor: The soundfile, Sound, or Channel instance whose volume to get. 
+        @param whatToSetVolFor: The soundfile, Sound, or Channel instance whose volume to get.
+                                If None, return global value setting
         @type whatToSetVolFor: {NoneType | string | Sound | Channel}
         @raise OSError: if given filename that does not exist. 
         '''
 
-        with self.lock:        
+        with self.lock:
+            
+            # Asking for global volume?
+            if whatToGetVolFor is None:
+                return self.globalVolume;
+                    
             # If whatToGetVolFor is a Sound or Channel instance,
             # a get_volume() method call will work:
             try:
@@ -523,7 +538,7 @@ class SoundPlayer(object):
         if sound is None:
             sound = self.loadSound(filename);
         if volume is not None:
-            self.setSoundVolume(sound, volume);
+            self.setSoundVolume(volume, sound);
         channel = sound.play();
         return (sound, channel);
 
