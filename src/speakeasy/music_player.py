@@ -71,7 +71,8 @@ class MusicPlayer(object):
     
     def play(self, whatToPlay, repeats=0, startTime=0.0, blockTillDone=False, volume=None):
         '''
-        Play an .mp3 or .ogg file, or File class instance.
+        Play an .mp3 or .ogg file, or File class instance. Note that pygame does
+        not support startTime for .wav files. They will play, but startTime is ignored.
         Offers choice of blocking return until the music is finished, or
         returning immediately. 
         
@@ -144,8 +145,17 @@ class MusicPlayer(object):
             pygame.mixer.music.set_endevent(self.PLAY_ENDED_EVENT);
             
             # Pygame play method wants total number of times
-            # to play the song; therefore: add 1: 
-            pygame.mixer.music.play(repeats+1, startTime);
+            # to play the song; therefore: add 1. Start time is
+            # in seconds. If file is a .wav file, leave out the
+            # start time:
+            if filename.endswith('.wav'):
+                pygame.mixer.music.play(repeats+1);
+            else:
+                try:
+                    pygame.mixer.music.play(repeats+1,startTime);
+                except:
+                    self.playStatus = PlayStatus.STOPPED;
+                    return;
             self.playStatus = PlayStatus.PLAYING;
 
         if blockTillDone:
@@ -311,15 +321,30 @@ class MusicPlayer(object):
     # waitForSoundDone
     #---------------
     
-    def waitForSongDone(self):
+    def waitForSongDone(self, timeout=None):
         '''
         Block until song is done playing. Used in play() method.
+        @param timeout: Maximum time to wait in seconds.
+        @type timeout: {int | float}
+        @return: True if song ended, False if timeout occurred.
+        @returnt: boolean
         '''
         if self.getPlayStatus() == PlayStatus.STOPPED:
             return;
-        while (pygame.mixer.music.get_busy() == 1) and pygame.mixer.music.get_endevent() != self.PLAY_ENDED_EVENT:
-            time.sleep(0.3);
-           
+        if timeout is not None:
+            startTime = time.time();
+            while (pygame.mixer.music.get_busy() == 1) and ((time.time() - startTime) < timeout):
+                time.sleep(0.3);
+            if pygame.mixer.music.get_busy() == 0:
+                return True;
+            else:
+                return False;
+        else:
+            while (pygame.mixer.music.get_busy() == 1):
+                time.sleep(0.3);
+            return True;
+
+        
     #--------------------------------
     # formatSupported
     #---------------
@@ -404,20 +429,38 @@ if __name__ == '__main__':
 #    player.play(testFileCottonFields, blockTillDone=False);
 #    playPauseUnpause();
     print "Done testing pause/unpause";
+    print "---------------"
     
     print "Test playhead settings. Expect: Play from start for 3sec, play from 10 for 3sec, play from 10 again for 3sec. Stop."
 #    player.play(testFileCottonFields);
 #    testPlayheadMove();
     print "Done testing playhead settings."
+    print "---------------"
     
     print "Test waitForSongDone()"
-    print "Immediate return when stopped:..."
-    player.waitForSongDone();
-    print "Immediate return when stopped OK."
-    player.play(testFileRooster);
-    print "Return when rooster done..."
-    player.waitForSongDone();
-    print "Return when rooster done OK."
+#    print "Immediate return when stopped:..."
+#    player.waitForSongDone();
+#    print "Immediate return when stopped OK."
+#    player.play(testFileRooster);
+#    print "Return when rooster done..."
+#    player.waitForSongDone();
+#    print "Return when rooster done OK."
+    print "Wait for song end with 10 second timeout:"
+#    player.play(testFileCottonFields);
+#    player.waitForSongDone(timeout=10);
+    
     print "Done testing waitForSongDone()"
+    print "---------------"
+
+    print "Request play of .wav file with startTime (which should be ignored), and with start time longer than song:"
+#    player.play(testFileRooster, startTime=0.3, blockTillDone=True);
+#    # Plays from the 10sec mark for 10 seconds:
+#    player.play(testFileCottonFields, startTime=10.0);    
+#    time.sleep(10);
+#    # This one would go past: 
+#    player.play(testFileCottonFields, startTime=3600.0);
+
+    print  "Done requesting play with start time longer than song:"
+    print "---------------"
     
     print "All  done"

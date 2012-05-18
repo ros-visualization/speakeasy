@@ -140,7 +140,18 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="songPositionSpinbox"/>
+       <widget class="QDoubleSpinBox" name="songPositionSpinbox">
+        <property name="maximum">
+         <double>3600.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>seconds</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer_2">
@@ -218,8 +229,6 @@
     </item>
    </layout>
   </widget>
-  <zorder>smallMoveSizeLabel</zorder>
-  <zorder>verticalLayoutWidget</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

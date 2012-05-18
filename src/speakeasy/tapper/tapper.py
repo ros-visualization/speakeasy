@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 import time
+import random
 
 from speakeasy.music_player import MusicPlayer;
 from speakeasy.music_player import TimeReference
@@ -36,6 +37,8 @@ class Tapper(QWidget):
     # class var.
     ui = None;
     
+    WINDOW_SIZE = QRect(88, 682, 720, 380)    
+    
     TAB_INDEX_PICK_SONG = 0;
     TAB_INDEX_TAP_BEAT  = 1;
     TAB_INDEX_USE_BEAT  = 2;
@@ -57,14 +60,21 @@ class Tapper(QWidget):
         self.commChannel = CommChannel();
         self.initUI();
         
+        # Initialize tapping panel data:
+        self.resetTap();
+        
         # Start thread that blinks the pause button when
         # paused, and updates the playhead counter while
         # playing: 
-        OneSecondMaintenance(self.musicPlayer, self.commChannel.pauseBlinkSignal, self.commChannel.playCounterUpdateSignal).start();
+        self.maintenanceThread = OneSecondMaintenance(self, self.musicPlayer, self.commChannel.pauseBlinkSignal, self.commChannel.playCounterUpdateSignal);
+        self.maintenanceThread.start();
         
     def initUI(self):
         
         self.setWindowTitle("Tapper");
+        
+        # No play stop time scheduled:
+        self.scheduledPlayStopTime = None;
         
         # Load QtCreator's XML UI files:
         # Make QtCreator generated UIs children if this instance:
@@ -82,10 +92,32 @@ class Tapper(QWidget):
         layout =  QVBoxLayout()
         layout.addWidget(self.toolStack);
         self.setLayout(layout)
-        self.setGeometry(QRect(88, 682, 750, 489));
+        #self.setGeometry(QRect(88, 682, 750, 489));
+        self.setGeometry(Tapper.WINDOW_SIZE);
 
         # Make simple names for the widgets we care about:
+
+                
+        # Pick-a-song panel:
         self.pickSongList = self.pickSongWidget.pickSongList; # Combobox
+        self.pickSongPlayExcerptButton = self.pickSongWidget.shortPlayButton
+        self.pickSongStopExcerptButton = self.pickSongWidget.shortPlayStopButton
+        self.pickSongSongSampleLenSpinBox = self.pickSongWidget.songSampleLength
+        
+        # Tap-the-beat panel:
+        self.tapButton        = self.tapBeatWidget.tapButton;
+        self.tapBeatPeriodLCD = self.tapBeatWidget.beatPeriodLCD;
+        self.tapResetButton   = self.tapBeatWidget.tapResetButton;
+        
+        # Beat chooser panel:
+        self.beatChooserSongName = self.beatChooserWidget.songName;
+        self.beatChooserOneBeatButton = self.beatChooserWidget.oneBeat;
+        self.beatChooserHalfBeatButton = self.beatChooserWidget.halfBeat;
+        self.beatChooserQuarterBeatButton = self.beatChooserWidget.quarterBeat;
+        self.beatChooserEighthBeatButton = self.beatChooserWidget.eighthBeat;
+        self.beatChooserInserSongButton = self.beatChooserWidget.insertSongButton;
+
+        # Tape recorder embedded in the Tap-the-beat panel:        
         self.playButton = self.tapeRecWidget.playButton;
         self.rewindButton = self.tapeRecWidget.rewindButton;
         self.backALittleButton =  self.tapeRecWidget.littleBitLeftButton;
@@ -93,6 +125,8 @@ class Tapper(QWidget):
         self.stopButton = self.tapeRecWidget.stopButton;
         self.incrementalMoveTimeSpinBox = self.tapeRecWidget.smallMoveTimeSpinBox;
         self.songPositionSpinBox = self.tapeRecWidget.songPositionSpinbox;
+        
+        # Robot speech panel:
         self.speechText = self.speechWidget.speechTextBox;
         self.speechPlayButton = self.speechWidget.playButton;
         self.speechStopButton = self.speechWidget.stopButton;
@@ -122,7 +156,19 @@ class Tapper(QWidget):
 
 
     def connectWidgets(self):
+        
+        # Tab switch signal:
         self.toolStack.currentChanged.connect(self.switchedTab);
+        
+        # Pick-a-song panel:
+        self.pickSongPlayExcerptButton.clicked.connect(self.playSongExcerptAction);
+        self.pickSongStopExcerptButton.clicked.connect(self.stopSongExcerptAction);
+
+        # Tapping the beat:
+        self.tapButton.clicked.connect(self.tapButtonAction);
+        self.tapResetButton.clicked.connect(self.tapResetAction);
+        
+        # Tape recorder:
         self.playButton.clicked.connect(self.playAction);
         self.rewindButton.clicked.connect(self.rewindAction);
         self.backALittleButton.clicked.connect(self.backALittleAction);
@@ -134,7 +180,13 @@ class Tapper(QWidget):
         self.commChannel.pauseBlinkSignal.connect(self.blinkPauseButtonIcon);
         # Update playhead pos counter during playback:
         self.commChannel.playCounterUpdateSignal.connect(self.updatePlayheadCounter)
-        
+
+    def closeEvent(self, eventObj):
+        try:
+            self.maintenanceThread.stop();
+            eventObj.accept();
+        except:
+            pass;
         
     def switchedTab(self, newTabIndex):
         #print str(self.geometry());
@@ -171,7 +223,7 @@ class Tapper(QWidget):
         currentSongName = self.getCurrentSongName();
         if currentSongName is None:
             return;
-        self.musicPlayer.play(self.allSongs[currentSongName]);
+        self.musicPlayer.play(currentSongName)
         #******self.setPlayPauseButtonIcon(self.pauseIcon);
         
     def backALittleAction(self):
@@ -198,7 +250,7 @@ class Tapper(QWidget):
             return;
         else:
             # Play is stopped. Just play the song from the start again: 
-            fullFilename = self.allSongs[self.getCurrentSongName()];
+            fullFilename = self.getCurrentSongName();
             self.musicPlayer.play(fullFilename);
             self.setPlayPauseButtonIcon(self.pauseIcon);
         
@@ -211,6 +263,64 @@ class Tapper(QWidget):
         if not isinstance(newVal, float):
             return;
         self.musicPlayer.setPlayhead(newVal, TimeReference.ABSOLUTE);
+
+    def playSongExcerptAction(self):
+        
+        if self.getCurrentSongName() is None:
+            return
+        sampleLen = self.pickSongSongSampleLenSpinBox.value();
+        
+        # Find a random spot in the song, and play for sampleLen 
+        # seconds. Make sure that if the song is very short, move
+        # start time closer to the start of the song:
+
+        # Avg song is 3 minutes (180 seconds). Pick an upper
+        # time bound below that, but not too low, so that random
+        # snippets will be played from all over the song:
+        highestStartTime = 170; # sec
+        random.seed();        
+        playedSample = False;
+        while not playedSample:
+            sampleStart = random.randint(0,highestStartTime); 
+            self.musicPlayer.play(self.getCurrentSongName(), startTime=float(sampleStart), blockTillDone=False);
+            if self.musicPlayer.getPlayStatus() != PlayStatus.PLAYING:
+                highestStartTime = int(highestStartTime / 2);
+                continue;
+            else:
+                # Schedule for playback to stop after sampleLen seconds.
+                # This action will be taken by the maintenance thread:
+                self.scheduledPlayStopTime = time.time() + sampleLen;
+                return;
+
+    def stopSongExcerptAction(self):
+        '''
+        Stop song snippet playing in pick-a-song panel.
+        '''
+        self.musicPlayer.stop();
+
+    def tapButtonAction(self):
+        
+        # If more than 15 seconds since the previous tap,
+        # or since initialization, start over:
+        if (time.time() - self.mostRecentTapTime) > 15:
+            self.resetTap();
+        
+        self.numTaps += 1;
+        self.mostRecentTapTime = time.time();
+        self.currentBeatPerSecs = float(self.numTaps) / (self.mostRecentTapTime - self.firstTapTime);
+        # Convert to beats per minute:
+        self.currentBeat       = self.currentBeatPerSecs * 60.0;
+        self.tapBeatPeriodLCD.display(self.currentBeat); 
+        
+    def tapResetAction (self):
+        self.resetTap();
+
+    def resetTap(self):
+        self.firstTapTime = time.time();
+        self.mostRecentTapTime = self.firstTapTime;
+        self.currentBeat = 0.0; 
+        self.numTaps = 0;
+        self.tapBeatPeriodLCD.display(0.0);
 
     # -----------------------------------------------------  Signal Handlers -----------------------------
     
@@ -238,10 +348,17 @@ class Tapper(QWidget):
         self.songPositionSpinBox.setValue(playheadPos);
 
     def getCurrentSongName(self):
+        '''
+        Return full pathname of song name on pick-a-song's combobox:
+        '''
         currentSongNameOnComboBox = self.pickSongList.currentText();
         if currentSongNameOnComboBox == Tapper.EMPTY_SONG_LIST_TEXT:
             return None
-        return currentSongNameOnComboBox;
+        try:
+            currentSong = self.allSongs[currentSongNameOnComboBox];
+        except KeyError:
+            return None;
+        return currentSong;
 
     def getIncrementalMoveTime(self):
         return self.incrementalMoveTimeSpinBox.value();
@@ -256,11 +373,35 @@ class Tapper(QWidget):
         
 
 class OneSecondMaintenance(threading.Thread):
+    '''
+    Thread for 1-second period chores:
+    <ul>
+        <li>When tape recorder is paused, changes play button icon between
+            play and pause symbols.</li>
+        <li>For song snippet playing, stops playback after tapper.snippetLength
+            seconds.</li>
+    </ul>
+       
+    '''
     
-    def __init__(self, musicPlayer, pauseBlinkSignal, playCounterSignal):
+    def __init__(self, tapper, musicPlayer, pauseBlinkSignal, playCounterSignal):
+        '''
+        The info the thread needs:
+        @param tapper: instance of Tapper (to obtain various instance vars from it).
+        @type tapper: Tapper
+        @param musicPlayer: Instance of MusicPlayer (to check for play status, and to stop playback)
+        @type musicPlayer: MusicPlayer
+        @param pauseBlinkSignal: Signal to emit so that the GUI thread will do the play button
+                                 icon switching, which only that thread is allowed to do.
+        @type pauseBlinkSignal: Signal
+        @param playCounterSignal: Signal to emit so that the playhead time counter will be advanced
+                                  in the GUI thread.
+        @type playCounterSignal: Signal
+        '''
         super(OneSecondMaintenance, self).__init__();
         self.stopped = False;
         self.musicPlayer = musicPlayer;
+        self.tapper = tapper;
         self.pauseBlinkSignal = pauseBlinkSignal;
         self.playCounterSignal = playCounterSignal;
         
@@ -271,6 +412,11 @@ class OneSecondMaintenance(threading.Thread):
                 self.pauseBlinkSignal.emit();
             elif playStatus == PlayStatus.PLAYING:
                 self.playCounterSignal.emit();
+
+            if self.tapper.scheduledPlayStopTime is not None:
+                if time.time() >= tapper.scheduledPlayStopTime:
+                    self.musicPlayer.stop();
+                    tapper.scheduledPlayStopTime = None;
 
             time.sleep(1.0);
             
@@ -289,7 +435,4 @@ if __name__ == "__main__":
     # Enter Qt application main loop
     #builderFullUI.show();
     sys.exit(app.exec_());
-
-        
-
     
