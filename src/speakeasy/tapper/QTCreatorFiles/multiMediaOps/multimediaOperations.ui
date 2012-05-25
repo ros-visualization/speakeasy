@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>918</width>
-    <height>440</height>
+    <width>738</width>
+    <height>432</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -18,15 +24,15 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>891</width>
-     <height>421</height>
+     <width>721</width>
+     <height>411</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="outermostVBox">
     <item>
-     <widget class="QGroupBox" name="outermostGroupBox">
+     <widget class="QGroupBox" name="insertSongtGroupBox">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -40,10 +46,10 @@
       <widget class="QWidget" name="verticalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>40</x>
          <y>20</y>
-         <width>750</width>
-         <height>90</height>
+         <width>647</width>
+         <height>141</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="insertSongVbox">
@@ -242,32 +248,71 @@
          </layout>
         </item>
         <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QPushButton" name="pauseSongButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color=rgb(255, 170, 127)</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Pause song'</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="unpauseSongButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Unpause song'</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stopSongButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Stop song'</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
      </widget>
     </item>
     <item>
-     <widget class="Line" name="lineUnderInsertSong">
+     <widget class="Line" name="line">
       <property name="styleSheet">
-       <string notr="true">color=rgb(170, 0, 0)</string>
+       <string notr="true">color=rgb(85, 0, 127)</string>
       </property>
       <property name="lineWidth">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="midLineWidth">
-       <number>3</number>
+       <number>4</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -275,225 +320,28 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="miscControlsInsertionGroup">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Insert music and sound control commands</string>
-      </property>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>641</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pauseSongButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Pause song'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="unpauseSongButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Unpause song'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="stopSongButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Stop song'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>663</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QPushButton" name="pauseSoundButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color=rgb(255, 170, 127)</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Pause sound'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="unpauseSoundButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Unpause sound'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="stopSoundButton">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Insert pause command into currently playing song</string>
-          </property>
-          <property name="text">
-           <string>Insert 'Stop sound'</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
-      <zorder>horizontalLayoutWidget</zorder>
-      <zorder>horizontalLayoutWidget_2</zorder>
-      <zorder>soundInsertionGroup</zorder>
-     </widget>
-    </item>
-    <item>
-     <widget class="Line" name="lineUnderInsertButtons">
-      <property name="styleSheet">
-       <string notr="true">color=rgb(170, 0, 0)</string>
-      </property>
-      <property name="lineWidth">
-       <number>2</number>
-      </property>
-      <property name="midLineWidth">
-       <number>3</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="soundInsertionGroup">
+     <widget class="QGroupBox" name="insertSoundEffectsGroupBox">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>129</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>Insert a sound effect into the program.</string>
-      </property>
       <property name="title">
-       <string>Insert sounds into program</string>
+       <string>Insert sound effects into program</string>
       </property>
-      <widget class="QWidget" name="verticalLayoutWidget_3">
+      <widget class="QWidget" name="verticalLayoutWidget_4">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>651</width>
-         <height>41</height>
+         <x>30</x>
+         <y>30</y>
+         <width>852</width>
+         <height>161</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="soundInsertionVbox">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLabel" name="playSoundLabel">
             <property name="font">
@@ -527,117 +375,153 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="insertSoundButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Insert 'Start sound'</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="soundTestStopButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>70</width>
+              <height>30</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="soundTestPlayButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>70</width>
+              <height>30</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="soundRepeatsLabel">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>How often should the sound effect repeat after its initial playback?</string>
+            </property>
+            <property name="text">
+             <string>Repeats:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="soundRepeatsSpinbox">
+            <property name="toolTip">
+             <string>How often should the sound effect repeat after its initial playback?</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QPushButton" name="pauseSoundButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Pause sound'</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="unpauseSoundButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Unpause sound'</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stopSoundButton">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Insert pause command into currently playing song</string>
+            </property>
+            <property name="text">
+             <string>Insert 'Stop sound'</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
-      </widget>
-      <widget class="QPushButton" name="soundTestPlayButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>121</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>70</width>
-         <height>30</height>
-        </size>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="soundTestStopButton">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>70</y>
-         <width>131</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>70</width>
-         <height>30</height>
-        </size>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="insertSoundButton">
-       <property name="geometry">
-        <rect>
-         <x>660</x>
-         <y>20</y>
-         <width>201</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Insert 'Start sound'</string>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="soundRepeatsSpinbox">
-       <property name="geometry">
-        <rect>
-         <x>370</x>
-         <y>80</y>
-         <width>55</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>How often should the sound effect repeat after its initial playback?</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="soundRepeatsLabel">
-       <property name="geometry">
-        <rect>
-         <x>284</x>
-         <y>75</y>
-         <width>80</width>
-         <height>37</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>How often should the sound effect repeat after its initial playback?</string>
-       </property>
-       <property name="text">
-        <string>Repeats:</string>
-       </property>
       </widget>
      </widget>
     </item>
