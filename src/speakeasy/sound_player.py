@@ -58,6 +58,8 @@ class SoundPlayer(object):
     
     # Used to enforce Singleton pattern:
     singletonInstanceRunning = False;    
+
+    supportedFormats = ['ogg', 'wav'];    
     
     #--------------------------------
     # Initializer
@@ -325,7 +327,13 @@ class SoundPlayer(object):
         if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
             raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
 
-        with self.lock:
+        try:
+            # Lock if not already locked. Lock is already acquired if 
+            # this call to setSoundVolume() did not originate from a 
+            # client, but from a method within SoundPlayer(), which 
+            # acquired the lock. In that case, remember that the lock
+            # was already set, so that we don't release it on exit:
+            wasUnlocked = self.lock.acquire(False);
             
             if whatToSetVolFor is None:
                 self.globalVolume = volume;
@@ -351,6 +359,13 @@ class SoundPlayer(object):
                 sound = self.loadSound(whatToSetVolFor);
                 sound.set_volume(volume);
                 return;
+        except:
+            pass;
+        finally:
+            # Only release the lock if the call to this method came from
+            # a client of SoundPlayer, not from a method within SoundPlayer:
+            if wasUnlocked:
+                self.lock.release();
         
     #--------------------------------
     # getSoundVolume
@@ -375,7 +390,14 @@ class SoundPlayer(object):
         @raise OSError: if given filename that does not exist. 
         '''
 
-        with self.lock:
+
+        try:
+            # Lock if not already locked. Lock is already acquired if 
+            # this call to getSoundVolume() did not originate from a 
+            # client, but from a method within SoundPlayer(), which 
+            # acquired the lock. In that case, remember that the lock
+            # was already set, so that we don't release it on exit:
+            wasUnlocked = self.lock.acquire(False);
             
             # Asking for global volume?
             if whatToGetVolFor is None:
@@ -396,7 +418,35 @@ class SoundPlayer(object):
                 # Try loading the sound. Will barf with OSError if file not found:
                 sound = self.loadSound(whatToGetVolFor);
                 return sound.get_volume();
+        except:
+            pass
+        finally:
+            # Only release the lock if the call to this method came from
+            # a client of SoundPlayer, not from a method within SoundPlayer:
+            if wasUnlocked:
+                self.lock.release();
 
+    #--------------------------------
+    # formatSupported
+    #---------------
+    
+    def formatSupported(self, fileExtension):
+        '''
+        Checks whether the given file extension implies a supported
+        sound format.
+        @param fileExtension: file extension with or without leading period. Example: ".ogg"
+        @type fileExtension: string
+        @return: True if the format is supported, else False.
+        @returnt: boolean
+        @raise ValueError: if fileExtension is anything other than a string with length > 0. 
+        '''
+        if (fileExtension is None) or (not isinstance(fileExtension, basestring)) or (len(fileExtension) == 0):
+            raise ValueError("File format specification must be the format's file extension string.");
+        if fileExtension[0] == '.':
+            fileExtension = fileExtension[1:];
+        return fileExtension in SoundPlayer.supportedFormats;
+
+    
     #--------------------------------
     # numChannels
     #---------------
