@@ -1,18 +1,18 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2012-05-18T11:09:56
+# Project created by QtCreator 2012-05-26T13:43:06
 #
 #-------------------------------------------------
 
 QT       += core gui
 
-TARGET = insertSongToProgram
+TARGET = insertMultiMediaControls
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        dialog.cpp
+        widget.cpp
 
-HEADERS  += dialog.h
+HEADERS  += widget.h
 
-FORMS    += insertSongIntoProgram.ui
+FORMS    += insertMultiMediaControls.ui
