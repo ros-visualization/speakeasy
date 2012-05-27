@@ -7,12 +7,13 @@ import time
 import random
 
 from speakeasy.speakeasy_ui import DialogService;
+from speakeasy.speakeasy_ui import SpeakEasyGUI;
 
 from speakeasy.music_player import MusicPlayer;
 from speakeasy.music_player import TimeReference;
 from speakeasy.music_player import PlayStatus;
 from speakeasy.sound_player import SoundPlayer;
-
+from speakeasy.text_to_speech import TextToSpeechProvider;
 
 from python_qt_binding import QtBindingHelper;
 from PyQt4.QtCore import QRect, Signal, QObject
@@ -45,7 +46,6 @@ class Tapper(QWidget):
     # class var.
     ui = None;
     
-    #WINDOW_SIZE = QRect(88, 682, 720, 380)    
     WINDOW_SIZE = QRect(88, 682, 720, 480)
     
     TAB_INDEX_PICK_SONG = 0;
@@ -68,6 +68,7 @@ class Tapper(QWidget):
         Tapper.ui = self;
         self.musicPlayer = MusicPlayer();
         self.soundPlayer = SoundPlayer();
+        self.textToSpeechProvider = TextToSpeechProvider();
         self.commChannel = CommChannel();
         # Error message popup utility:
         self.dialogService = DialogService();
@@ -98,7 +99,7 @@ class Tapper(QWidget):
         self.toolStack.addTab(self.pickSongWidget, "Pick a song");
         self.toolStack.addTab(self.tapBeatWidget, "Tap the beat");
         self.toolStack.addTab(self.beatChooserWidget, "Use the beat");
-        self.toolStack.addTab(self.insertCommandsDialog, "Insert songs/sounds to program");
+        self.toolStack.addTab(self.insertMultiMediaControlsWidget, "Insert songs/sounds to program");
         self.toolStack.addTab(self.speechWidget, "Robot says...");
         
         self.tapeRecWidget.setParent(self.tapBeatWidget.recorderContainerWidget);
@@ -106,7 +107,6 @@ class Tapper(QWidget):
         layout =  QVBoxLayout()
         layout.addWidget(self.toolStack);
         self.setLayout(layout)
-        #self.setGeometry(QRect(88, 682, 750, 489));
         self.setGeometry(Tapper.WINDOW_SIZE);
 
         # Make simple names for the widgets we care about:
@@ -141,31 +141,34 @@ class Tapper(QWidget):
         self.songPositionSpinBox = self.tapeRecWidget.songPositionSpinbox;
         
         # Song/Sound insert panel:
-        self.insertCmdSongToInsert = self.insertCommandsDialog.songSelectComboBox;
-        self.insertCmdStartPos = self.insertCommandsDialog.startPosSpinbox;
-        self.insertCmdSongRepeats = self.insertCommandsDialog.repeatsSpinbox;
-        self.insertCmdPlayDuration = self.insertCommandsDialog.playForSpinbox;
+        self.insertCmdSongToInsert = self.insertMultiMediaControlsWidget.songSelectComboBox;
+        self.insertCmdStartSong = self.insertMultiMediaControlsWidget.songInsertSongButton;
+        self.insertCmdStartPos = self.insertMultiMediaControlsWidget.songStartPosSpinBox;
+        self.insertCmdSongRepeats = self.insertMultiMediaControlsWidget.songRepeatsSpinBox;
+        self.insertCmdPlayDuration = self.insertMultiMediaControlsWidget.songPlayForSpinBox;
         
-        self.insertCmdPauseSongButton = self.insertCommandsDialog.pauseSongButton;
-        self.insertCmdUnpauseSongButton = self.insertCommandsDialog.unpauseSongButton;
-        self.insertCmdStopSongButton = self.insertCommandsDialog.stopSongButton;
-        self.insertCmdPauseSoundButton = self.insertCommandsDialog.pauseSoundButton;
-        self.insertCmdUnpauseSoundButton = self.insertCommandsDialog.unpauseSoundButton;
-        self.insertCmdStopSoundButton = self.insertCommandsDialog.stopSoundButton;
+        self.insertCmdPauseSongButton = self.insertMultiMediaControlsWidget.songInsertPauseButton;
+        self.insertCmdUnpauseSongButton = self.insertMultiMediaControlsWidget.songInsertUnpauseButton;
+        self.insertCmdStopSongButton = self.insertMultiMediaControlsWidget.songInsertStopSongButton;
         
-        self.insertCmdSoundToInsert = self.insertCommandsDialog.soundSelectComboBox;
-        self.insertCmdSoundRepeats = self.insertCommandsDialog.soundRepeatsSpinbox;
-        self.insertCmdSoundTestPlayButton = self.insertCommandsDialog.soundTestPlayButton;
-        self.insertCmdSoundTestStopButton = self.insertCommandsDialog.soundTestStopButton;
+        self.insertCmdSoundToInsert = self.insertMultiMediaControlsWidget.soundSelectComboBox;
+        self.insertCmdStartSound = self.insertMultiMediaControlsWidget.soundInsertSoundButton;
+        self.insertCmdSoundRepeats = self.insertMultiMediaControlsWidget.soundRepeatsSpinBox;
+        self.insertCmdSoundTestPlayButton = self.insertMultiMediaControlsWidget.soundTestPlayButton;
+        self.insertCmdSoundTestStopButton = self.insertMultiMediaControlsWidget.soundTestStopButton;
         
-        self.insertCmtSoundTestInsert = self.insertCommandsDialog.insertSoundButton;
+        self.insertCmdPauseSoundButton = self.insertMultiMediaControlsWidget.soundInsertPauseButton;
+        self.insertCmdUnpauseSoundButton = self.insertMultiMediaControlsWidget.soundInsertUnpauseButton;
+        self.insertCmdStopSoundButton = self.insertMultiMediaControlsWidget.soundInsertStopButton;
         
         
         # Robot speech panel:
         self.speechText = self.speechWidget.speechTextBox;
         self.speechPlayButton = self.speechWidget.playButton;
-        self.speechStopButton = self.speechWidget.stopButton;        self.speechDavidVoice = self.speechWidget.davidVoiceRadioButton;
-        self.speechComputerVoice = self.speechWidget.davidVoiceRadioButton;
+        self.speechStopButton = self.speechWidget.stopButton;
+        self.voiceButtonGroup = self.speechWidget.voiceGroupBox;        
+        self.speechDavidVoice = self.speechWidget.davidVoiceRadioButton;
+        self.speechComputerVoice = self.speechWidget.computerVoiceRadioButton;
         self.speechInsertButton = self.speechWidget.speechInsertButton;
 
         self.connectWidgets()
@@ -183,14 +186,20 @@ class Tapper(QWidget):
         self.pauseIcon = QIcon(os.path.join(IMAGE_DIRECTORY, "pause.png"));
         self.currentPlayPauseIconState = PlayPauseIconState.PAUSE_ICON_SHOWING;
 
+        self.initStyling();
+
         self.show();
         
+
+    def initStyling(self):
+        self.insertCmdSoundRepeats.setStyleSheet(SpeakEasyGUI.playRepeatSpinboxStylesheet);
 
     def loadUIs(self):
         self.pickSongWidget       = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "pickSong/pickSong.ui"));
         self.tapBeatWidget        = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "tapBeat/tapBeat.ui"));
         self.beatChooserWidget    = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "beatChooser/beatChooser.ui"));
-        self.insertCommandsDialog = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "multiMediaOps/multimediaOperations.ui"));
+        self.insertMultiMediaControlsWidget = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, 
+                                                                                  "insertMultiMediaControls/insertMultiMediaControls.ui"));
         self.speechWidget         = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "saySomething/saySomething.ui"));
         self.tapeRecWidget        = QtBindingHelper.loadUi(os.path.join(QT_CREATOR_UI_FILE_ROOT, "tapeRecorder/tapeRecorder.ui"));
 
@@ -216,27 +225,29 @@ class Tapper(QWidget):
         self.stopButton.clicked.connect(self.stopAction);
         self.songPositionSpinBox.valueChanged.connect(self.setPlayheadFromSpinBoxAction);
         
-        self.insertCmdPauseSongButton.clicked.connect(self.insertCommandPauseSongButtonAction);
-        self.insertCmdUnpauseSongButton.clicked.connect(self.insertCommandUnpauseSongButtonAction);
-        self.insertCmdStopSongButton.clicked.connect(self.insertCommandStopSongButtonAction);
+        # Inserting multimedia actions into the program:
+        self.insertCmdPauseSongButton.clicked.connect(self.insertCmdPauseSongButtonAction);
+        self.insertCmdUnpauseSongButton.clicked.connect(self.insertCmdUnpauseSongButtonAction);
+        self.insertCmdStopSongButton.clicked.connect(self.insertCmdStopSongButtonAction);
         
-        self.insertCmdPauseSoundButton.clicked.connect(self.insertCommandPauseSoundButtonAction);
-        self.insertCmdUnpauseSoundButton.clicked.connect(self.insertCommandUnpauseSoundButtonAction);
-        self.insertCmdStopSoundButton.clicked.connect(self.insertCommandStopSoundButtonAction);
+        self.insertCmdPauseSoundButton.clicked.connect(self.insertCmdPauseSoundButtonAction);
+        self.insertCmdUnpauseSoundButton.clicked.connect(self.insertCmdUnpauseSoundButtonAction);
+        self.insertCmdStopSoundButton.clicked.connect(self.insertCmdStopSoundButtonAction);
         
+        self.insertCmdStartSound.clicked.connect(self.insertSoundAction);
         self.insertCmdSoundTestPlayButton.clicked.connect(self.playSoundAction);
         self.insertCmdSoundTestStopButton.clicked.connect(self.stopSoundAction);
-        self.insertCmtSoundTestInsert.clicked.connect(self.insertSoundAction);
         
+        # Text to speech:
+        
+        self.speechPlayButton.clicked.connect(self.sayAction);
+        self.speechStopButton.clicked.connect(self.stopSayingAction);
+        self.speechInsertButton.clicked.connect(self.insertSaySomethingAction);
         
         # Blink pause icon on/off during paused playback:
         self.commChannel.pauseBlinkSignal.connect(self.blinkPauseButtonIcon);
         # Update playhead pos counter during playback:
         self.commChannel.playCounterUpdateSignal.connect(self.updatePlayheadCounter)
-
-
-
-
 
     def closeEvent(self, eventObj):
         try:
@@ -439,6 +450,27 @@ class Tapper(QWidget):
         #TODO implement.
         self.dialogService.showErrorMsg("Sound insertion not yet implemented.");
         
+        
+    def sayAction(self):
+        
+        whatToSay = self.speechText.toPlainText();
+        voiceName = self.getSelectedVoiceName();
+        if voiceName == 'David':
+            ttsEngine = 'cepstral'
+        elif voiceName == 'voice_kal_diphone':
+            ttsEngine = 'festival';
+        else:
+            ttsEngine = None;
+            
+        # Speak the text, using the default t2s engine, and unblocked operation:
+        self.textToSpeechProvider.say(whatToSay, voiceName=voiceName, t2sEngineName=ttsEngine, blockTillDone=False);
+
+    def stopSayingAction(self):
+        self.textToSpeechProvider.stop();
+        
+    def insertSaySomethingAction(self):
+        #TODO implement.
+        self.dialogService.showErrorMsg("Speech insertion not yet implemented.");
 
     # -----------------------------------------------------  Signal Handlers -----------------------------
     
@@ -464,6 +496,8 @@ class Tapper(QWidget):
         '''
         playheadPos = self.musicPlayer.getPlayheadPosition();
         self.songPositionSpinBox.setValue(playheadPos);
+
+    #------------------------------------------------------ Private Utilities --------------------------
 
     def getCurrentSongName(self):
         return self.getCurrentFileName(self.pickSongList, SoundType.SONG);
@@ -512,6 +546,16 @@ class Tapper(QWidget):
             raise ValueError("Song position must be a floating point number. Instead it was: " + str(newValue));
         self.songPositionSpinBox.setValue(newValue);
         
+
+    def getSelectedVoiceName(self):
+        if self.speechDavidVoice.isChecked():
+            return 'David';
+        elif self.speechComputerVoice.isChecked():
+            return "voice_kal_diphone";
+        else:
+            return None;
+
+# -------------------------------------------------  One-Second Maintenance Thread ------------------
 
 class OneSecondMaintenance(threading.Thread):
     '''

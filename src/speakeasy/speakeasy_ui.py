@@ -6,7 +6,7 @@ import rospy
 from functools import partial;
 from threading import Timer;
 
-#import QtBindingHelper;
+from python_qt_binding import QtBindingHelper;
 from PyQt4.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
 from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox
 from PyQt4.QtCore import pyqtSignal

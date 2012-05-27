@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>519</width>
-    <height>325</height>
+    <height>343</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -130,7 +130,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/play.png</iconset>
+     <normaloff>../../img/play.png</normaloff>../../img/play.png</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -153,7 +153,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</normaloff>../../../../../../../../../../../u/paepcke/fuerte/stacks/speakeasy/src/speakeasy/tapper/img/stop.png</iconset>
+     <normaloff>../../img/stop.png</normaloff>../../img/stop.png</iconset>
    </property>
    <property name="iconSize">
     <size>
