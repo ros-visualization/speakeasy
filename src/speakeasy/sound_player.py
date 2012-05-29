@@ -337,6 +337,7 @@ class SoundPlayer(object):
             
             if whatToSetVolFor is None:
                 self.globalVolume = volume;
+                return;
                 
             # If whatToSetVolFor is a Sound or Channel instance,
             # a set_volume() method call will work:

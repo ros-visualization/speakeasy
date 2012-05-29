@@ -3,8 +3,8 @@
 import threading;
 import unittest;
 
-from msg import SpeakEasyStatus;
-from msg import SpeakEasyMusic, SpeakEasySound, SpeakEasyPlayhead, SpeakEasyTextToSpeech;
+from speakeasy.msg import SpeakEasyStatus;
+from speakeasy.msg import SpeakEasyMusic, SpeakEasySound, SpeakEasyPlayhead, SpeakEasyTextToSpeech;
 
 from music_player import TimeReference, PlayStatus; 
 
@@ -43,9 +43,26 @@ class SoundCommands:
  
 
 class RoboComm(object):
+    '''
+    Provides all methods required to operate the SpeakEasy ROS node remotely.
+    Intention is for GUIs or other programs to use one instance of this class
+    to control all text-to-speech, sound effects, and music play functions if
+    those functions are provided by a SpeakEasy ROS node. 
+    <p>
+    For an exmple to use if these three functions are provided locally, without 
+    using ROS, see speakeasy_controller.py.  
+    '''
 
     # Timeout for awaiting SpeakEasy status message:
     STATUS_MSG_TIMEOUT = 5; # seconds
+    
+    # Timeout for awaiting SpeakEasy playhead message.
+    # Note: these messages are only sent while music is
+    #       playing. At that point the transmission period
+    #       is speakeasy_node.PLAYHEAD_PUBLICATION_PERIOD:
+    
+    PLAYHEAD_MSG_TIMEOUT = 0.5; # seconds
+    
 
     def __init__(self):
         '''
@@ -61,6 +78,11 @@ class RoboComm(object):
         
         self.rosSpeakEasyNodeAvailable = False;
         self.latestCapabilitiesReply = None;
+        
+        self.nodeStatusLock   = threading.Lock();
+        self.textToSpeechLock = threading.Lock();
+        self.musicLock        = threading.Lock();
+        self.soundLock        = threading.Lock();
 
         # init_node hangs indefinitely if roscore is not running.
         # Therefore: check for that. If roscore isn't running,
@@ -70,47 +92,73 @@ class RoboComm(object):
         
         # We now know that ROS is installed, and that roscore is running.
         
-        # Declare us to be a ROS node.
-        # Allow multiple GUIs to run simultaneously. Therefore
-        # the anonymous=True:
-        rospy.init_node('speakeasy_remote_gui', anonymous=True);
-    
-        # Wait for Ros SpeakEasy service for a limited time; there might be none:
-        waitTime = 4; # seconds
-        try:
-            SpeakeasyUtils.waitForRosNode('speakeasy', 
-                                          timeout=waitTime, 
-                                          waitMessage='Wait for sound and speech capabilities service: ', 
-                                          provideTimeInfo=True)
-        except NotImplementedError:
-            rospy.loginfo("Speech/sound/music capabilities service is offline.");
-            self.rosSpeakEasyNodeAvailable = False;    
-            raise NotImplementedError("Speech capabilities service is offline.");
-                
-        rospy.loginfo("Speech capabilities service online.");
-        
         # Publishers of requests for sound effects, music, and text-to-speech:
         self.rosSoundRequestor = rospy.Publisher('speakeasy_sound_req', SpeakEasySound);
         self.rosMusicRequestor = rospy.Publisher('speakeasy_music_req', SpeakEasyMusic);
         self.rosTTSRequestor = rospy.Publisher('speakeasy_text_to_speech_req', SpeakEasyTextToSpeech);
         
-        # Prepare request messages for easy reuse:
-        self.musicRequestMsg = SpeakEasyMusic();
-            
+        # Declare us to be a ROS node.
+        # Allow multiple GUIs to run simultaneously. Therefore
+        # the anonymous=True:
+        nodeInfo = rospy.init_node('speakeasy_remote_gui', anonymous=True);
+        # Don't know why, but without a bit of delay after this init, the first
+        # published message will not be transmitted, no matter what the message type:
+        rospy.sleep(1.0);
+    
+        # Wait for Ros SpeakEasy service for a limited time; there might be none:
+        waitTime = 4; # seconds
+        secsWaited = 0;
+        while not self.robotAvailable() and (secsWaited < waitTime):
+            rospy.loginfo("No SpeakEasy node available. Keep checking for %d more second(s)..." % (waitTime - secsWaited));
+            rospy.sleep(1);
+            secsWaited += 1;
+        if secsWaited >= waitTime:
+            rospy.logerr("Speech/sound/music capabilities service is offline.");
+            self.rosSpeakEasyNodeAvailable = False;    
+            raise NotImplementedError("Speech capabilities service is offline.");
+                
+        rospy.loginfo("Speech capabilities service online.");
+        
     def robotAvailable(self):
-        return self.rosSpeakEasyNodeAvailable
+        '''
+        Return True if a SpeakEasy service is available, i.e. if a SpeakEasy ROS
+        node is running. Else return False.
+        @return: Result of checking whether a live SpeakEasy node is detected.
+        @rtype: bool 
+        '''
+        if self.getSpeakEasyNodeStatus() is None:
+            return False;
+        else:
+            return True;
         
     def getSpeakEasyNodeStatus(self, cachedOK=False):
-        if cachedOK and self.latestCapabilitiesReply is not None:
+        '''
+        Return a SpeakEasy status message instance as received from a live
+        SpeakEasy node. See msg.SpeakEasyStatus.msg for field details.
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Message instance if available, else None. Message instances are unavailable if no SpeakEasy node is running.
+        @rtype: SpeakEasyStatus
+        '''
+        with self.nodeStatusLock:
+            if cachedOK and self.latestCapabilitiesReply is not None:
+                return self.latestCapabilitiesReply;
+            try:
+                self.latestCapabilitiesReply = rospy.wait_for_message('/speakeasy_status', SpeakEasyStatus, self.STATUS_MSG_TIMEOUT);
+            except rospy.ROSException:
+                rospy.loginfo("SpeakEasy status messages not being received.")
+                return None;
             return self.latestCapabilitiesReply;
-        try:
-            self.latestCapabilitiesReply = rospy.wait_for_message('/speakeasy_status', SpeakEasyStatus, self.STATUS_MSG_TIMEOUT);
-        except rospy.ROSException:
-            rospy.loginfo("SpeakEasy status messages not being received.")
-            return None;
-        return self.latestCapabilitiesReply;
 
     def getSoundEffectNames(self, cachedOK=False):
+        '''
+        Return a list of the sound effects that the SpeakEasy node is offering.
+        These effects may be invoked via the playSound() method.
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Array of sound effect names.
+        @rtype: [string] 
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.sounds;
@@ -118,6 +166,15 @@ class RoboComm(object):
             return [];
         
     def getSongNames(self, cachedOK=False):
+        '''
+        Return a list of the music files that the SpeakEasy node is offering.
+        These songs may be played via the playMusic() method.
+        
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Array of music files.
+        @rtype: [bool]
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.music;
@@ -125,6 +182,14 @@ class RoboComm(object):
             return [];
     
     def getTextToSpeechEngineNames(self,cachedOK=False):
+        '''
+        Return array of text-to-speech engines that are available at the SpeakEasy node.
+        Examples: Festival, the Linux open source engine, or Cepstral, the commercial engine.
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: List of engine names.
+        @rtype: [string]
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.ttsEngines;
@@ -132,6 +197,20 @@ class RoboComm(object):
             return [];
     
     def getVoiceNames(self, ttsEngine=None, cachedOK=False):
+        '''
+        Return a list of text-to-speech voices that the SpeakEasy node provides.
+        If a particular text-to-speech engine is specified, only that engine's 
+        voices are returned, else all voices of all available engines are
+        returned in one list.
+        @param ttsEngine: Name of one available text-to-speech engine.
+        @type ttsEngine: string
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: List of voice names, or empty list. List may be empty either because
+                 the SpeakEasy node does not offer text-to-speech services, or because
+                 the node has terminated, and is no longer broadcasting status messages.
+        @rtype: [string]
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             ttsVoicesEnums = capabilities.voices;
@@ -147,6 +226,15 @@ class RoboComm(object):
             return [];
     
     def getNumSoundChannels(self,cachedOK=False):
+        '''
+        Return the number of simultaneous sound effects that the SpeakEasy node provides.
+        Note that SpeakEasy nodes can be configured to provide many sound effect channels,
+        though this API does not provide such control. Default is eight.
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Number of sound effect channels.
+        @rtype: int
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.numSoundChannels;
@@ -154,6 +242,14 @@ class RoboComm(object):
             return [];
     
     def getSoundVolume(self,cachedOK=False):
+        '''
+        Return default sound effect volume level. Note that sound volume can be set
+        on a case-by-case basis in calls to playSound();
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Default sound volume as a number between 0.0 and 1.0.
+        @rtype: float
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.soundVolume;
@@ -161,6 +257,14 @@ class RoboComm(object):
             return [];
     
     def getMusicVolume(self,cachedOK=False):
+        '''
+        Return default music volume level. Note that music volume can be set
+        on a case-by-case basis in calls to playMusic();
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Default sound volume as a number between 0.0 and 1.0.
+        @rtype: float
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.musicVolume;
@@ -168,6 +272,18 @@ class RoboComm(object):
             return [];
     
     def getPlayStatus(self,cachedOK=False):
+        '''
+        Return current music play state. These states are defined in music_player.py.
+        For reference, at the time of this writing:
+            class PlayStatus:
+				STOPPED = 0;
+				PAUSED  = 1;
+				PLAYING = 2;
+        @param cachedOK: Set True if OK to use a previously cached status message.
+        @type cachedOK: bool
+        @return: Status of the music playback engine on the SpeakEasy node.
+        @rtype: PlayStatus
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.musicStatus;
@@ -175,9 +291,20 @@ class RoboComm(object):
             return [];
 
     def getMusicBusy(self):
+        '''
+        Convenience method to determine whether music is currently either
+        playing or paused.
+        @return: True/False to indicate whether music status is currently PlayStatus.STOPPED.
+        @rtype: bool
+        '''
         return self.getPlayStatus() != PlayStatus.STOPPED;
     
     def getTextToSpeechBusy(self, cachedOK=False):
+        '''
+        Return whether SpeakEasy node is currently generating speech from text.
+        @return: True/False to indicate whether text-to-speech engine is busy.
+        @rtype: bool
+        '''
         capabilities = self.getSpeakEasyNodeStatus(cachedOK=cachedOK);
         if capabilities is not None:
             return capabilities.textToSpeechBusy;
@@ -188,15 +315,20 @@ class RoboComm(object):
     
     def say(self, text, voice=None, ttsEngine=None, numRepeats=0, repeatPeriod=0, blockTillDone=False):
         '''
-		# Command Codes:
-		int8 SAY = 0
-		int8 STOP= 1
-		
-		# Parameters:
-		int8 command  	    # One of the above Command codes
-		string text		    # mandatory
-		string voiceName    # optional. Use default voice if unspecified
-		string engineName   # optional. Use default engine if unspecified
+        Given a piece of text, generate corresponding speech at the SpeakEasy node site.
+        @param text: Words to speak.
+        @type text: string
+        @param voice: Name of text-to-speech voice to use.
+        @type voice: string
+        @param ttsEngine: Name of text-to-speech engine to use.
+        @type ttsEngine: string
+        @param numRepeats: Number of times the utterance is to be repeated after the first time.
+        @type numRepeats: int
+        @param repeatPeriod: Time period in fractional seconds to wait between repeated utterances.
+        @type repeatPeriod: float
+        @param blockTillDone: Request to return immediately, or block until the utterance if finished.
+        @type blockTillDone: bool
+        @raises TypeError: if one of the parameters is of incorrect type.
         '''
         
         if not SpeakeasyUtils.ensureType(numRepeats, int):
@@ -216,7 +348,8 @@ class RoboComm(object):
         else:
             ttsRequestMsg.engineName = '';
             
-        self.rosTTSRequestor.publish(ttsRequestMsg);
+        with self.textToSpeechLock:        
+            self.rosTTSRequestor.publish(ttsRequestMsg);
         if numRepeats > 0:
             RoboComm.SpeechReplayDemon(text, voice, ttsEngine, numRepeats, repeatPeriod, self).start();
             
@@ -225,13 +358,29 @@ class RoboComm(object):
                 rospy.sleep(0.5);
         
     def stopSaying(self):
+        '''
+        Stop text-to-speech utterance. No effect if text-to-speech is currently inactive.
+        '''
         self.ttsRequestMsg.command = TTSCommands.STOP;
-        self.rosTTSRequestor.publish(self.ttsRequestMsg);
+        with self.textToSpeechLock:
+            self.rosTTSRequestor.publish(self.ttsRequestMsg);
     
     
     # --------------------------------------------   Sound Effects  -------------------------------
     
     def playSound(self, soundName, volume=None, numRepeats=0, repeatPeriod=0):
+        '''
+        Play a sound effect at the SpeakEasy node.
+        @param soundName: Name of the sound effect. (see getSoundEffectNames()).
+        @type soundName: string
+        @param volume: Loudness for the sound effect. If None, current volume is used. Volume must be in range 0.0 to 1.0
+        @type volume: float.
+        @param numRepeats: Number of times the sound effect is to be repeated after the first time.
+        @type numRepeats: int
+        @param repeatPeriod: Time period in fractional seconds to wait between repeats.
+        @type repeatPeriod: float
+        @raise TypeError: if any parameter is of the wrong type. 
+        '''
         
         if not SpeakeasyUtils.ensureType(numRepeats, int):
             raise TypeError("Number of repeats must be an integer. Was " + str(numRepeats));
@@ -246,37 +395,79 @@ class RoboComm(object):
         else:
             soundReqMsg.volume = volume;
 
-        self.rosSoundRequestor.publish(soundReqMsg);
+        with self.soundLock:
+            self.rosSoundRequestor.publish(soundReqMsg);
         if numRepeats > 0:
-            RoboComm.SoundReplayDemon(soundName, numRepeats, repeatPeriod, self).start();
+            RoboComm.SoundReplayDemon(soundName, self, volume=volume, numRepeats=numRepeats, repeatPeriod=repeatPeriod).start();
 
     def stopSound(self):
+        '''
+        Stop the all currently playing sound effects. Method has no effect if no sound is currently playing.
+        '''
         soundReqMsg = SpeakEasySound();
         soundReqMsg.command = SoundCommands.STOP;
-        self.rosSoundRequestor.publish(soundReqMsg);
+        with self.soundLock:        
+            self.rosSoundRequestor.publish(soundReqMsg);
         
     def pauseSound(self):
+        '''
+        Pause the all currently playing sound effects. Method has no effect if no sound is currently playing.
+        '''
         soundReqMsg = SpeakEasySound();
         soundReqMsg.command = SoundCommands.PAUSE;
-        self.rosSoundRequestor.publish(soundReqMsg);
+        with self.soundLock:        
+            self.rosSoundRequestor.publish(soundReqMsg);
         
     def unPauseSound(self):
+        '''
+        Un-pause all currently paused sound effects. Method has no effect if no sound is currently paused.
+        '''
         soundReqMsg = SpeakEasySound();
         soundReqMsg.command = SoundCommands.UNPAUSE;
-        self.rosSoundRequestor.publish(soundReqMsg);
+        with self.soundLock:        
+            self.rosSoundRequestor.publish(soundReqMsg);
         
-    def setSoundVolume(self, vol):
-        if not SpeakeasyUtils.ensureType(vol, float):
-            raise TypeError("Volume must be a float between 0.0 and 1.0. Was " + str(vol));
+    def setSoundVolume(self, volume, soundName=None):
+        '''
+        Change the sound effect default volume.
+        @param volume: New default volume for sound effects. Value must be in range 0.0 to 1.0.
+        @type volume: float
+        @param soundName: Optionally the name of the sound whose volume is to be changed.
+        @type soundName: string
+        @raises TypeError: if any parameters are of incorrect type.
+        '''
+        if not SpeakeasyUtils.ensureType(volume, float):
+            raise TypeError("Volume must be a float between 0.0 and 1.0. Was " + str(volume));
         
         soundReqMsg = SpeakEasySound();
         soundReqMsg.command = SoundCommands.SET_VOL;
-        soundReqMsg.volume = vol;
-        self.rosSoundRequestor.publish(soundReqMsg);
+        if soundName is None:
+            soundName = '';
+        soundReqMsg.sound_name = soundName;
+        soundReqMsg.volume = volume;
+        with self.soundLock:
+            self.rosSoundRequestor.publish(soundReqMsg);
 
     # --------------------------------------------   Music Streaming  -------------------------------
     
     def playMusic(self, songName, volume=None, playheadTime=0.0, timeReference=TimeReference.ABSOLUTE, numRepeats=0, repeatPeriod=0):
+        '''
+        Play a piece of music (a sound file) at the SpeakEasy node.
+        @param songName: Name of sound file. (See getSongNames()). 
+        @type songName: string
+        @param volume: Loudness at which to play. Default uses current volume. Else must be in range 0.0 to 1.0
+        @type volume: {None | float}
+        @param playheadTime: Offset in fractional seconds into where to start the song. Default: start at beginning. 
+        @type playheadTime: float
+        @param timeReference: If playheadTime is provided, specifies whether the given time is intended as absolute (relative to the
+                              beginning of the song), or relative to the current playhead position.
+        @type timeReference: TimeReference
+        @param numRepeats: Number of times the song is to be repeated after the first time.
+        @type numRepeats: int
+        @param repeatPeriod: Time period in fractional seconds to wait between repeats.
+        @type repeatPeriod: float
+        @raise TypeError: if any parameters are of incorrect type. 
+        '''
         
         if not SpeakeasyUtils.ensureType(numRepeats, int):
             raise TypeError("Number of repeats must be an integer. Was " + str(numRepeats));
@@ -297,46 +488,95 @@ class RoboComm(object):
         else:
             musicReqMsg.volume = volume;
 
-        self.rosMusicRequestor.publish(musicReqMsg);
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
         if numRepeats > 0:
             RoboComm.MusicReplayDemon(songName, volume, playheadTime, timeReference, numRepeats, repeatPeriod, self).start();
 
     def stopMusic(self):
+        '''
+        Stop currently playing music. No effect if nothing playing.
+        '''
         musicReqMsg = SpeakEasyMusic();
         musicReqMsg.command = MusicCommands.STOP;
-        self.rosMusicRequestor.publish(musicReqMsg);
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
         
-    def pauseSound(self):
+    def pauseMusic(self):
+        '''
+        Pause currently playing music. No effect if nothing playing.
+        '''
         musicReqMsg = SpeakEasyMusic();
         musicReqMsg.command = MusicCommands.PAUSE;
-        self.rosMusicRequestor.publish(musicReqMsg);
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
         
-    def unPauseSound(self):
+    def unPauseMusic(self):
+        '''
+        Un-pause currently playing music. No effect if nothing paused or playing.
+        '''
         musicReqMsg = SpeakEasyMusic();
         musicReqMsg.command = MusicCommands.UNPAUSE;
-        self.rosMusicRequestor.publish(musicReqMsg);
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
         
-    def setSoundVolume(self, vol):
+    def setMusicVolume(self, vol):
+        '''
+        Set default volume of music playback.
+        @param vol: Loudness value between 0.0 and 1.0.
+        @type vol: float
+        @raise TypeError: if any parameters are of incorrect type. 
+        '''
         if not SpeakeasyUtils.ensureType(vol, float):
             raise TypeError("Volume must be a float between 0.0 and 1.0. Was " + str(vol));
         
         musicReqMsg = SpeakEasyMusic();
         musicReqMsg.command = MusicCommands.SET_VOL;
         musicReqMsg.volume = vol;
-        self.rosSoundRequestor.publish(musicReqMsg);
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
 
-    def setPlayhead(self, playheadTime):
+    def setPlayhead(self, playheadTime, timeReference=TimeReference.ABSOLUTE):
+        '''
+        Change the music playhead position to a particular time within a song.
+        Time may be specified absolute (i.e. relative to the start of the song), 
+        or relative to the current playhead. The playhead may be changed during
+        playback, or while a song is paused.
+        @param playheadTime: New time where to position the playhead.
+        @type playheadTime: float
+        @param timeReference: TimeReference.ABSOLUTE or TimeReference.RELATIVE
+        @type timeReference: TimeReference.
+        @raise TypeError: if any parameters are of incorrect type. 
+        '''
         if not SpeakeasyUtils.ensureType(playheadTime, int) and not SpeakeasyUtils.ensureType(playheadTime, float): 
             raise TypeError("Playhead must be an int or float indicating seconds. Was " + str(playheadTime));
         
         musicReqMsg = SpeakEasyMusic();
         musicReqMsg.command = MusicCommands.SET_PLAYHEAD;
         musicReqMsg.time = playheadTime;
-        self.rosSoundRequestor.publish(musicReqMsg);
+        musicReqMsg.timeReference = timeReference;
+        with self.musicLock:
+            self.rosMusicRequestor.publish(musicReqMsg);
+            
+    def getPlayhead(self):
+        '''
+        Return song position in fractional seconds. Return None
+        if no music is currently playing.
+        @return: Position in fractional seconds.
+        @rtype: float
+        '''
+        try:
+            playHeadMsg = rospy.wait_for_message('/speakeasy_playhead', SpeakEasyPlayhead, self.PLAYHEAD_MSG_TIMEOUT);
+            return playHeadMsg.playhead_time;
+        except:
+            return None;
     
-    # --------------------------------------------   Replay Demons -------------------------------
+    # --------------------------------------------   Replay Demon Threads -------------------------------
     
     class ReplayDemon(threading.Thread):
+        '''
+        Abstract class of all repeat demons: text-to-speech, sound effects, and music.
+        '''
         
         def __init__(self, repeatPeriod):
             super(RoboComm.ReplayDemon, self).__init__();
@@ -344,9 +584,13 @@ class RoboComm(object):
             self.stopped = True;
             
     class SoundReplayDemon(ReplayDemon):
+        '''
+        Responsible for repeating sound effects at appropriate intervals. Runs as thread.
+        '''
         
-        def __init__(self, soundName, roboComm, volume=None, repeatPeriod=0, numRepeats=0):
+        def __init__(self, soundName, roboComm, volume=None, numRepeats=0, repeatPeriod=0):
             super(RoboComm.SoundReplayDemon, self).__init__(repeatPeriod);
+
             self.soundName = soundName;
             self.volume = volume;
             self.numRepeats = numRepeats;
@@ -364,6 +608,9 @@ class RoboComm(object):
             self.roboComm.stopSound();
 
     class MusicReplayDemon(ReplayDemon):
+        '''
+        Responsible for repeating songs at appropriate intervals. Runs as thread.
+        '''
         
         def __init__(self, songName, roboComm, volume=None, playhead=0.0, timeReference=TimeReference.ABSOLUTE, numRepeats=0, repeatPeriod=0):
             super(RoboComm.SoundReplayDemon, self).__init__(repeatPeriod);
@@ -391,6 +638,9 @@ class RoboComm(object):
 
             
     class SpeechReplayDemon(ReplayDemon):
+        '''
+        Responsible for repeating text-to-speech utterances at appropriate intervals. Runs as thread.
+        '''
             
         def __init__(self, text, voiceName, ttsEngine, numRepeats, repeatPeriod, roboComm):
             super(RoboComm.SpeechReplayDemon, self).__init__(repeatPeriod);
@@ -471,11 +721,73 @@ class TestRobotInteraction(unittest.TestCase):
       
 if __name__ == '__main__':
     #unittest.main();
-    roboComm = RoboComm();
-    #roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
-    #roboComm.playSound("drill", numRepeats=2, repeatPeriod=4);
-    #roboComm.playMusic("cottonFields");
+    
+    try:
+        roboComm = RoboComm();
+    except NotImplementedError:
+        rospy.logerr("You must start a SpeakEasy service first.");
+        import sys
+        sys.exit();
+
+    # Test text to speech:
+#    rospy.loginfo("Testing text-to-speech...");
+#    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
+#    rospy.loginfo("Done testing text-to-speech...\n------------------");
+    
+    # Test sound effects:
+#    rospy.loginfo("Testing sound effects...");
+    #roboComm.playSound("drill", numRepeats=2, repeatPeriod=6);
+#    roboComm.setSoundVolume(0.1, None);
+#    roboComm.playSound("drill");
+#    rospy.sleep(5);
+#    roboComm.playSound("drill", 0.8);
+#    rospy.sleep(5);
+#    roboComm.setSoundVolume(0.5, 'drill');
+#    roboComm.playSound("drill");
+#    roboComm.setSoundVolume(0.9, None);
+#    rospy.loginfo("Done testing sound effects.\n------------------");
+
+    # Test music playing (Play 4 secs, pause 4 secs, play 10 secs, stop):
+#    rospy.loginfo("Testing music play/pause/unpause/stop...")
+#    roboComm.playMusic("cottonFields");
+#    rospy.sleep(4);
+#    roboComm.pauseMusic()
+#    rospy.sleep(4);
+#    roboComm.unPauseMusic()
+#    rospy.sleep(10);
+#    roboComm.stopMusic();
+#    rospy.sleep(5);
+#
+#    # Volume setting: 4 secs on half vol, 4 secs on full vol:
+#    roboComm.setMusicVolume(0.5);
+#    roboComm.playMusic("cottonFields");
+#    rospy.sleep(4);
+#    roboComm.stopMusic();
+#    roboComm.playMusic("cottonFields", volume=0.9);
+#    rospy.sleep(4);
+#    roboComm.stopMusic();
+    
+    # Set playhead:
+    rospy.sleep(3);
+    roboComm.playMusic("cottonFields");
+    rospy.sleep(4);
+    roboComm.setPlayhead(10);
+    if not int(roboComm.getPlayhead()) in range(10,13):
+        rospy.logerr("Playhead was not positioned (during playback).")
+    rospy.sleep(4);
+    roboComm.pauseMusic();
+    rospy.sleep(2);
+    roboComm.setPlayhead(20);
+    roboComm.unPauseMusic();
+    if not int(roboComm.getPlayhead()) in range(20,23):
+            rospy.logerr("Playhead was not positioned (after unpause playback).")
+    rospy.sleep(4);
     roboComm.stopMusic();
-    rospy.sleep(5);
-#    while not rospy.is_shutdown():
-#        rospy.spin();
+    
+    
+    
+    rospy.loginfo("Done testing music play/pause/unpause/stop.\n------------------")    
+     
+
+    
+    rospy.loginfo("Done testing robot_interaction.py")

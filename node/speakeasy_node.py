@@ -57,8 +57,7 @@ class SpeakEasyServer(object):
         # We publish a latched message with this SpeakEasy node's speech, sound, and music capabilities:
         self.status_pub = rospy.Publisher("/speakeasy_status", SpeakEasyStatus, latch=False)
         # During music playback we also publish the playhead time position every 1/10 second:
-        self.playhead_pub = rospy.Publisher("/speakeasy_playhead", SpeakEasyPlayhead);
-        
+                
         SpeakEasyServer.soundDir = os.path.join(os.path.dirname(__file__),'../sounds')
         SpeakEasyServer.musicDir = os.path.join(SpeakEasyServer.soundDir, 'music');
         
@@ -85,132 +84,139 @@ class SpeakEasyServer(object):
         
     def handleTextToSpeechRequest(self, req):
         
-        ttsCmd = req.command;
-        if ttsCmd == SpeakEasyServer.SAY:
-            text       = req.text;
-            engine     = req.engineName;
-            voiceName  = req.voiceName;
-            
-            # Defaulted tts engine and voice names come as
-            # empty strings in the request message. Change
-            # those to None, so that the ttsProvider will 
-            # understand to use default(s):
-            if len(engine) == 0:
-                engine = None;
-            if len(voiceName) == 0:
-                voiceName = None;
-            try:
-                self.ttsProvider.say(text, voiceName, engine)
-            except:
-                rospy.logerr("Error in received TextToSpeech.msg message caused text-to-speech error: " + self.makeMsg(sys.exc_info()));
-        elif ttxCmt == SpeakEasyServer.STOP:
-            self.ttsProvider.stop();
-        else:
-            rospy.logerr("Incorrect command type in received TextToSpeech.msg message: " + str(ttsCmd));
+        with self.lock:
+            ttsCmd = req.command;
+            if ttsCmd == SpeakEasyServer.SAY:
+                text       = req.text;
+                engine     = req.engineName;
+                voiceName  = req.voiceName;
+                
+                # Defaulted tts engine and voice names come as
+                # empty strings in the request message. Change
+                # those to None, so that the ttsProvider will 
+                # understand to use default(s):
+                if len(engine) == 0:
+                    engine = None;
+                if len(voiceName) == 0:
+                    voiceName = None;
+                try:
+                    self.ttsProvider.say(text, voiceName, engine)
+                except:
+                    rospy.logerr("Error in received TextToSpeech.msg message caused text-to-speech error: " + self.makeMsg(sys.exc_info()));
+            elif ttxCmt == SpeakEasyServer.STOP:
+                self.ttsProvider.stop();
+            else:
+                rospy.logerr("Incorrect command type in received TextToSpeech.msg message: " + str(ttsCmd));
     
     def handleSoundRequest(self, req):
-        soundCmd = req.command;
-        if soundCmd == SpeakEasyServer.PLAY:
-            soundName = req.sound_name;
-            volume    = req.volume;
-            # Default volume?:
-            if volume == -1.0:
-                volume = None;
-            
-            # Ensure best effort to find the file:
-            soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-            
-            try:
-                self.soundPlayer.play(soundName, blockTillDone=False, volume=volume);
-            except:
-                rospy.logerr("Error in received SoundPlay.msg message caused sound play error: " + self.makeMsg(sys.exc_info()));
-        elif soundCmd == SpeakEasyServer.STOP:
-            soundName = req.sound_name;
-            # Ensure best effort to find the file:
-            soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-            try:
-                self.soundPlayer.stop(soundName=soundName);
-            except:
-                rospy.logerr("Error while calling sound player command 'stop': " + self.makeMsg(sys.exc_info()));
-        elif soundCmd == SpeakEasyServer.PAUSE:
-            soundName = req.sound_name;
-            # Ensure best effort to find the file:
-            soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-            try:
-                self.soundPlayer.pause(soundName=soundName);
-            except:
-                rospy.logerr("Error while calling sound player command 'pause': " + self.makeMsg(sys.exc_info()));
-        elif soundCmd == SpeakEasyServer.UNPAUSE:
-            soundName = req.sound_name;
-            # Ensure best effort to find the file:
-            soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-            try:
-                self.soundPlayer.unpause(soundName=soundName);
-            except:
-                rospy.logerr("Error while calling sound player command 'unpause': " + self.makeMsg(sys.exc_info()));
-        elif soundCmd == SpeakEasyServer.SET_VOL:
-            volume = req.volume;
-            soundName = req.sound_name;
-            # Ensure best effort to find the file:
-            soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-            try:
-                self.soundPlayer.setSoundVolume(volume, soundName);
-                # Update latched status message to reflect this new volume:
-                self.publishStatus();
-            except:
-                rospy.logerr("Error while calling sound player command 'setSoundVolume': " + self.makeMsg(sys.exc_info()));
-        else:
-            rospy.logerr("Incorrect command type in received SoundPlay.msg message: " + str(soundCmd));
+        
+        with self.lock:
+            soundCmd = req.command;
+            if soundCmd == SpeakEasyServer.PLAY:
+                soundName = req.sound_name;
+                volume    = req.volume;
+                # Default volume?:
+                if volume == -1.0:
+                    volume = None;
+                
+                # Ensure best effort to find the file:
+                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                
+                try:
+                    self.soundPlayer.play(soundName, blockTillDone=False, volume=volume);
+                except:
+                    rospy.logerr("Error in received SoundPlay.msg message caused sound play error: " + self.makeMsg(sys.exc_info()));
+            elif soundCmd == SpeakEasyServer.STOP:
+                soundName = req.sound_name;
+                # Ensure best effort to find the file:
+                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                try:
+                    self.soundPlayer.stop(soundName=soundName);
+                except:
+                    rospy.logerr("Error while calling sound player command 'stop': " + self.makeMsg(sys.exc_info()));
+            elif soundCmd == SpeakEasyServer.PAUSE:
+                soundName = req.sound_name;
+                # Ensure best effort to find the file:
+                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                try:
+                    self.soundPlayer.pause(soundName=soundName);
+                except:
+                    rospy.logerr("Error while calling sound player command 'pause': " + self.makeMsg(sys.exc_info()));
+            elif soundCmd == SpeakEasyServer.UNPAUSE:
+                soundName = req.sound_name;
+                # Ensure best effort to find the file:
+                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                try:
+                    self.soundPlayer.unpause(soundName=soundName);
+                except:
+                    rospy.logerr("Error while calling sound player command 'unpause': " + self.makeMsg(sys.exc_info()));
+            elif soundCmd == SpeakEasyServer.SET_VOL:
+                volume = req.volume;
+                soundName = req.sound_name;
+                # Ensure best effort to find the file:
+                if len(soundName) > 0: 
+                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                else:
+                    soundName = None;
+                try:
+                    self.soundPlayer.setSoundVolume(volume, soundName);
+                    # Update latched status message to reflect this new volume:
+                    self.publishStatus();
+                except:
+                    rospy.logerr("Error while calling sound player command 'setSoundVolume': " + self.makeMsg(sys.exc_info()));
+            else:
+                rospy.logerr("Incorrect command type in received SoundPlay.msg message: " + str(soundCmd));
             
     def handleMusicRequest(self, req):
 
-        musicCmd = req.command;
-        if musicCmd == SpeakEasyServer.PLAY:
-            songName  = req.song_name;
-            repeats  = req.repeats;
-            startTime = req.time;
-            volume    = req.volume;
-            # Default volume?:
-            if volume == -1.0:
-                volume = None;
-
-            # Ensure best effort to find the file:
-            songName = self.toFullPath(songName, SpeakEasyServer.musicNameToFileDict);
-            
-            try:
-                self.musicPlayer.play(songName, repeats=repeats, startTime=startTime, blockTillDone=False, volume=volume);
-            except:
-                rospy.logerr("Error while calling music player command 'play': " + self.makeMsg(sys.exc_info()));
-        elif musicCmd == SpeakEasyServer.STOP:
-            try:
-                self.musicPlayer.stop();
-            except:
-                rospy.logerr("Error while calling music player command 'stop': " + self.makeMsg(sys.exc_info()));
-        elif musicCmd == SpeakEasyServer.PAUSE:
-            try:
-                self.musicPlayer.pause();
-            except:
-                rospy.logerr("Error while calling music player command 'pause': " + self.makeMsg(sys.exc_info()));
-        elif musicCmd == SpeakEasyServer.UNPAUSE:
-            try:
-                self.musicPlayer.unpause();
-            except:
-                rospy.logerr("Error while calling music player command 'unpause': " + self.makeMsg(sys.exc_info()));
-        elif musicCmd == SpeakEasyServer.SET_VOL:
-            volume = req.volume;
-            try:
-                self.musicPlayer.setVol(volume);
-                # Update latched status message to reflect this new volume:
-                self.publishStatus();
-            except:
-                rospy.logerr("Error while calling music player command 'setVol': " + self.makeMsg(sys.exc_info()));
-        elif musicCmd == SpeakEasyServer.SET_PLAYHEAD:
-            playheadTime  = req.time;
-            timeReference = req.timeReference;
-            try:
-                self.musicPlayer.setPlayhead(playheadTime, timeReference=timeReference);
-            except:
-                rospy.logerr("Error while calling music player command 'setPlayhead': " + self.makeMsg(sys.exc_info()));
+        with self.lock:
+            musicCmd = req.command;
+            if musicCmd == SpeakEasyServer.PLAY:
+                songName  = req.song_name;
+                repeats  = req.repeats;
+                startTime = req.time;
+                volume    = req.volume;
+                # Default volume?:
+                if volume == -1.0:
+                    volume = None;
+    
+                # Ensure best effort to find the file:
+                songName = self.toFullPath(songName, SpeakEasyServer.musicNameToFileDict);
+                
+                try:
+                    self.musicPlayer.play(songName, repeats=repeats, startTime=startTime, blockTillDone=False, volume=volume);
+                except:
+                    rospy.logerr("Error while calling music player command 'play': " + self.makeMsg(sys.exc_info()));
+            elif musicCmd == SpeakEasyServer.STOP:
+                try:
+                    self.musicPlayer.stop();
+                except:
+                    rospy.logerr("Error while calling music player command 'stop': " + self.makeMsg(sys.exc_info()));
+            elif musicCmd == SpeakEasyServer.PAUSE:
+                try:
+                    self.musicPlayer.pause();
+                except:
+                    rospy.logerr("Error while calling music player command 'pause': " + self.makeMsg(sys.exc_info()));
+            elif musicCmd == SpeakEasyServer.UNPAUSE:
+                try:
+                    self.musicPlayer.unpause();
+                except:
+                    rospy.logerr("Error while calling music player command 'unpause': " + self.makeMsg(sys.exc_info()));
+            elif musicCmd == SpeakEasyServer.SET_VOL:
+                volume = req.volume;
+                try:
+                    self.musicPlayer.setSoundVolume(volume);
+                    # Update latched status message to reflect this new volume:
+                    self.publishStatus();
+                except:
+                    rospy.logerr("Error while calling music player command 'setVol': " + self.makeMsg(sys.exc_info()));
+            elif musicCmd == SpeakEasyServer.SET_PLAYHEAD:
+                playheadTime  = req.time;
+                timeReference = req.timeReference;
+                try:
+                    self.musicPlayer.setPlayhead(playheadTime, timeReference=timeReference);
+                except:
+                    rospy.logerr("Error while calling music player command 'setPlayhead': " + self.makeMsg(sys.exc_info()));
 
     def buildStatusMsg(self):
         # Create an empty Status message:
@@ -339,6 +345,7 @@ class PlayheadPublisher(threading.Thread):
         self.musicPlayer = musicPlayer;
         self.statusMsgSendMethod = statusMsgSendMethod;
         self.playheadMsg = SpeakEasyPlayhead();
+        self.playhead_pub = rospy.Publisher("/speakeasy_playhead", SpeakEasyPlayhead);
         self.stopped     = False;
                     
     def run(self):

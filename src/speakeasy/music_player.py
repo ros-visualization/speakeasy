@@ -218,8 +218,22 @@ class MusicPlayer(object):
         if (volume is not None) and ( (volume < 0.0) or (volume > 1.0) ):
             raise ValueError("Sound volume must be between 0.0 and 1.0. Was " + str(volume));
 
-        with self.lock:
+        try:
+            # Lock if not already locked. Lock is already acquired if 
+            # this call to setSoundVolume() did not originate from a 
+            # client, but from a method within MusicPlayer(), which 
+            # acquired the lock. In that case, remember that the lock
+            # was already set, so that we don't release it on exit:
+            wasUnlocked = self.lock.acquire(False);
+
             pygame.mixer.music.set_volume(volume);
+        except:
+            pass
+        finally:
+            # Only release the lock if the call to this method came from
+            # a client of SoundPlayer, not from a method within SoundPlayer:
+            if wasUnlocked:
+                self.lock.release();
         
     #--------------------------------
     # getSoundVolume
@@ -232,8 +246,20 @@ class MusicPlayer(object):
         @returnt: float
         '''
 
-        with self.lock:
+        try:
+            # Lock if not already locked. Lock is already acquired if 
+            # this call to setSoundVolume() did not originate from a 
+            # client, but from a method within MusicPlayer(), which 
+            # acquired the lock. In that case, remember that the lock
+            # was already set, so that we don't release it on exit:
+            wasUnlocked = self.lock.acquire(False);
+
             return pygame.mixer.music.get_volume();
+        finally:
+            # Only release the lock if the call to this method came from
+            # a client of SoundPlayer, not from a method within SoundPlayer:
+            if wasUnlocked:
+                self.lock.release();
             
     #--------------------------------
     # setPlayhead
