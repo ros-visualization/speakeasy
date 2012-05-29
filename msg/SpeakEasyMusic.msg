@@ -29,12 +29,12 @@ int8 RELATIVE = 0
 int8 ABSOLUTE = 1
 
 # Parameters:
-int8 command  			  # One of the above Command codes
+int8 command  		  # One of the above Command codes
 
-string sound_name         # Sound file name with or without file extension.
+string song_name          # Music/Song file name with or without file extension.
 int8   repeats            # Optional, and only relevant for play(). Default is to play once (zero repeats)
-						  # Required for play(). Optional for others
+			  # Required for play(). Optional for others
 float32 volume            # Values that cause change: 0.0 to 1.0. Set - -1.0 to use currently set vol.
 float32 time              # Optional for play(): How far into a song to start playing 
-					      # Mandatory for setPlayhead().
+			  # Mandatory for setPlayhead().
 int8   timeReference	  # One of RELATIVE or ABSOLUTE					 

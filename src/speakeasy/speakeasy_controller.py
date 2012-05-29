@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
 # TODO:
-#   - No local repeat play for T2S
-#   - Repeated sounds won't stop with Stop button
 #   - Robot ops with new msg
-#   - Word completion 
+#   - Word completion
+#   - Switch live between local and remote ops. 
 
 
 import sys
@@ -17,20 +16,22 @@ import threading
 from functools import partial;
 from threading import Timer;
 
+from python_qt_binding import QtBindingHelper;
 from PyQt4.QtGui import QApplication
+
+from utilities.speakeasy_utils import SpeakeasyUtils; 
 
 from sound_player import SoundPlayer;
 from text_to_speech import TextToSpeechProvider;
 
 from speakeasy.msg import SpeakEasyRequest;
-from speakeasy.srv import SpeechCapabilitiesInquiry
+
+from robot_interaction import RoboComm;
 
 from speakeasy_ui import SpeakEasyGUI;
 from speakeasy_ui import DialogService;
 from speakeasy_ui import PlayLocation;
 from speakeasy_ui import DEFAULT_PLAY_LOCATION;
-
-from speakeasy.libspeakeasy import SoundClient;
 
 from speakeasy_ui import alternateLookHandler;
 from speakeasy_ui import standardLookHandler;
@@ -39,16 +40,17 @@ from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
 
-# Try importing ROS related modules. Remember whether
-# that worked. In the SpeakEasyController __init__() method
-# we'll switch to local, and warn user if appropriate:
-try:
-    import roslib; roslib.load_manifest('speakeasy');
-    import rospy
-    ROS_IMPORT_OK = True;
-except ImportError:
-    # Ros not installed on this machine; run locally:
-    ROS_IMPORT_OK = False;
+#TODO: Delete:
+## Try importing ROS related modules. Remember whether
+## that worked. In the SpeakEasyController __init__() method
+## we'll switch to local, and warn user if appropriate:
+#try:
+#    import roslib; roslib.load_manifest('speakeasy');
+#    import rospy
+#    ROS_IMPORT_OK = True;
+#except ImportError:
+#    # Ros not installed on this machine; run locally:
+#    ROS_IMPORT_OK = False;
 # ----------------------------------------------- Class Program ------------------------------------
 
 class ButtonProgram(object):
@@ -182,18 +184,10 @@ class SpeakEasyController(object):
     
     def __init__(self, dirpath, stand_alone=None):
 
-        if not ROS_IMPORT_OK:
-            # Remember original default play location, so that
-            # we can warn user of the import error condition further
-            # down, when the GUI is up:
-            DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
-            # Was running on robot the default?
-            if DEFAULT_PLAY_LOCATION == PlayLocation.ROBOT:
-                stand_alone = True;
-        else:
-            if stand_alone is None:
-                stand_alone = (DEFAULT_PLAY_LOCATION == PlayLocation.LOCALLY);
-         
+        if stand_alone is None:
+            stand_alone = (DEFAULT_PLAY_LOCATION == PlayLocation.LOCALLY);
+        
+        
         self.stand_alone = stand_alone;
         self.gui = None;
         self.soundPlayer = None;
@@ -201,47 +195,43 @@ class SpeakEasyController(object):
         self.rosInitialized = False;
         self.speechReplayDemons = [];
         self.soundReplayDemons  = [];
+        self.sound_file_names   = [];
+        self.roboComm = None;
               
         if self.stand_alone:
             initOK = self.initLocalOperation();
         else: # Robot operation
-            # Try to initialize ROS. If it goes right, returns True,
-            # else raises IOError with an error message:
+            # Try to initialize ROS. If that does not work, instantiation
+            # raises NotImplementedError, or IOError:
             try:
-                initOK = self.initRobotOperation();
-            except IOError as rosInitFailed:
-                initOK = False;
-            if not initOK:
-                # If robot init didn't work, fall back to local op:
+                self.roboComm = RoboComm();
+                self.speakEasyCapabilities = self.roboComm.getSpeakEasyNodeStatus();
+                self.sound_file_names = self.speakEasyCapabilities.sounds;
+            except Exception as rosInitFailure:
+                self.rosInitException = rosInitFailure;
+                # Robot init didn't work, fall back to local op:
                 self.stand_alone = True;
+                # Remember original default play location, so that
+                # we can warn user of the import error condition further
+                # down, when the GUI is up:
+                DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
                 self.initLocalOperation();
-        
 
         self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
+        self.dialogService = DialogService(self.gui);
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
         self.gui.hideButtonSignal.connect(alternateLookHandler);
         # Handler that makes program button look normal:
         self.gui.showButtonSignal.connect(standardLookHandler);
-        self.dialogService = DialogService(self.gui);
 
         # Now that we have the GUI up, we can warn user
         # if ROS couldn't be imported, yet this app was 
         # set to control a Ros node:
-        if not ROS_IMPORT_OK and DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT:
-            self.dialogService.showErrorMsg("Application was set to control sound on robot, but ROS is not installed. Switching to local operation.");
-        
-        
-        # If the app was set to run on robot, but the ROS init 
-        # failed, then rosInitFailed will hold an IOError instance.
-        # Use it to inform user. If not ROS init error occurred,
-        # then rosInitFailed with be unbound:
-        try:
-            if not initOK and rosInitFailed is not None:
-                self.gui.setWhereToPlay(PlayLocation.LOCALLY);
-                self.dialogService.showErrorMsg(str(rosInitFailed));
-        except NameError:
-            pass
+        if DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT and self.roboComm is None or not self.roboComm.robotAvailable():
+            self.dialogService.showErrorMsg("Application was set to control sound on robot, but: %s. Switching to local operation." %
+                                            str(self.rosInitException));
+            self.gui.setWhereToPlay(PlayLocation.LOCALLY);
             
         self.dirpath = dirpath;
         
@@ -270,55 +260,6 @@ class SpeakEasyController(object):
         self.sound_file_names = self.getAvailableSoundEffectFileNames(stand_alone=True);
         return True;
         
-    #----------------------------------
-    # initRobotOperation 
-    #--------------
-        
-    def initRobotOperation(self):
-        '''
-        Initialize sound to play at the robot. Initializes
-        self.sound_file_names to a list of sound file names
-        for use with play-sound calls to the Robot via ROS.
-        @return: True if initialization went OK. Else False.
-        @returnt: True
-        @raise IOError: if ROS initialization failed. 
-        '''
-        
-        self.sound_file_names = [];        
-        self.soundClient = SoundClient();
-
-        # Allow multiple GUIs to run simultaneously. Therefore
-        # the anonymous=True:
-        if not self.rosInitialized:
-            # init_node hangs indefinitely if roscore is not running.
-            # Therefore: check for that. If roscore isn't running,
-            # revert to local operation:
-            if not self.processRunning('roscore'):
-                raise IOError("The roscore process is not running. Switching to local operation.");
-            rospy.init_node('speakeasy_gui', anonymous=True);
-        
-        # Wait for Ros service for a limited time; there might be none:
-        waitTime = 4; # seconds
-        while waitTime > 0:
-            try:
-                rospy.loginfo("Wait for speech capabilities service for %d ..." % waitTime);
-                rospy.wait_for_service('speech_capabilities_inquiry', timeout=1); # seconds
-            except rospy.exceptions.ROSException:
-                waitTime -= 1;
-                if waitTime <= 0:
-                    rospy.loginfo("Speech capabilities service is offline, switching to local operations.");    
-                    raise IOError("Speech capabilities service is offline, switching to local operations.");
-                
-        rospy.loginfo("Speech capabilities service online.");    
-        capabilitiesService = rospy.ServiceProxy('speech_capabilities_inquiry', SpeechCapabilitiesInquiry)
-        try:
-            capabilitiesReply = capabilitiesService();
-            self.sound_file_names = capabilitiesReply.sounds
-            return True;
-        except rospy.ServiceException, e:
-            self.dialogService.showErrorMsg("Service call failed: %s"%e);
-            raise IOError("Service call failed: %s"%e);
-
     #----------------------------------
     # connectWidgetsToActions 
     #--------------
@@ -365,15 +306,8 @@ class SpeakEasyController(object):
         if stand_alone:
             return self.getAvailableLocalSoundEffectFileNames();
 
-        sound_file_basenames = [];
-        for (i, full_file_name) in enumerate(self.sound_file_names):
-            SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
-            baseName = os.path.basename(full_file_name);
-            # Chop extension off the basename (e.g. rooster.wav --> rooster):
-            sound_file_basenames.append(os.path.splitext(baseName)[0])
-            # Map basename (e.g. 'rooster.wav') to its full file name.
-            self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
-        return sound_file_basenames; 
+        # Get sound effect names from SpeakEasy ROS node:
+        
         
     #----------------------------------
     # getAvailableLocalSoundEffectFileNames 
@@ -386,16 +320,22 @@ class SpeakEasyController(object):
         if not os.path.exists(soundDir):
             raise ValueError("No sound files found.")
         
-        fileList = os.listdir(soundDir);
+        fileAndDirsList = os.listdir(soundDir);
+        fileList = [];
+        # Grab all usable sound file names:
+        for fileName in fileAndDirsList:
+            fileExtension = SpeakeasyUtils.fileExtension(fileName); 
+            if (fileExtension == "wav") or (fileExtension == "ogg"):
+                fileList.append(fileName);
+         
         sound_file_basenames = [];
         for (i, full_file_name) in enumerate(fileList):
             baseName = os.path.basename(full_file_name);
-            # Isolate the file extension:
-            fileExtension = os.path.splitext(full_file_name)[1][1:].strip()
-            if (fileExtension == "wav") or (fileExtension == "ogg"):
-                SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
-                sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0]);
-                self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
+            SpeakEasyController.soundPaths['SOUND_' + str(i)] = full_file_name;
+            # Chop extension off the basename (e.g. rooster.wav --> rooster):
+            sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0]);
+            # Map basename (e.g. 'rooster.wav') to its full file name.
+            self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
         return sound_file_basenames;
     
     
@@ -439,9 +379,9 @@ class SpeakEasyController(object):
                 self.speechReplayDemons[-1].start();
         else:
             if sayOnce:
-                self.soundClient.say(text, voice=voice, ttsEngine=ttsEngine);
+                self.roboComm.say(text, voice=voice, ttsEngine=ttsEngine);
             else:
-                self.soundClient.repeat(text, voice=voice, ttsEngine=ttsEngine, repeatPeriod=self.gui.getPlayRepeatPeriod());
+                self.roboComm.repeat(text, voice=voice, ttsEngine=ttsEngine, repeatPeriod=self.gui.getPlayRepeatPeriod());
         return;
     
     #----------------------------------
@@ -760,32 +700,6 @@ class SpeakEasyController(object):
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
     
-    #----------------------------------
-    # processExists
-    #--------------
-
-    def processRunning(self, proc_name):
-        '''
-        Returns true if process of given name is running. 
-        @param proc_name: Process name (no need for full path)
-        @type proc_name: string
-        @return: True if process is currently running, else false.
-        '''
-        ps = subprocess.Popen("ps ax -o pid= -o args= ", shell=True, stdout=subprocess.PIPE)
-        ps_pid = ps.pid
-        output = ps.stdout.read()
-        ps.stdout.close()
-        ps.wait()
-    
-        for line in output.split("\n"):
-            res = re.findall("(\d+) (.*)", line)
-            if res:
-                pid = int(res[0][0])
-                if proc_name in res[0][1] and pid != os.getpid() and pid != ps_pid:
-                    return True
-        return False
-
-
     # --------------------------------------------   Replay Demon -------------------------------
     
     class ReplayDemon(threading.Thread):

@@ -19,8 +19,9 @@ string[]    ttsEngines
 TtsVoices[] voices
 string[]    sounds
 string[]    music
-int8	 	numSoundChannels
+int8	    numSoundChannels
 int8        musicStatus
+bool	    textToSpeechBusy
 float32     soundVolume
 float32     musicVolume
 

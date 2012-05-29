@@ -90,8 +90,17 @@ class SpeakEasyServer(object):
             text       = req.text;
             engine     = req.engineName;
             voiceName  = req.voiceName;
+            
+            # Defaulted tts engine and voice names come as
+            # empty strings in the request message. Change
+            # those to None, so that the ttsProvider will 
+            # understand to use default(s):
+            if len(engine) == 0:
+                engine = None;
+            if len(voiceName) == 0:
+                voiceName = None;
             try:
-                self.ttsProvider.say(text, voiceName, engine, destFileName)
+                self.ttsProvider.say(text, voiceName, engine)
             except:
                 rospy.logerr("Error in received TextToSpeech.msg message caused text-to-speech error: " + self.makeMsg(sys.exc_info()));
         elif ttxCmt == SpeakEasyServer.STOP:
@@ -158,7 +167,7 @@ class SpeakEasyServer(object):
         musicCmd = req.command;
         if musicCmd == SpeakEasyServer.PLAY:
             songName  = req.song_name;
-            repeates  = req.repeats;
+            repeats  = req.repeats;
             startTime = req.time;
             volume    = req.volume;
             # Default volume?:
@@ -166,7 +175,7 @@ class SpeakEasyServer(object):
                 volume = None;
 
             # Ensure best effort to find the file:
-            songName = self.toFullPath(songName, SpeakEasyServer.musicDirNameToFileDict);
+            songName = self.toFullPath(songName, SpeakEasyServer.musicNameToFileDict);
             
             try:
                 self.musicPlayer.play(songName, repeats=repeats, startTime=startTime, blockTillDone=False, volume=volume);
@@ -247,6 +256,7 @@ class SpeakEasyServer(object):
         
         statusMsg.numSoundChannels = self.soundPlayer.numChannels();
         statusMsg.musicStatus = self.musicPlayer.getPlayStatus();
+        statusMsg.textToSpeechBusy = self.ttsProvider.busy();
         statusMsg.soundVolume = self.soundPlayer.getSoundVolume(None) #**** Refine this
         statusMsg.musicVolume = self.musicPlayer.getSoundVolume()
 
@@ -333,7 +343,7 @@ class PlayheadPublisher(threading.Thread):
                     
     def run(self):
         lastStatusPublish = rospy.Time.now();
-        while not self.stopped:
+        while not self.stopped and not rospy.is_shutdown():
             # Time to publish a general status message?
             if (rospy.Time.now() - lastStatusPublish).secs >= SpeakEasyServer.STATUS_PUBLICATION_PERIOD:
                     try:
@@ -342,13 +352,13 @@ class PlayheadPublisher(threading.Thread):
                         rospy.logerr(str(sys.exc_info()[1]));
                     lastStatusPublish = rospy.Time.now();
             
-            while self.musicPlayer.getPlayStatus() == PlayStatus.PLAYING:
+            while (self.musicPlayer.getPlayStatus() == PlayStatus.PLAYING) and not self.stopped and not rospy.is_shutdown():
                 self.playheadMsg.playhead_time = self.musicPlayer.getPlayheadPosition();
                 try:
                     self.playhead_pub.publish(self.playheadMsg);
                 except:
                     rospy.logerr(str(sys.exc_info()[1]));
-                time.sleep(PLAYHEAD_PUBLICATION_PERIOD);
+                rospy.sleep(SpeakEasyServer.PLAYHEAD_PUBLICATION_PERIOD);
                 # Time to publish a general status message?
                 if (rospy.Time.now() - lastStatusPublish).secs >= SpeakEasyServer.STATUS_PUBLICATION_PERIOD:
                     try:
@@ -363,7 +373,10 @@ class PlayheadPublisher(threading.Thread):
 if __name__ == '__main__':
     speakEasyServer = SpeakEasyServer();
     rospy.loginfo("SpeakEasy ROS node is ready...")
-    rospy.spin();
-    speakEasyServer.playheadPublisherThread.stop();
+    while not rospy.is_shutdown():
+        rospy.spin();
+    if speakEasyServer.playheadPublisherThread is not None:
+        speakEasyServer.playheadPublisherThread.stop();
     rospy.loginfo("Exiting ROS node SpeakEasy...")
+    sys.exit();
     

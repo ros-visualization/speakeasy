@@ -86,7 +86,7 @@ class TextPanel(QTextEdit):
         # Get text field text as plain text, and convert
         # unicode to ascii, ignoring errors:
         #return self.toPlainText().encode('ascii', 'ignore');
-        return self.toPlainText().toAscii();
+        return self.toPlainText().encode('utf-8');
     
     #----------------------------------
     # isEmpty
