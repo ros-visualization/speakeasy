@@ -182,6 +182,9 @@ class SpeakEasyController(object):
     # Mapping sound file basenames to their full file names:
     soundPathsFull = {};
     
+    # Constant for repeating play of sound/music/voice forever: 
+    FOREVER = -1;
+    
     def __init__(self, dirpath, stand_alone=None):
 
         if stand_alone is None:
@@ -197,6 +200,10 @@ class SpeakEasyController(object):
         self.soundReplayDemons  = [];
         self.sound_file_names   = [];
         self.roboComm = None;
+        # Remember original default play location, so that
+        # we can warn user of the import error condition further
+        # down, when the GUI is up:
+        DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
               
         if self.stand_alone:
             initOK = self.initLocalOperation();
@@ -205,16 +212,11 @@ class SpeakEasyController(object):
             # raises NotImplementedError, or IOError:
             try:
                 self.roboComm = RoboComm();
-                self.speakEasyCapabilities = self.roboComm.getSpeakEasyNodeStatus();
-                self.sound_file_names = self.speakEasyCapabilities.sounds;
+                self.sound_file_names = self.roboComm.getSoundEffectNames();
             except Exception as rosInitFailure:
                 self.rosInitException = rosInitFailure;
                 # Robot init didn't work, fall back to local op:
                 self.stand_alone = True;
-                # Remember original default play location, so that
-                # we can warn user of the import error condition further
-                # down, when the GUI is up:
-                DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
                 self.initLocalOperation();
 
         self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
@@ -226,12 +228,21 @@ class SpeakEasyController(object):
         self.gui.showButtonSignal.connect(standardLookHandler);
 
         # Now that we have the GUI up, we can warn user
-        # if ROS couldn't be imported, yet this app was 
-        # set to control a Ros node:
-        if DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT and self.roboComm is None or not self.roboComm.robotAvailable():
+        # if ROS couldn't be imported, the ROS node wasn't running,
+        # or no SpeakEasy node was available, yet this app was 
+        # set to control a Ros node (rather than running locally):
+        
+        if DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT and\
+            self.roboComm is None or\
+            not self.roboComm.robotAvailable():
             self.dialogService.showErrorMsg("Application was set to control sound on robot, but: %s. Switching to local operation." %
                                             str(self.rosInitException));
+    
+
+        if stand_alone:
             self.gui.setWhereToPlay(PlayLocation.LOCALLY);
+        else:
+            self.gui.setWhereToPlay(PlayLocation.ROBOT);
             
         self.dirpath = dirpath;
         
@@ -307,7 +318,7 @@ class SpeakEasyController(object):
             return self.getAvailableLocalSoundEffectFileNames();
 
         # Get sound effect names from SpeakEasy ROS node:
-        
+            return self.roboComm.getSoundEffectNames();
         
     #----------------------------------
     # getAvailableLocalSoundEffectFileNames 
@@ -381,7 +392,7 @@ class SpeakEasyController(object):
             if sayOnce:
                 self.roboComm.say(text, voice=voice, ttsEngine=ttsEngine);
             else:
-                self.roboComm.repeat(text, voice=voice, ttsEngine=ttsEngine, repeatPeriod=self.gui.getPlayRepeatPeriod());
+                self.roboComm.say(text, voice=voice, ttsEngine=ttsEngine, numRepeats=SpeakEasyController.FOREVER, repeatPeriod=self.gui.getPlayRepeatPeriod());
         return;
     
     #----------------------------------
@@ -390,8 +401,8 @@ class SpeakEasyController(object):
             
     def actionRecorderButtons(self, buttonObj):
         '''
-        Handler for one of the recorder buttons pushed.
-        this handler, because it is fast. However, 
+        Handler for one of the recorder buttons pushed:
+        Play Text, or Stop.
         @param buttonObj: The button object that was pushed.
         @type  buttonObj: QPushButton
         '''
@@ -434,10 +445,9 @@ class SpeakEasyController(object):
                     self.soundReplayDemons = []; 
                 self.soundPlayer.stop();
             else: # Robot op
-                # If nothing in text input field, then we are not playing text:
-                if not self.gui.speechInputFld.isEmpty():
-                    return;
-                self.soundClient.stopSaying(self.gui.speechInputFld.getText());
+                self.roboComm.stopSaying();
+                self.roboComm.stopSound();
+                #self.roboComm.stopMusic();
                 return;
         
     #----------------------------------
@@ -534,8 +544,13 @@ class SpeakEasyController(object):
             except KeyError:
                 raise ValueError("Unknown widget passed to actionSoundButton() method: " + str(buttonObj));
             if buttonObj == oneButtonObj:
-                 soundFile = SpeakEasyController.soundPaths[soundKey];
-                 break;
+                # For local operation, sound effect button labels are keys
+                # to a dict that maps to the local file names:
+                if self.stand_alone:
+                    soundFile = SpeakEasyController.soundPaths[soundKey];
+                else:
+                    soundFile = buttonObj.text();
+                break;
             else:
                 soundIndx += 1;
         
@@ -557,9 +572,10 @@ class SpeakEasyController(object):
                 self.dialogService.showErrorMsg(str(e));
                 return
         else: # Robot operation
-            self.soundClient.sendMsg(SpeakEasyRequest.PLAY_FILE,
-    	                             SpeakEasyRequest.PLAY_START,
-    				                 soundFile);
+            if self.gui.playRepeatedlyChecked():
+                self.roboComm.playSound(soundFile, numRepeats=SpeakEasyController.FOREVER, repeatPeriod=self.gui.getPlayRepeatPeriod());
+            else:
+                self.roboComm.playSound(soundFile);
         
     # ------------------------- Changing and Adding Button Programs --------------
         
@@ -702,6 +718,7 @@ class SpeakEasyController(object):
     
     # --------------------------------------------   Replay Demon -------------------------------
     
+    # Only used for local operation:
     class ReplayDemon(threading.Thread):
         
         def __init__(self, repeatPeriod):

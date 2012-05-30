@@ -83,6 +83,13 @@ class RoboComm(object):
         self.textToSpeechLock = threading.Lock();
         self.musicLock        = threading.Lock();
         self.soundLock        = threading.Lock();
+        
+        # Place to remember threads that repeat voice/sound/music.
+        # These lists are used when stopping those threads:
+        self.speechThreads = [];
+        self.soundThreads  = [];
+        self.musicThreads  = [];
+        
 
         # init_node hangs indefinitely if roscore is not running.
         # Therefore: check for that. If roscore isn't running,
@@ -322,7 +329,7 @@ class RoboComm(object):
         @type voice: string
         @param ttsEngine: Name of text-to-speech engine to use.
         @type ttsEngine: string
-        @param numRepeats: Number of times the utterance is to be repeated after the first time.
+        @param numRepeats: Number of times the utterance is to be repeated after the first time. Use -1 if forever.
         @type numRepeats: int
         @param repeatPeriod: Time period in fractional seconds to wait between repeated utterances.
         @type repeatPeriod: float
@@ -350,8 +357,13 @@ class RoboComm(object):
             
         with self.textToSpeechLock:        
             self.rosTTSRequestor.publish(ttsRequestMsg);
-        if numRepeats > 0:
-            RoboComm.SpeechReplayDemon(text, voice, ttsEngine, numRepeats, repeatPeriod, self).start();
+            
+        # Keep this block out of the lock! Thread registration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        if numRepeats > 0 or numRepeats == -1:
+            speechRepeatThread = RoboComm.SpeechReplayDemon(text, voice, ttsEngine, numRepeats, repeatPeriod, self);
+            self.registerSpeechRepeaterThread(speechRepeatThread); 
+            speechRepeatThread.start();
             
         if blockTillDone:
             while self.getTextToSpeechBusy():
@@ -361,10 +373,14 @@ class RoboComm(object):
         '''
         Stop text-to-speech utterance. No effect if text-to-speech is currently inactive.
         '''
-        self.ttsRequestMsg.command = TTSCommands.STOP;
+        ttsRequestMsg = SpeakEasyTextToSpeech();
+        ttsRequestMsg.command = TTSCommands.STOP;
         with self.textToSpeechLock:
-            self.rosTTSRequestor.publish(self.ttsRequestMsg);
-    
+            self.rosTTSRequestor.publish(ttsRequestMsg);
+
+        # Keep this following statement out of the lock! Thread unregistration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        self.killSpeechRepeatThreads(self.speechThreads);
     
     # --------------------------------------------   Sound Effects  -------------------------------
     
@@ -375,7 +391,7 @@ class RoboComm(object):
         @type soundName: string
         @param volume: Loudness for the sound effect. If None, current volume is used. Volume must be in range 0.0 to 1.0
         @type volume: float.
-        @param numRepeats: Number of times the sound effect is to be repeated after the first time.
+        @param numRepeats: Number of times the sound effect is to be repeated after the first time.  Use -1 to play forever.
         @type numRepeats: int
         @param repeatPeriod: Time period in fractional seconds to wait between repeats.
         @type repeatPeriod: float
@@ -397,8 +413,13 @@ class RoboComm(object):
 
         with self.soundLock:
             self.rosSoundRequestor.publish(soundReqMsg);
-        if numRepeats > 0:
-            RoboComm.SoundReplayDemon(soundName, self, volume=volume, numRepeats=numRepeats, repeatPeriod=repeatPeriod).start();
+            
+        # Keep this block out of the lock! Thread registration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        if numRepeats > 0 or numRepeats == -1:
+            soundRepeatThread = RoboComm.SoundReplayDemon(soundName, self, volume=volume, numRepeats=numRepeats, repeatPeriod=repeatPeriod);
+            self.registerSoundRepeaterThread(soundRepeatThread) 
+            soundRepeatThread.start();
 
     def stopSound(self):
         '''
@@ -408,6 +429,10 @@ class RoboComm(object):
         soundReqMsg.command = SoundCommands.STOP;
         with self.soundLock:        
             self.rosSoundRequestor.publish(soundReqMsg);
+            
+        # Keep this following statement out of the lock! Thread unregistration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        self.killSoundRepeatThreads(soundThreads);
         
     def pauseSound(self):
         '''
@@ -462,7 +487,7 @@ class RoboComm(object):
         @param timeReference: If playheadTime is provided, specifies whether the given time is intended as absolute (relative to the
                               beginning of the song), or relative to the current playhead position.
         @type timeReference: TimeReference
-        @param numRepeats: Number of times the song is to be repeated after the first time.
+        @param numRepeats: Number of times the song is to be repeated after the first time. Use -1 to play forever.
         @type numRepeats: int
         @param repeatPeriod: Time period in fractional seconds to wait between repeats.
         @type repeatPeriod: float
@@ -490,8 +515,13 @@ class RoboComm(object):
 
         with self.musicLock:
             self.rosMusicRequestor.publish(musicReqMsg);
-        if numRepeats > 0:
-            RoboComm.MusicReplayDemon(songName, volume, playheadTime, timeReference, numRepeats, repeatPeriod, self).start();
+            
+        # Keep this block out of the lock! Thread registration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        if numRepeats > 0 or numRepeats == -1:
+            musicRepeatThread = RoboComm.MusicReplayDemon(songName, volume, playheadTime, timeReference, numRepeats, repeatPeriod, self);
+            self.registerMusicRepeaterThread(musicRepeatThread);
+            musicRepeatThread.start();
 
     def stopMusic(self):
         '''
@@ -501,6 +531,10 @@ class RoboComm(object):
         musicReqMsg.command = MusicCommands.STOP;
         with self.musicLock:
             self.rosMusicRequestor.publish(musicReqMsg);
+
+        # Keep this following statement out of the lock! Thread unregistration will 
+        # acquire the lock (thus leading to deadlock, if lock is owned here):
+        self.killMusicRepeatThreads(self.musicThreads);
         
     def pauseMusic(self):
         '''
@@ -571,6 +605,59 @@ class RoboComm(object):
         except:
             return None;
     
+    
+    # --------------------------------------------   Repeater Thread Methods -------------------------------
+    
+    #  NOTE:  Do not call methods in this section with the respective
+    #         locks set. You will deadlock. 'Respective' means one
+    #         of self.textToSpeechLock, self.soundLock, self.musicLock.
+    #         See the methods for which lock is relevant.
+    #  These methods are already thread safe.
+    
+    def registerSpeechRepeaterThread(self, speechThread):
+        with self.textToSpeechLock:
+            self.speechThreads.append(speechThread);
+        
+    def killSpeechRepeatThreads(self, speechThreads):
+        speechThread.stop();
+        
+        with self.textToSpeechLock:
+            # Copy list for the loop, b/c unregisterRepeatThread() 
+            # modifies the pass-in list in place:
+            for speechThread in list(speechThreads):
+                self.unregisterRepeatThread(speechThread, self.speechThreads);
+                 
+    def registerSoundRepeaterThread(self, soundThread):
+        with self.soundLock:
+            self.soundThreads.append(soundThread);
+        
+    def killSoundRepeatThreads(self, soundThreads):
+        soundThread.stop();
+        with self.soundLock:
+            # Copy list for the loop, b/c unregisterRepeatThread() 
+            # modifies the pass-in list in place:
+            for soundThread in list(soundThreads):
+                self.unregisterRepeatThread(soundThread, self.soundThreads);
+    
+    def registerMusicRepeaterThread(self, musicThread):
+        with self.musicLock:
+            self.musicThreads.append(musicThread);
+        
+    def killMusicRepeatThreads(self, musicThreads):
+        musicThread.stop();
+        with self.musicLock:
+            # Copy list for the loop, b/c unregisterRepeatThread() 
+            # modifies the pass-in list in place:
+            for musicThread in list(musicThreads):
+                self.unregisterRepeatThread(musicThread, self.musicThreads);
+            
+    def unregisterRepeatThread(self, threadObj, threadList):
+        # NOTE: this method is not re-entrant. Ensure this condition in callers:
+        try:
+            threadList.remove(threadObj);
+        except:
+            pass;
+    
     # --------------------------------------------   Replay Demon Threads -------------------------------
     
     class ReplayDemon(threading.Thread):
@@ -594,18 +681,28 @@ class RoboComm(object):
             self.soundName = soundName;
             self.volume = volume;
             self.numRepeats = numRepeats;
+            if numRepeats == -1:
+                self.playForever = True;
+            else:
+                self.playForever = False;
             self.roboComm = roboComm;
     
         def run(self):
             self.stopped = False;
-            while not self.stopped and (self.numRepeats > 0):
+            while not self.stopped and ((self.numRepeats > 0) or self.playForever):
                 rospy.sleep(self.repeatPeriod);
                 self.roboComm.playSound(self.soundName, volume=self.volume)
-                self.numRepeats -= 1;
+                if not self.playForever:
+                    self.numRepeats -= 1;
+                    
+            with self.roboComm.soundLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.soundThreads);
         
         def stop(self):
             self.stopped = True;
             self.roboComm.stopSound();
+            with self.soundLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.soundThreads);
 
     class MusicReplayDemon(ReplayDemon):
         '''
@@ -620,22 +717,32 @@ class RoboComm(object):
             self.playhead = playhead
             self.timeReference = timeReference
             self.numRepeats = numRepeats
+            if numRepeats == -1:
+                self.playForever = True;
+            else:
+                self.playForever = False;
+            
             self.repeatPeriod = repeatPeriod
     
         def run(self):
             self.stopped = False;
-            while not self.stopped and (self.numRepeats > 0):
+            while not self.stopped and ((self.numRepeats > 0) or self.playForever):
                 rospy.sleep(self.repeatPeriod);
                 self.roboComm.playMusic(self.songName,
                                         volume=self.volume, 
                                         playhead=self.playhead, 
                                         timeReference=self.timeReference); 
-                self.numRepeats -= 1;
+                if not self.playForever:
+                    self.numRepeats -= 1;
+
+            with self.roboComm.musicLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.musicThreads);            
         
         def stop(self):
             self.stopped = True;
             self.roboComm.stopMusic();
-
+            with self.roboComm.musicLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.musicThreads);            
             
     class SpeechReplayDemon(ReplayDemon):
         '''
@@ -647,6 +754,10 @@ class RoboComm(object):
             self.text = text;
             self.voiceName = voiceName;
             self.ttsEngine = ttsEngine;
+            if numRepeats == -1:
+                self.playForever = True;
+            else:
+                self.playForever = False;
             self.numRepeats = numRepeats;
             self.roboComm = roboComm;
             
@@ -654,15 +765,20 @@ class RoboComm(object):
             self.stopped = False;
             while self.roboComm.getTextToSpeechBusy():
                 rospy.sleep(0.5);
-            while not self.stopped and (self.numRepeats > 0):
+            while not self.stopped and ((self.numRepeats > 0) or self.playForever):
                 rospy.sleep(self.repeatPeriod);
                 self.roboComm.say(self.text, voice=self.voiceName, ttsEngine=self.ttsEngine, blockTillDone=True);
-                self.numRepeats -= 1;
+                if not self.playForever:
+                    self.numRepeats -= 1;
+                    
+            with self.roboComm.textToSpeechLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.speechThreads);                     
         
         def stop(self):
             self.stopped = True;
             self.roboComm.stopSaying();
-    
+            with self.roboComm.textToSpeechLock:
+                self.roboComm.unregisterRepeatThread(self, self.roboComm.speechThreads);                     
      
 #---------------------------------------- Testing -------------------------------
     
@@ -730,9 +846,12 @@ if __name__ == '__main__':
         sys.exit();
 
     # Test text to speech:
-#    rospy.loginfo("Testing text-to-speech...");
-#    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
-#    rospy.loginfo("Done testing text-to-speech...\n------------------");
+    rospy.loginfo("Testing text-to-speech...");
+    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
+    rospy.loginfo("Done testing text-to-speech...\n------------------");
+    while len(roboComm.speechThreads) != 0:
+        rospy.loginfo("Waiting for %d speech thread(s) to terminate..." % len(roboComm.speechThreads));
+        rospy.sleep(1.0);
     
     # Test sound effects:
 #    rospy.loginfo("Testing sound effects...");
@@ -766,28 +885,25 @@ if __name__ == '__main__':
 #    roboComm.playMusic("cottonFields", volume=0.9);
 #    rospy.sleep(4);
 #    roboComm.stopMusic();
+#    rospy.loginfo("Done testing music play/pause/unpause/stop.\n------------------");
     
     # Set playhead:
-    rospy.sleep(3);
-    roboComm.playMusic("cottonFields");
-    rospy.sleep(4);
-    roboComm.setPlayhead(10);
-    if not int(roboComm.getPlayhead()) in range(10,13):
-        rospy.logerr("Playhead was not positioned (during playback).")
-    rospy.sleep(4);
-    roboComm.pauseMusic();
-    rospy.sleep(2);
-    roboComm.setPlayhead(20);
-    roboComm.unPauseMusic();
-    if not int(roboComm.getPlayhead()) in range(20,23):
-            rospy.logerr("Playhead was not positioned (after unpause playback).")
-    rospy.sleep(4);
-    roboComm.stopMusic();
-    
-    
-    
-    rospy.loginfo("Done testing music play/pause/unpause/stop.\n------------------")    
-     
-
+#    rospy.loginfo("Testing music playhead setting...")    
+#    rospy.sleep(3);
+#    roboComm.playMusic("cottonFields");
+#    rospy.sleep(4);
+#    roboComm.setPlayhead(10);
+#    if not int(roboComm.getPlayhead()) in range(10,13):
+#        rospy.logerr("Playhead was not positioned (during playback).")
+#    rospy.sleep(4);
+#    roboComm.pauseMusic();
+#    rospy.sleep(2);
+#    roboComm.setPlayhead(20);
+#    roboComm.unPauseMusic();
+#    if not int(roboComm.getPlayhead()) in range(20,23):
+#            rospy.logerr("Playhead was not positioned (after unpause playback).")
+#    rospy.sleep(4);
+#    roboComm.stopMusic();
+#    rospy.loginfo("Done testing music playhead setting.\n------------------");    
     
     rospy.loginfo("Done testing robot_interaction.py")

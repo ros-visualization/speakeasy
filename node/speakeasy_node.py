@@ -120,8 +120,11 @@ class SpeakEasyServer(object):
                     volume = None;
                 
                 # Ensure best effort to find the file:
-                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-                
+                try:
+                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                except ValueError:
+                    rospy.logerr("SpeakEasy error playing a sound: " + self.makeMsg(sys.exc_info()));
+                    return;                    
                 try:
                     self.soundPlayer.play(soundName, blockTillDone=False, volume=volume);
                 except:
@@ -129,7 +132,12 @@ class SpeakEasyServer(object):
             elif soundCmd == SpeakEasyServer.STOP:
                 soundName = req.sound_name;
                 # Ensure best effort to find the file:
-                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+
+                try:                
+                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                except ValueError:
+                    rospy.logerr("SpeakEasy error stopping a sound: " + self.makeMsg(sys.exc_info()));
+                    return;                    
                 try:
                     self.soundPlayer.stop(soundName=soundName);
                 except:
@@ -137,7 +145,12 @@ class SpeakEasyServer(object):
             elif soundCmd == SpeakEasyServer.PAUSE:
                 soundName = req.sound_name;
                 # Ensure best effort to find the file:
-                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                
+                try:
+                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                except ValueError:
+                    rospy.logerr("SpeakEasy error pausing a sound: " + self.makeMsg(sys.exc_info()));
+                    return;                    
                 try:
                     self.soundPlayer.pause(soundName=soundName);
                 except:
@@ -145,7 +158,12 @@ class SpeakEasyServer(object):
             elif soundCmd == SpeakEasyServer.UNPAUSE:
                 soundName = req.sound_name;
                 # Ensure best effort to find the file:
-                soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                try:
+                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                except ValueError:
+                    rospy.logerr("SpeakEasy error un-pausing a sound: " + self.makeMsg(sys.exc_info()));
+                    return;                    
+                    
                 try:
                     self.soundPlayer.unpause(soundName=soundName);
                 except:
@@ -154,8 +172,12 @@ class SpeakEasyServer(object):
                 volume = req.volume;
                 soundName = req.sound_name;
                 # Ensure best effort to find the file:
-                if len(soundName) > 0: 
-                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                if len(soundName) > 0:
+                    try: 
+                        soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                    except ValueError:
+                        rospy.logerr("SpeakEasy error setting volume for a sound: " + self.makeMsg(sys.exc_info()));
+                        return;                    
                 else:
                     soundName = None;
                 try:
@@ -181,7 +203,11 @@ class SpeakEasyServer(object):
                     volume = None;
     
                 # Ensure best effort to find the file:
-                songName = self.toFullPath(songName, SpeakEasyServer.musicNameToFileDict);
+                try:
+                    songName = self.toFullPath(songName, SpeakEasyServer.musicNameToFileDict);
+                except ValueError:
+                    rospy.logerr("SpeakEasy error playing a song: " + self.makeMsg(sys.exc_info()));
+                    return;                    
                 
                 try:
                     self.musicPlayer.play(songName, repeats=repeats, startTime=startTime, blockTillDone=False, volume=volume);
