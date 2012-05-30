@@ -103,7 +103,7 @@ class SpeakEasyServer(object):
                     self.ttsProvider.say(text, voiceName, engine)
                 except:
                     rospy.logerr("Error in received TextToSpeech.msg message caused text-to-speech error: " + self.makeMsg(sys.exc_info()));
-            elif ttxCmt == SpeakEasyServer.STOP:
+            elif ttsCmd == SpeakEasyServer.STOP:
                 self.ttsProvider.stop();
             else:
                 rospy.logerr("Incorrect command type in received TextToSpeech.msg message: " + str(ttsCmd));
@@ -131,57 +131,65 @@ class SpeakEasyServer(object):
                     rospy.logerr("Error in received SoundPlay.msg message caused sound play error: " + self.makeMsg(sys.exc_info()));
             elif soundCmd == SpeakEasyServer.STOP:
                 soundName = req.sound_name;
+                if len(soundName) == 0:
+                    soundName = None;
                 # Ensure best effort to find the file:
-
-                try:                
-                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-                except ValueError:
-                    rospy.logerr("SpeakEasy error stopping a sound: " + self.makeMsg(sys.exc_info()));
-                    return;                    
+                if soundName is not None:
+                    try:                
+                        soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                    except ValueError:
+                        rospy.logerr("SpeakEasy error stopping a sound: " + self.makeMsg(sys.exc_info()));
+                        return;                    
                 try:
-                    self.soundPlayer.stop(soundName=soundName);
+                    self.soundPlayer.stop(whatToStop=soundName);
                 except:
                     rospy.logerr("Error while calling sound player command 'stop': " + self.makeMsg(sys.exc_info()));
             elif soundCmd == SpeakEasyServer.PAUSE:
                 soundName = req.sound_name;
-                # Ensure best effort to find the file:
-                
+                if len(soundName) == 0:
+                    soundName = None;
+                if soundName is not None:
+                    # Ensure best effort to find the file:
+                    try:
+                        soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                    except ValueError:
+                        rospy.logerr("SpeakEasy error pausing a sound: " + self.makeMsg(sys.exc_info()));
+                        return;                    
                 try:
-                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-                except ValueError:
-                    rospy.logerr("SpeakEasy error pausing a sound: " + self.makeMsg(sys.exc_info()));
-                    return;                    
-                try:
-                    self.soundPlayer.pause(soundName=soundName);
+                    self.soundPlayer.pause(whatToPause=soundName);
                 except:
                     rospy.logerr("Error while calling sound player command 'pause': " + self.makeMsg(sys.exc_info()));
             elif soundCmd == SpeakEasyServer.UNPAUSE:
                 soundName = req.sound_name;
-                # Ensure best effort to find the file:
-                try:
-                    soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
-                except ValueError:
-                    rospy.logerr("SpeakEasy error un-pausing a sound: " + self.makeMsg(sys.exc_info()));
-                    return;                    
+                if len(soundName) == 0:
+                    soundName = None;
+                if soundName is not None:
+                    # Ensure best effort to find the file:
+                    try:
+                        soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
+                    except ValueError:
+                        rospy.logerr("SpeakEasy error un-pausing a sound: " + self.makeMsg(sys.exc_info()));
+                        return;                    
                     
                 try:
-                    self.soundPlayer.unpause(soundName=soundName);
+                    self.soundPlayer.unpause(whatToUnPause=soundName);
                 except:
                     rospy.logerr("Error while calling sound player command 'unpause': " + self.makeMsg(sys.exc_info()));
             elif soundCmd == SpeakEasyServer.SET_VOL:
                 volume = req.volume;
                 soundName = req.sound_name;
-                # Ensure best effort to find the file:
-                if len(soundName) > 0:
+                if len(soundName) == 0:
+                    soundName = None;
+
+                if soundName is not None:
+                    # Ensure best effort to find the file:
                     try: 
                         soundName = self.toFullPath(soundName, SpeakEasyServer.soundNameToFileDict);
                     except ValueError:
                         rospy.logerr("SpeakEasy error setting volume for a sound: " + self.makeMsg(sys.exc_info()));
                         return;                    
-                else:
-                    soundName = None;
                 try:
-                    self.soundPlayer.setSoundVolume(volume, soundName);
+                    self.soundPlayer.setSoundVolume(volume, whatToSetVolFor=soundName);
                     # Update latched status message to reflect this new volume:
                     self.publishStatus();
                 except:
@@ -354,7 +362,7 @@ class SpeakEasyServer(object):
         try:
             return musicOrSoundDict[baseNameNoExt]
         except KeyError:
-            raise ValueError("Sound or music name %s is unknown on this SpeakEasy node." % soundName);
+            raise ValueError("Sound or music name '%s' is unknown on this SpeakEasy node." % soundName);
             
         
 

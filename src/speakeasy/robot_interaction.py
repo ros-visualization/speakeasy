@@ -21,6 +21,18 @@ except ImportError:
 
 from utilities.speakeasy_utils import SpeakeasyUtils 
 
+def run(self):
+   
+    # To enable breakpoint processing in Eclipse plugin
+    # pydev, we need the following. The Try/Except will
+    # fail harmlessly if running outside of Eclipse:
+    try:
+        import pydevd
+        pydevd.connected = True
+        pydevd.settrace(suspend=False)
+    except:
+        pass;
+
 
 class TTSCommands:
     SAY  = 0;
@@ -432,7 +444,7 @@ class RoboComm(object):
             
         # Keep this following statement out of the lock! Thread unregistration will 
         # acquire the lock (thus leading to deadlock, if lock is owned here):
-        self.killSoundRepeatThreads(soundThreads);
+        self.killSoundRepeatThreads(self.soundThreads);
         
     def pauseSound(self):
         '''
@@ -618,38 +630,34 @@ class RoboComm(object):
         with self.textToSpeechLock:
             self.speechThreads.append(speechThread);
         
-    def killSpeechRepeatThreads(self, speechThreads):
-        speechThread.stop();
-        
+    def killSpeechRepeatThreads(self, speechThreads):      
         with self.textToSpeechLock:
             # Copy list for the loop, b/c unregisterRepeatThread() 
             # modifies the pass-in list in place:
             for speechThread in list(speechThreads):
-                self.unregisterRepeatThread(speechThread, self.speechThreads);
+                speechThread.stop();
                  
     def registerSoundRepeaterThread(self, soundThread):
         with self.soundLock:
             self.soundThreads.append(soundThread);
         
     def killSoundRepeatThreads(self, soundThreads):
-        soundThread.stop();
         with self.soundLock:
             # Copy list for the loop, b/c unregisterRepeatThread() 
             # modifies the pass-in list in place:
             for soundThread in list(soundThreads):
-                self.unregisterRepeatThread(soundThread, self.soundThreads);
+                soundThread.stop();
     
     def registerMusicRepeaterThread(self, musicThread):
         with self.musicLock:
             self.musicThreads.append(musicThread);
         
     def killMusicRepeatThreads(self, musicThreads):
-        musicThread.stop();
         with self.musicLock:
             # Copy list for the loop, b/c unregisterRepeatThread() 
             # modifies the pass-in list in place:
             for musicThread in list(musicThreads):
-                self.unregisterRepeatThread(musicThread, self.musicThreads);
+                musicThread.stop();
             
     def unregisterRepeatThread(self, threadObj, threadList):
         # NOTE: this method is not re-entrant. Ensure this condition in callers:
@@ -700,7 +708,6 @@ class RoboComm(object):
         
         def stop(self):
             self.stopped = True;
-            self.roboComm.stopSound();
             with self.soundLock:
                 self.roboComm.unregisterRepeatThread(self, self.roboComm.soundThreads);
 
@@ -740,7 +747,6 @@ class RoboComm(object):
         
         def stop(self):
             self.stopped = True;
-            self.roboComm.stopMusic();
             with self.roboComm.musicLock:
                 self.roboComm.unregisterRepeatThread(self, self.roboComm.musicThreads);            
             
@@ -776,7 +782,6 @@ class RoboComm(object):
         
         def stop(self):
             self.stopped = True;
-            self.roboComm.stopSaying();
             with self.roboComm.textToSpeechLock:
                 self.roboComm.unregisterRepeatThread(self, self.roboComm.speechThreads);                     
      
@@ -846,12 +851,12 @@ if __name__ == '__main__':
         sys.exit();
 
     # Test text to speech:
-    rospy.loginfo("Testing text-to-speech...");
-    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
-    rospy.loginfo("Done testing text-to-speech...\n------------------");
-    while len(roboComm.speechThreads) != 0:
-        rospy.loginfo("Waiting for %d speech thread(s) to terminate..." % len(roboComm.speechThreads));
-        rospy.sleep(1.0);
+#    rospy.loginfo("Testing text-to-speech...");
+#    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
+#    rospy.loginfo("Done testing text-to-speech...\n------------------");
+    #while len(roboComm.speechThreads) != 0:
+    #    rospy.loginfo("Waiting for %d speech thread(s) to terminate..." % len(roboComm.speechThreads));
+    #    rospy.sleep(3.0);
     
     # Test sound effects:
 #    rospy.loginfo("Testing sound effects...");

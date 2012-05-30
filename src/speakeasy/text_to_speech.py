@@ -69,7 +69,13 @@ class TextToSpeechProvider(object):
         
 
     def stop(self):
-        self.lastUsedEngineObj.stop();
+        '''
+        Stop text-to-speech that is currently playing.
+        '''
+        # Stop might be called before any tts was played.
+        # Therefore the test for None:
+        if self.lastUsedEngineObj is not None:
+            self.lastUsedEngineObj.stop();
 
     def busy(self):
         '''
