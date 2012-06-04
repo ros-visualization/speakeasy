@@ -24,8 +24,6 @@ from utilities.speakeasy_utils import SpeakeasyUtils;
 from sound_player import SoundPlayer;
 from text_to_speech import TextToSpeechProvider;
 
-from speakeasy.msg import SpeakEasyRequest;
-
 from robot_interaction import RoboComm;
 
 from speakeasy_ui import SpeakEasyGUI;
@@ -169,12 +167,6 @@ class SpeakEasyController(object):
 	Festival: 1.  Usually voice_kal_diphone (male) on Ubuntu installations
 	Cepstral: Depends on your installation.       
             
-    Available built-in, hardwired sounds (legacy from original sound_play_node.py):
-	- C{msg.SpeakEasyRequest.BACKINGUP}
-	- C{msg.SpeakEasyRequest.NEEDS_UNPLUGGING}
-	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING}
-	- C{msg.SpeakEasyRequest.NEEDS_UNPLUGGING_BADLY}
-	- C{msg.SpeakEasyRequest.NEEDS_PLUGGING_BADLY}
     '''
     
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
@@ -189,7 +181,7 @@ class SpeakEasyController(object):
 
         if stand_alone is None:
             stand_alone = (DEFAULT_PLAY_LOCATION == PlayLocation.LOCALLY);
-        
+        originalStandAlone = stand_alone
         
         self.stand_alone = stand_alone;
         self.gui = None;
@@ -200,24 +192,19 @@ class SpeakEasyController(object):
         self.soundReplayDemons  = [];
         self.sound_file_names   = [];
         self.roboComm = None;
+        
+        localInit = False;
+        robotInit = False;
+        
         # Remember original default play location, so that
         # we can warn user of the import error condition further
         # down, when the GUI is up:
         DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
               
         if self.stand_alone:
-            initOK = self.initLocalOperation();
+            localInit = self.initLocalOperation();
         else: # Robot operation
-            # Try to initialize ROS. If that does not work, instantiation
-            # raises NotImplementedError, or IOError:
-            try:
-                self.roboComm = RoboComm();
-                self.sound_file_names = self.roboComm.getSoundEffectNames();
-            except Exception as rosInitFailure:
-                self.rosInitException = rosInitFailure;
-                # Robot init didn't work, fall back to local op:
-                self.stand_alone = True;
-                self.initLocalOperation();
+            robotInit = self.initROSOperation();
 
         self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
         self.dialogService = DialogService(self.gui);
@@ -232,12 +219,9 @@ class SpeakEasyController(object):
         # or no SpeakEasy node was available, yet this app was 
         # set to control a Ros node (rather than running locally):
         
-        if DEFAULT_PLAY_LOCATION_ORIG == PlayLocation.ROBOT and\
-            self.roboComm is None or\
-            not self.roboComm.robotAvailable():
+        if originalStandAlone == PlayLocation.ROBOT and not robotInit:
             self.dialogService.showErrorMsg("Application was set to control sound on robot, but: %s. Switching to local operation." %
                                             str(self.rosInitException));
-    
 
         if stand_alone:
             self.gui.setWhereToPlay(PlayLocation.LOCALLY);
@@ -269,7 +253,34 @@ class SpeakEasyController(object):
         if self.textToSpeechPlayer is None:
             self.textToSpeechPlayer = TextToSpeechProvider();
         self.sound_file_names = self.getAvailableSoundEffectFileNames(stand_alone=True);
+        self.stand_alone = True;
         return True;
+
+    #----------------------------------
+    # initROSOperation 
+    #--------------
+    
+    def initROSOperation(self):
+        '''
+        Try to initialize operation through ROS messages to 
+        a SpeakEasy ROS node. If that init fails, revert to local
+        operation.
+        @return: True if ROS operation init succeeded. Else, if local ops was initiated instead, 
+                 return False.
+        @rtype: bool
+        '''
+        # Try to initialize ROS. If that does not work, instantiation
+        # raises NotImplementedError, or IOError:
+        try:
+            self.roboComm = RoboComm();
+            self.sound_file_names = self.roboComm.getSoundEffectNames();
+            self.stand_alone = False;
+            return True
+        except Exception as rosInitFailure:
+            self.rosInitException = rosInitFailure;
+            # Robot init didn't work, fall back to local op:
+            self.initLocalOperation();
+            return False
         
     #----------------------------------
     # connectWidgetsToActions 
@@ -286,8 +297,16 @@ class SpeakEasyController(object):
         newSpeechSetButton.clicked.connect(self.actionNewSpeechSet);
         pickSpeechSetButton = self.gui.speechSetButtonDict[SpeakEasyGUI.interactionWidgets['PICK_SPEECH_SET']];
         pickSpeechSetButton.clicked.connect(self.actionPickSpeechSet);
-    
 
+        # Location where to play: Locally, or at the Robot:
+        for radioButton in self.gui.playLocalityRadioButtonsDict.values():
+            if radioButton.text() == "Play at robot":
+                radioButton.clicked.connect(partial(self.actionWhereToPlayRadioButton, PlayLocation.ROBOT));
+            else:
+                radioButton.clicked.connect(partial(self.actionWhereToPlayRadioButton, PlayLocation.LOCALLY));
+        
+        self.gui.replayPeriodSpinBox.valueChanged.connect(self.actionRepeatPeriodChanged);
+        
     def connectProgramButtonsToActions(self):
         for programButton in self.gui.programButtonDict.values():
             programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
@@ -432,24 +451,43 @@ class SpeakEasyController(object):
         # Stop button pushed?
         buttonKey = self.gui.interactionWidgets['STOP'];
         if buttonObj == self.gui.recorderButtonDict[buttonKey]:
-            if self.stand_alone:
-                if self.textToSpeechPlayer.busy():
-                    if len(self.speechReplayDemons) > 0:
-                        for speechDemon in self.speechReplayDemons:
-                            speechDemon.stop();
-                        self.speechReplayDemons = [];
-                    self.textToSpeechPlayer.stop();
-                if len(self.soundReplayDemons) > 0:
-                    for soundDemon in self.soundReplayDemons:
-                        soundDemon.stop();
-                    self.soundReplayDemons = []; 
-                self.soundPlayer.stop();
-            else: # Robot op
-                self.roboComm.stopSaying();
-                self.roboComm.stopSound();
-                #self.roboComm.stopMusic();
-                return;
-        
+            self.stopAll();
+            
+    #----------------------------------
+    #  stopAll
+    #--------------
+    
+    def stopAll(self):
+        if self.stand_alone:
+            if len(self.speechReplayDemons) > 0:
+                for speechDemon in self.speechReplayDemons:
+                    speechDemon.stop();
+                self.speechReplayDemons = [];
+            self.textToSpeechPlayer.stop();
+            if len(self.soundReplayDemons) > 0:
+                for soundDemon in self.soundReplayDemons:
+                    soundDemon.stop();
+            self.soundReplayDemons = []; 
+            
+            self.soundPlayer.stop();
+            self.textToSpeechPlayer.stop();
+        else: # Robot op
+            self.roboComm.stopSaying();
+            self.roboComm.stopSound();
+            return;
+    
+    #----------------------------------
+    #  actionWhereToPlayRadioButton
+    #--------------
+    
+    def actionWhereToPlayRadioButton(self, playLocation):
+        if playLocation == PlayLocation.LOCALLY:
+            self.stopAll();
+            self.initLocalOperation();
+        elif playLocation == PlayLocation.ROBOT:
+            self.stopAll();
+            self.initROSOperation();
+    
     #----------------------------------
     # actionProgramButtons 
     #--------------
@@ -611,7 +649,7 @@ class SpeakEasyController(object):
             shutil.copy(fileName, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"));
         except:
             rospy.logerr("Could not copy new program XML file to default.xml.");
-
+        self.dialogService.showInfoMessage("New speech set created.");
 
     #----------------------------------
     # actionPickSpeechSet
@@ -651,6 +689,16 @@ class SpeakEasyController(object):
         # loaded next time the application starts:
         
         ButtonSavior.saveToFile(buttonPrograms, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"), title="default.xml");      
+    
+    
+    #----------------------------------
+    # actionRepeatPeriodChanged 
+    #--------------
+      
+    def actionRepeatPeriodChanged(self):
+        # If the repeat period is changed on its spinbox,
+        # automatically select 'Play repeatedly':
+        self.gui.setPlayRepeatedlyChecked();
         
     #----------------------------------
     # installDefaultSpeechSet

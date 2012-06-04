@@ -2,6 +2,7 @@
 
 import threading;
 import unittest;
+import time;
 
 from speakeasy.msg import SpeakEasyStatus;
 from speakeasy.msg import SpeakEasyMusic, SpeakEasySound, SpeakEasyPlayhead, SpeakEasyTextToSpeech;
@@ -20,18 +21,6 @@ except ImportError:
 
 
 from utilities.speakeasy_utils import SpeakeasyUtils 
-
-def run(self):
-   
-    # To enable breakpoint processing in Eclipse plugin
-    # pydev, we need the following. The Try/Except will
-    # fail harmlessly if running outside of Eclipse:
-    try:
-        import pydevd
-        pydevd.connected = True
-        pydevd.settrace(suspend=False)
-    except:
-        pass;
 
 
 class TTSCommands:
@@ -631,33 +620,30 @@ class RoboComm(object):
             self.speechThreads.append(speechThread);
         
     def killSpeechRepeatThreads(self, speechThreads):      
-        with self.textToSpeechLock:
-            # Copy list for the loop, b/c unregisterRepeatThread() 
-            # modifies the pass-in list in place:
-            for speechThread in list(speechThreads):
-                speechThread.stop();
+        # Copy list for the loop, b/c unregisterRepeatThread() 
+        # modifies the pass-in list in place:
+        for speechThread in list(speechThreads):
+            speechThread.stop();
                  
     def registerSoundRepeaterThread(self, soundThread):
         with self.soundLock:
             self.soundThreads.append(soundThread);
         
     def killSoundRepeatThreads(self, soundThreads):
-        with self.soundLock:
-            # Copy list for the loop, b/c unregisterRepeatThread() 
-            # modifies the pass-in list in place:
-            for soundThread in list(soundThreads):
-                soundThread.stop();
+        # Copy list for the loop, b/c unregisterRepeatThread() 
+        # modifies the pass-in list in place:
+        for soundThread in list(soundThreads):
+            soundThread.stop();
     
     def registerMusicRepeaterThread(self, musicThread):
         with self.musicLock:
             self.musicThreads.append(musicThread);
         
     def killMusicRepeatThreads(self, musicThreads):
-        with self.musicLock:
-            # Copy list for the loop, b/c unregisterRepeatThread() 
-            # modifies the pass-in list in place:
-            for musicThread in list(musicThreads):
-                musicThread.stop();
+        # Copy list for the loop, b/c unregisterRepeatThread() 
+        # modifies the pass-in list in place:
+        for musicThread in list(musicThreads):
+            musicThread.stop();
             
     def unregisterRepeatThread(self, threadObj, threadList):
         # NOTE: this method is not re-entrant. Ensure this condition in callers:
@@ -675,8 +661,25 @@ class RoboComm(object):
         
         def __init__(self, repeatPeriod):
             super(RoboComm.ReplayDemon, self).__init__();
+
+            # Ensure that this thread dies if only deamons like this repeat
+            # thread are left running:
+            self.daemon = True;
+            
             self.repeatPeriod = repeatPeriod;
             self.stopped = True;
+
+        def setName(self, nameRoot):
+            '''
+            Set this thread's name to nameRoot plus time-and-date.
+            @param nameRoot: Prefix of the thread name. E.g. "speechRepeatThread'
+            @type nameRoot: string
+            '''
+            # Get current time in the form 'Thu_May_31_09:51':
+            timeStr = time.strftime("%a_%b_%d_%H:%M")
+
+            name = nameRoot + "_" + timeStr;
+            self.name = name;  
             
     class SoundReplayDemon(ReplayDemon):
         '''
@@ -685,6 +688,7 @@ class RoboComm(object):
         
         def __init__(self, soundName, roboComm, volume=None, numRepeats=0, repeatPeriod=0):
             super(RoboComm.SoundReplayDemon, self).__init__(repeatPeriod);
+            self.setName("soundReplayThread");
 
             self.soundName = soundName;
             self.volume = volume;
@@ -696,9 +700,21 @@ class RoboComm(object):
             self.roboComm = roboComm;
     
         def run(self):
+            # To enable breakpoint processing in Eclipse plugin
+            # pydev, we need the following. The Try/Except will
+            # fail harmlessly if running outside of Eclipse:
+            try:
+                import pydevd
+                pydevd.connected = True
+                pydevd.settrace(suspend=False)
+            except:
+                pass;
+            
             self.stopped = False;
             while not self.stopped and ((self.numRepeats > 0) or self.playForever):
-                rospy.sleep(self.repeatPeriod);
+                # Note: rospy.sleep() does not seem to release the Global Interpreter Lock.
+                #       => Thread would not release control. Must use time.sleep():
+                time.sleep(self.repeatPeriod);
                 self.roboComm.playSound(self.soundName, volume=self.volume)
                 if not self.playForever:
                     self.numRepeats -= 1;
@@ -708,7 +724,7 @@ class RoboComm(object):
         
         def stop(self):
             self.stopped = True;
-            with self.soundLock:
+            with self.roboComm.soundLock:
                 self.roboComm.unregisterRepeatThread(self, self.roboComm.soundThreads);
 
     class MusicReplayDemon(ReplayDemon):
@@ -718,6 +734,8 @@ class RoboComm(object):
         
         def __init__(self, songName, roboComm, volume=None, playhead=0.0, timeReference=TimeReference.ABSOLUTE, numRepeats=0, repeatPeriod=0):
             super(RoboComm.SoundReplayDemon, self).__init__(repeatPeriod);
+            self.setName("musicReplayThread");
+                        
             self.songName = songName
             self.roboComm = roboComm
             self.volume = volume
@@ -732,9 +750,21 @@ class RoboComm(object):
             self.repeatPeriod = repeatPeriod
     
         def run(self):
+            # To enable breakpoint processing in Eclipse plugin
+            # pydev, we need the following. The Try/Except will
+            # fail harmlessly if running outside of Eclipse:
+            try:
+                import pydevd
+                pydevd.connected = True
+                pydevd.settrace(suspend=False)
+            except:
+                pass;
+            
             self.stopped = False;
             while not self.stopped and ((self.numRepeats > 0) or self.playForever):
-                rospy.sleep(self.repeatPeriod);
+                # Note: rospy.sleep() does not seem to release the Global Interpreter Lock.
+                #       => Thread would not release control. Must use time.sleep():
+                time.sleep(self.repeatPeriod);
                 self.roboComm.playMusic(self.songName,
                                         volume=self.volume, 
                                         playhead=self.playhead, 
@@ -757,6 +787,8 @@ class RoboComm(object):
             
         def __init__(self, text, voiceName, ttsEngine, numRepeats, repeatPeriod, roboComm):
             super(RoboComm.SpeechReplayDemon, self).__init__(repeatPeriod);
+            self.setName("speechReplayThread");
+            
             self.text = text;
             self.voiceName = voiceName;
             self.ttsEngine = ttsEngine;
@@ -768,11 +800,25 @@ class RoboComm(object):
             self.roboComm = roboComm;
             
         def run(self):
+            # To enable breakpoint processing in Eclipse plugin
+            # pydev, we need the following. The Try/Except will
+            # fail harmlessly if running outside of Eclipse:
+            try:
+                import pydevd
+                pydevd.connected = True
+                pydevd.settrace(suspend=False)
+            except:
+                pass;
+            
             self.stopped = False;
             while self.roboComm.getTextToSpeechBusy():
-                rospy.sleep(0.5);
+                # Note: rospy.sleep() does not seem to release the Global Interpreter Lock.
+                #       => Thread would not release control. Must use time.sleep():
+                time.sleep(0.5);
             while not self.stopped and ((self.numRepeats > 0) or self.playForever):
-                rospy.sleep(self.repeatPeriod);
+                # Note: rospy.sleep() does not seem to release the Global Interpreter Lock.
+                #       => Thread would not release control. Must use time.sleep():
+                time.sleep(self.repeatPeriod);
                 self.roboComm.say(self.text, voice=self.voiceName, ttsEngine=self.ttsEngine, blockTillDone=True);
                 if not self.playForever:
                     self.numRepeats -= 1;
@@ -811,31 +857,31 @@ class TestRobotInteraction(unittest.TestCase):
     def tearDown(self):
         pass;
 
-    unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
+    #unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
     def testVolumeGetting(self):
         import math;
         self.assertEqual(math.ceil(self.roboComm.getMusicVolume()), 1.0, "Get music volume failed.");
         self.assertEqual(math.ceil(self.roboComm.getSoundVolume()), 1.0, "Get music volume failed.");
 
-    unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
+    #unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
     def testPlayStatus(self):
         self.assertEqual(self.roboComm.getPlayStatus(), 0, "Play status is not 'stopped'");
 
-    unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
+    #unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
     def testNumChannels(self):
         self.assertEqual(self.roboComm.getNumSoundChannels(cachedOK=True), 8, "Wrong number of sound channels.");
 
-    unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
+    #unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')
     def testVoiceAndTtsEngineNames(self):
         self.assertIn('voice_kal_diphone', self.roboComm.getVoiceNames('festival',cachedOK=True), "Festival engine not reported to contain 'voice_kal_diphone'");
         self.assertIn('festival', self.roboComm.getTextToSpeechEngineNames(), "Festival engine not reported as present.");
     
-    unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')    
+    #unittest.skipUnless(TestGroup.STATUS_MSGS in groupsToTest, 'Not testing for status message processing.')    
     def testSongAndSoundNames(self):
         self.assertIn('cottonFields.ogg', self.roboComm.getSongNames(), "Cottonfields not reported as present in available music.");
         self.assertIn('drill.wav', self.roboComm.getSoundEffectNames(), "Drill.wav not reported as present in sounds.");
     
-    unittest.skipUnless(TestGroup.TTS in groupsToTest, 'Not testing for text-to-speech processing.')    
+    #unittest.skipUnless(TestGroup.TTS in groupsToTest, 'Not testing for text-to-speech processing.')    
     def testSay(self):
         self.roboComm.say("This is a test.");
         rospy.spin();

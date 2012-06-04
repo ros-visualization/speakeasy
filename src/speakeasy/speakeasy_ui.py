@@ -8,7 +8,7 @@ from threading import Timer;
 
 from python_qt_binding import QtBindingHelper;
 from PyQt4.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox
+from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox
 from PyQt4.QtCore import pyqtSignal
 
 
@@ -123,6 +123,8 @@ class DialogService(object):
         # or self.showErrorMsg(<string>).
         self.errorMsgPopup = QErrorMessage.qtHandler();
         self.errorMsgPopup.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
+        self.infoMsg = QMessageBox();
+        self.infoMsg.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
 #        if parent is not None:
 #            self.errorMsgPopup.setParent(parent);
 
@@ -139,6 +141,13 @@ class DialogService(object):
         '''
         self.errorMsgPopup.showMessage(errMsg);
     
+    #----------------------------------
+    # showInfoMsg 
+    #--------------
+
+    def showInfoMessage(self, text):
+        self.infoMsg.setText(text);
+        self.infoMsg.exec_();        
 
 #----------------------------------------------------  SpeakEasyGUI Class ---------------------------
 
@@ -859,7 +868,13 @@ class SpeakEasyGUI(QMainWindow):
 
     def playOnceChecked(self):
         return self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_ONCE']].isChecked();
+
+    #----------------------------------
+    # setPlayOnceChecked 
+    #--------------
     
+    def setPlayOnceChecked(self):
+        self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_ONCE']].setChecked(True);
     
     #----------------------------------
     # playRepeatedlyChecked 
@@ -868,6 +883,13 @@ class SpeakEasyGUI(QMainWindow):
     def playRepeatedlyChecked(self):
         return self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].isChecked();
 
+    #----------------------------------
+    # setPlayRepeatedlyChecked 
+    #--------------
+    
+    def setPlayRepeatedlyChecked(self):
+        self.onceOrRepeatDict[SpeakEasyGUI.interactionWidgets['PLAY_REPEATEDLY']].setChecked(True);
+        
     #----------------------------------
     # playRepeatPeriod 
     #--------------
