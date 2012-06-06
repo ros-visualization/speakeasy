@@ -5,6 +5,7 @@
 #   - Word completion
 #   - Switch live between local and remote ops. 
 
+import roslib; roslib.load_manifest('speakeasy');
 
 import sys
 import os
