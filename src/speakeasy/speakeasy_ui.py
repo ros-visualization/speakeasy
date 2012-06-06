@@ -197,7 +197,7 @@ class SpeakEasyGUI(QMainWindow):
     # underlying text-to-speech engines:
     voices = {'VOICE_1': 'voice_kal_diphone',  # Festival voice
               'VOICE_2': 'David',              # Cepstral voices
-              'VOICE_3': 'Ann',
+              'VOICE_3': 'Amy',
               'VOICE_4': 'Shouty',
               'VOICE_5': 'Whispery',
               };
@@ -210,7 +210,7 @@ class SpeakEasyGUI(QMainWindow):
                           'PLAY_REPEATEDLY_PERIOD': 'Pause between plays',
                           'VOICE_1': 'Machine',
                           'VOICE_2': 'David',
-                          'VOICE_3': 'Ann',
+                          'VOICE_3': 'Amy',
                           'VOICE_4': 'Shout',
                           'VOICE_5': 'Whisper',
                           'PLAY_TEXT': 'Play Text',
