@@ -663,6 +663,7 @@ class SpeakEasyController(object):
         xmlFileNames = self.getAllSpeechSetXMLFileNames();
         if xmlFileNames is None:
             self.dialogService.showErrorMsg("No additional button sets are stored on your disk.");
+            return None;
         
         # Fill the following array with arrays of ButtonProgram:    
         buttonProgramArrays = [];
