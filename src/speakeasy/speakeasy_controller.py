@@ -400,7 +400,12 @@ class SpeakEasyController(object):
         # Repeat over and over? Or say once?
         if stand_alone:
             if sayOnce:
-                self.textToSpeechPlayer.say(text, voice, ttsEngine);
+                try:
+                    self.textToSpeechPlayer.say(text, voice, ttsEngine);
+                except ValueError:
+                    self.dialogService.showErrorMsg("Voice '" + str(voice) +
+                                                    "' is not supported by the text-to-speech engine '" +
+                                                    str(ttsEngine) + "'.");
             else:
                 self.speechReplayDemons.append(SpeakEasyController.SpeechReplayDemon(text, 
                                                                                      voice, 
@@ -437,15 +442,10 @@ class SpeakEasyController(object):
             
             # Got text in input fld. Which of the voices is checked?
             voice = self.gui.activeVoice();
-            if (voice == "Male"):
-                voice = "voice_kal_diphone"
+            if (voice == "voice_kal_diphone"):
                 ttsEngine = "festival"
-            # TODO: **************** Read from radio buttons!
-            elif voice == "David":
-                ttsEngine = "cepstral"
             else:
-                raise ValueError("Unknown voice: " + str(voice));
-            # ****** end TODO
+                ttsEngine = "cepstral"
             self.sayText(self.gui.speechInputFld.getText(), voice, ttsEngine, self.gui.playOnceChecked());
             return;
         
@@ -537,12 +537,10 @@ class SpeakEasyController(object):
             self.gui.setButtonLabel(buttonObj,newButtonLabel);
         
         textToSave = self.gui.speechInputFld.getText();
-        #******** TODO!!!!
-        if self.gui.activeVoice() == "Male":
+        if self.gui.activeVoice() == "voice_kal_diphone":
             ttsEngine = "festival"
-        elif self.gui.activeVoice() == "David":
+        else:
             ttsEngine = "cepstral"
-        #******** End TODO
         programObj = ButtonProgram(buttonObj.text(), textToSave, self.gui.activeVoice(), ttsEngine, self.gui.playOnceChecked());
         
         self.programs[buttonObj] = programObj; 
@@ -808,7 +806,12 @@ class SpeakEasyController(object):
             self.textToSpeechPlayer.waitForSoundDone();
             while not self.stopped:
                 time.sleep(self.repeatPeriod);
-                self.textToSpeechPlayer.say(self.text, self.voiceName, self.ttsEngine, blockTillDone=True);
+                try:
+                    self.textToSpeechPlayer.say(self.text, self.voiceName, self.ttsEngine, blockTillDone=True);
+                except:
+                    # If any problem, stop this thread so that we don't keep
+                    # generating that same error:
+                    self.stop();
         
         def stop(self):
             self.stopped = True;
@@ -823,7 +826,16 @@ if __name__ == "__main__":
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
     #speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
     #speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
-    speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'local':
+            print "Starting SpeakEasy in local (i.e. non-ROS) mode."
+            speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
+        else:
+            try:
+                rospy.loginfo("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
+            except:
+                print("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
+            speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
         
     # Enter Qt application main loop
     sys.exit(app.exec_());

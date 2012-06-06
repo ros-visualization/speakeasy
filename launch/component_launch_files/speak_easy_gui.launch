@@ -1,3 +1,0 @@
-<launch>
-  <node name="speakeasy_controller" pkg="speakeasy" type="speakeasy_controller.py"/>
-</launch>
