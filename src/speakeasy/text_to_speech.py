@@ -368,7 +368,7 @@ class Festival(TextToSpeechEngine):
         if self.voiceList is not None:
             return self.voiceList;
         
-        self.voiceList = ["voice_kal_diphone"];
+        self.voiceList = ['voice_kal_diphone'];
         self.defaultVoice = "voice_kal_diphone";
         return self.voiceList; 
     

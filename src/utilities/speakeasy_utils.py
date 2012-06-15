@@ -50,6 +50,10 @@ class SpeakeasyUtils(object):
                     return True
         return False
 
+    #----------------------------------
+    #  rosNodeRunning
+    #--------------
+    
     @staticmethod
     def rosNodeRunning(nodeName):
         '''
@@ -69,6 +73,10 @@ class SpeakeasyUtils(object):
                 return True
         return False
 
+    #----------------------------------
+    # waitForRosNode  
+    #--------------
+    
     @staticmethod
     def waitForRosNode(nodeName, timeout=None, waitMessage=None, provideTimeInfo=None):
         '''
@@ -122,6 +130,30 @@ class SpeakeasyUtils(object):
             time.sleep(1.0);
 
     #----------------------------------
+    # findPackage  
+    #--------------
+        
+    @staticmethod
+    def findPackage(packageName):
+        '''
+        Find package's absolute path. None if path not found.
+        @param packageName: name of package to find
+        @type packageName: string
+        @return: absolute path to package. None if not found.
+        @rtype: {string | None}
+        '''
+        try:
+            # In Python 2.7 we would simply do this:
+            #path = subprocess.check_output(["rospack", "find", packageName]);
+            path = subprocess.Popen("rospack find " + packageName, shell=True, stdout=subprocess.PIPE)
+            output = path.stdout.read()
+            path.stdout.close()
+            path.wait()
+        except subprocess.CalledProcessError:
+            return None;
+        return output.strip()
+
+    #----------------------------------
     # ensureType
     #--------------
     
@@ -155,13 +187,13 @@ class SpeakeasyUtils(object):
 
 class UtilsTest(unittest.TestCase):
     
-    def testFileExtension(self):
-        self.assertEqual(SpeakeasyUtils.fileExtension("foo.txt"), 'txt', "Simple extension failed");
-        self.assertEqual(SpeakeasyUtils.fileExtension("foo"), '', "No-extension failed");
-        self.assertEqual(SpeakeasyUtils.fileExtension("/foo/bar.ogg"), 'ogg', "Full name failed");
+#    def testFileExtension(self):
+#        self.assertEqual(SpeakeasyUtils.fileExtension("foo.txt"), 'txt', "Simple extension failed");
+#        self.assertEqual(SpeakeasyUtils.fileExtension("foo"), '', "No-extension failed");
+#        self.assertEqual(SpeakeasyUtils.fileExtension("/foo/bar.ogg"), 'ogg', "Full name failed");
     
-    def testProcessRunning(self):
-        self.assertTrue(SpeakeasyUtils.processRunning('bash'), "No bash process is seen to be running.");
+#    def testProcessRunning(self):
+#        self.assertTrue(SpeakeasyUtils.processRunning('bash'), "No bash process is seen to be running.");
         
 #    def testRosNodeRunning(self):
 #        self.assertTrue(SpeakeasyUtils.rosNodeRunning('speakeasy_node'), "No speakeasy_node is seen to be running.");
@@ -183,15 +215,23 @@ class UtilsTest(unittest.TestCase):
 #        # Counting up in message indefinitely:
 #        #self.assertRaises(NotImplementedError, SpeakeasyUtils.waitForRosNode, 'fum_node', waitMessage="Waiting indefinitely for fum_node.", provideTimeInfo=True);
 
-    def testEnsureType(self):
-        self.assertTrue(SpeakeasyUtils.ensureType(4, int), "Int not recognized.")
-        self.assertFalse(SpeakeasyUtils.ensureType(4.0, int), "Float recognized as int.")
-        self.assertFalse(SpeakeasyUtils.ensureType([], dict), "List recognized as dict.")
-        self.assertFalse(SpeakeasyUtils.ensureType('foo', list), "String recognized as list.")
-        self.assertTrue(SpeakeasyUtils.ensureType('foo', basestring), "String not recognized.")
-        self.assertTrue(SpeakeasyUtils.ensureType([], list), "List not recognized.")
-        self.assertTrue(SpeakeasyUtils.ensureType({}, dict), "Dict not recognized.")
-        
+#    def testEnsureType(self):
+#        self.assertTrue(SpeakeasyUtils.ensureType(4, int), "Int not recognized.")
+#        self.assertFalse(SpeakeasyUtils.ensureType(4.0, int), "Float recognized as int.")
+#        self.assertFalse(SpeakeasyUtils.ensureType([], dict), "List recognized as dict.")
+#        self.assertFalse(SpeakeasyUtils.ensureType('foo', list), "String recognized as list.")
+#        self.assertTrue(SpeakeasyUtils.ensureType('foo', basestring), "String not recognized.")
+#        self.assertTrue(SpeakeasyUtils.ensureType([], list), "List not recognized.")
+#        self.assertTrue(SpeakeasyUtils.ensureType({}, dict), "Dict not recognized.")
+    
+    def testFindPackage(self):
+        path = SpeakeasyUtils.findPackage("rospy")
+        print path
+        realPath = os.path.abspath(os.path.join(os.getenv("ROS_ROOT") + "/..", "rospy"));
+        self.assertEqual(SpeakeasyUtils.findPackage("rospy"),
+                         realPath,
+                         "Could not find rospy package. findPackage returns '%s' instead of '%s'" % 
+                         (str(SpeakeasyUtils.findPackage("rospy")), realPath));
         
 if __name__ == '__main__':
     
