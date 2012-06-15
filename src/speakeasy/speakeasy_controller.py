@@ -146,23 +146,7 @@ class ButtonProgram(object):
 
 class SpeakEasyController(object):
     '''
-    Control logic behind the speakeasy GUI. Relies on 
-    libspeakeasy.py. Primitives in that library are as follows.
-
-	- C{voiceSound(str)}: create voice C{Sound} instance
-	- C{waveSound(abspath)}: create wave C{Sound} instance
-	- C{builtInSound(soundID)}: create built-in C{Sound} instance. See below.
-    
-	- C{say(txt, voice=<voice-id-str>)}: say txt string with given voice. Default is male
-	- C{repeat(txt)}: Say str over and over till stopSay(txt), or stopAll();
-	- C{stopSaying(txt)}: stop repeating txt (which was started with C{ repeat(txt)}
-	- C{playWave(abspath)}: play a .wav file, given its absolute path.
-	- C{startWave(abspath)} play a .wav file repeatedly, given its absolute path.
-	- C{stopWave(abspath)} stop repeatedly playing .wav file
-	- C{play(soundID)} play one of the built-in sounds (see below for C{soundID}.)
-	- C{start(soundID)} play built-in sound repeatedly
-	- C{stop(soundID)} stop playing built-in sound repeatedly
-	- C{stopAll()} stop all voice, .wav, and built-in sounds
+    Control logic behind the speakeasy GUI.
 	
 	Available voices:
 	Festival: 1.  Usually voice_kal_diphone (male) on Ubuntu installations
