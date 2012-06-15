@@ -1,4 +1,4 @@
 <launch>
-	<include file="component_launch_files/speak_easy_service.launch" />
-	<include file="component_launch_files/speak_easy_gui.launch" />
+	<node name="speakeasy_node" pkg="speakeasy" type="speakeasy_node.py"/>
+	<node name="speakeasy_controller" pkg="speakeasy" type="speakeasy_controller.py" />
 </launch>

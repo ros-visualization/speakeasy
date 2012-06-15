@@ -74,9 +74,9 @@ class SpeakeasyUtils(object):
         return False
 
     #----------------------------------
-    # waitForRosNode  
+    # waitForRosNode 
     #--------------
-    
+
     @staticmethod
     def waitForRosNode(nodeName, timeout=None, waitMessage=None, provideTimeInfo=None):
         '''
@@ -182,6 +182,23 @@ class SpeakeasyUtils(object):
         elif type == list:
             return isinstance(item, list);
                 
+    #----------------------------------
+    # findPackage 
+    #--------------
+
+    @staticmethod
+    def findPackage(packName, default=None):
+        '''
+        Find full path of given package. Return None if package is not installed
+        on the local machine.
+        @param packName: Name of package whose path is to be found.
+        @type packName: Full path, or None is the package is not installed.
+        @rtype: {string | None}
+        '''
+        try:
+            return subprocess.check_output(["rospack", "find", packName]).strip();
+        except subprocess.CalledProcessError as err:
+            return default;
             
 # ----------------------------  Testing ----------------------
 

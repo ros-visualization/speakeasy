@@ -193,8 +193,13 @@ class SpeakEasyGUI(QMainWindow):
     
     # ---------------------- Names for Voices ----------------------
     
-    voices = {'VOICE_1': 'Male',
-              'VOICE_2':'David'
+    # Official names of voices as recognized by the
+    # underlying text-to-speech engines:
+    voices = {'VOICE_1': 'voice_kal_diphone',  # Festival voice
+              'VOICE_2': 'David',              # Cepstral voices
+              'VOICE_3': 'Amy',
+              'VOICE_4': 'Shouty',
+              'VOICE_5': 'Whispery',
               };
         
     # ---------------------- Names for Widgets ----------------------
@@ -203,8 +208,11 @@ class SpeakEasyGUI(QMainWindow):
                           'PLAY_ONCE': 'Play once',
                           'PLAY_REPEATEDLY': 'Play repeatedly',
                           'PLAY_REPEATEDLY_PERIOD': 'Pause between plays',
-                          'VOICE_1': 'Male',
+                          'VOICE_1': 'Machine',
                           'VOICE_2': 'David',
+                          'VOICE_3': 'Amy',
+                          'VOICE_4': 'Shout',
+                          'VOICE_5': 'Whisper',
                           'PLAY_TEXT': 'Play Text',
                           'STOP': 'Stop',
                           'STOP_ALL' : 'Stop All',
@@ -533,10 +541,13 @@ class SpeakEasyGUI(QMainWindow):
         secondsLabel = QLabel("secs delay");
         onceOrRepeatButtonLayout.addWidget(secondsLabel);
         
+        # Create an array of voice radio button labels:
+        voiceRadioButtonLabels = [];
+        for voiceKey in SpeakEasyGUI.voices.keys():
+            voiceRadioButtonLabels.append(SpeakEasyGUI.interactionWidgets[voiceKey]);
+            
         (self.voicesGroup, voicesButtonLayout, self.voicesRadioButtonsDict) =\
-            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['VOICE_1'],
-                                    SpeakEasyGUI.interactionWidgets['VOICE_2']
-                                    ],
+            self.buildRadioButtons(voiceRadioButtonLabels,
                                    Orientation.HORIZONTAL,
                                    Alignment.RIGHT,
                                    activeButtons=[SpeakEasyGUI.interactionWidgets['VOICE_1']],
@@ -902,10 +913,16 @@ class SpeakEasyGUI(QMainWindow):
     #--------------
 
     def activeVoice(self):
-        if self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets['VOICE_1']].isChecked():
-            return SpeakEasyGUI.voices['VOICE_1'];
-        elif self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets['VOICE_2']].isChecked():
-            return SpeakEasyGUI.voices['VOICE_2'];
+        '''
+        Return the official name of the voice that is currently
+        checked in the UI. This is the name that will be recognized
+        by the underlying text-to-speech engine(s).
+        @return: Name of voice as per the SpeakEasyGUI.voices dict.
+        @rtype: string
+        '''
+        for voiceKey in SpeakEasyGUI.voices.keys():
+            if self.voicesRadioButtonsDict[SpeakEasyGUI.interactionWidgets[voiceKey]].isChecked():
+                return SpeakEasyGUI.voices[voiceKey];
 
     #----------------------------------
     # whereToPlay 

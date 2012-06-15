@@ -1,3 +1,3 @@
 <launch>
-	<include file="launch/component_launch_files/speak_easy_gui.launch" />
+	<node name="speakeasy_controller" pkg="speakeasy" type="speakeasy_controller.py" args="local"/>
 </launch>
