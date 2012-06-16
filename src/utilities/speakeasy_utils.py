@@ -20,7 +20,7 @@ class SpeakeasyUtils(object):
         @param filePath: full path or filename.
         @type filePath: string
         @return: Extension only. Example: foo.txt --> 'txt'
-        @returnt: string
+        @rtype: string
         '''
         return os.path.splitext(filePath)[1][1:].strip()
 
@@ -167,7 +167,7 @@ class SpeakeasyUtils(object):
         @param type: Type to check.
         @type type: type object.
         @return: True/False depending on whether or not item is of the given type.
-        @returnt: bool
+        @rtype: bool
         '''
         if type == int:
             return isinstance(item, int);

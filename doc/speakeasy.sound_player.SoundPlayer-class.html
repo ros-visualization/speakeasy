@@ -1,0 +1,1358 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.sound_player.SoundPlayer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;speakeasy ::
+        <a href="speakeasy.sound_player-module.html">Module&nbsp;sound_player</a> ::
+        Class&nbsp;SoundPlayer
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.sound_player.SoundPlayer-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class SoundPlayer</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">SoundPlayer</strong>
+</pre>
+
+<hr />
+<p>Plays up to NUM_SIMULTANEOUS_SOUNDS .wav/.ogg files simultaneously. 
+  Allows pause/unpause on any of these sounds. (.ogg untested)</p>
+  <p>Theory of operation: The class uses the pygame module. This module 
+  involves Sound instances and Channel instances. A Sound is created from a
+  .wav or .ogg file, and can play on one or more Channel instances.</p>
+  <p>All channels can simultaneously play, one Sound per channel. The 
+  number of channels can be set via the module-global constant 
+  NUM_SIMULTANEOUS_SOUNDS. Default is 8. Channels and Sounds are managed by
+  pygame.mixer.</p>
+  <p>This class uses parameter polymorphism to unify all these concepts as 
+  much as possible. The only public methods are &lt;code&gt;play(), stop(),
+  pause(), unpause(),set_volume(), get_volume()&lt;/code&gt;. Each of these
+  methods takes either the path to a sound file, a Sound instances, or a 
+  Channel instance. The SoundPlayer takes care of creating Sound instances 
+  by loading them from files, caching sounds, and tracking which Sounds are
+  playing on which Channel at any time. Callers of these methods need to 
+  deal only with the sound file paths. These paths, when passed to, say, 
+  the pause() method, will do the right thing; Sound instances are cached, 
+  so they will not be loaded repeatedly.</p>
+  <p>Note that this wonderful collapsing of complex underlying pygame 
+  concepts comes at a price in code ugliness.  Since Python does not have 
+  parameter based polymorphism, methods must figure out incoming parameter 
+  types via duck typing methods: Treat the parameters as some type and see 
+  whether an error occurs. Terrible, but the 'pythonic' way.</p>
+  <p>As background: The pygame API provides methods three entities: Mixer, 
+  Channel, and Sound. The main methods are:</p>
+  <ol start="1">
+    <li>
+      Mixer:
+      <ul>
+        <li>
+          stop()
+        </li>
+        <li>
+          pause()
+        </li>
+        <li>
+          unpause()
+        </li>
+        <li>
+          get_num_channels()
+        </li>
+        <li>
+          set_num_channels()
+        </li>
+      </ul>
+    </li>
+    <li>
+      Channel:
+      <ul>
+        <li>
+          play()
+        </li>
+        <li>
+          stop()
+        </li>
+        <li>
+          pause()
+        </li>
+        <li>
+          unpause()
+        </li>
+      </ul>
+    </li>
+    <li>
+      Sound:
+      <ul>
+        <li>
+          play()
+        </li>
+        <li>
+          stop()
+        </li>
+        <li>
+          pause()
+        </li>
+        <li>
+          unpause()
+        </li>
+      </ul>
+    </li>
+  </ol>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      x.__init__(...) initializes x; see help(type(x)) for signature</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#play" class="summary-sig-name">play</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToPlay</span>,
+        <span class="summary-sig-arg">blockTillDone</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">volume</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Play a file, or an already loaded Sound instance.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.play">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#stop" class="summary-sig-name">stop</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToStop</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Stop either all currently playing sounds, or a particular sound.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.stop">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#pause" class="summary-sig-name">pause</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToPause</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Pause either all currently playing sounds, or a particular sound.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.pause">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#unpause" class="summary-sig-name">unpause</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToUnPause</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Unpause either all currently playing sounds, or a particular sound.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unpause">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#setSoundVolume" class="summary-sig-name">setSoundVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">volume</span>,
+        <span class="summary-sig-arg">whatToSetVolFor</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Set sound volume for a particular sound or channel.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.setSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#getSoundVolume" class="summary-sig-name">getSoundVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToGetVolFor</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Get sound volume for a particular sound or channel.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#formatSupported" class="summary-sig-name">formatSupported</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fileExtension</span>)</span><br />
+      Checks whether the given file extension implies a supported sound 
+      format.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.formatSupported">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#numChannels" class="summary-sig-name">numChannels</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Number of sounds to play simultaneously.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.numChannels">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#loadSound" class="summary-sig-name">loadSound</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      Create a Sound instance from the given file.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.loadSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#checkCacheStatus" class="summary-sig-name">checkCacheStatus</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Ensures that number of cached sounds does not exceed 
+      NUM_OF_CACHED_SOUNDS.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.checkCacheStatus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#unloadSound" class="summary-sig-name">unloadSound</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">sound</span>)</span><br />
+      Remove Sound instance from cache and all other references.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unloadSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">(Sound, Channel)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#playFile" class="summary-sig-name">playFile</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>,
+        <span class="summary-sig-arg">volume</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Private Method! Called by play(); Given a filename, load it into a 
+      Sound instance, if it is not already cached.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.playFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#stopFile" class="summary-sig-name">stopFile</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      Private Method! Called by stop(); Stops currently playing sound from 
+      the given filename.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.stopFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#pauseFile" class="summary-sig-name">pauseFile</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      Private Method! Called by pause(); Pauses currently playing sound 
+      from the given filename.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.pauseFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Sound</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#unpauseFile" class="summary-sig-name">unpauseFile</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      Unpauses currently paused sound from the given filename.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unpauseFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">{Sound | NoneType}</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#getSoundFromFileName" class="summary-sig-name">getSoundFromFileName</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      Given a sound file path name, return the corresponding Sound 
+      instance, if the file was loaded.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundFromFileName">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#getSoundFromChannel" class="summary-sig-name">getSoundFromChannel</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">channel</span>)</span><br />
+      Return Sound instance that is currently playing on the given Channel 
+      instance.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundFromChannel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">{[Channel] | NoneType}</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#getChannelsFromSound" class="summary-sig-name">getChannelsFromSound</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">sound</span>)</span><br />
+      Return all channels on which the given Sound instance is currently 
+      playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getChannelsFromSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#addSoundToChannelBinding" class="summary-sig-name">addSoundToChannelBinding</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">sound</span>,
+        <span class="summary-sig-arg">channel</span>)</span><br />
+      Register that a Sound is beginning to play on a given Channel.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.addSoundToChannelBinding">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="cleanupSoundChannelBindings"></a><span class="summary-sig-name">cleanupSoundChannelBindings</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Runs through the sound-to-channel bindings and removes the entries of
+      channels that are done playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.cleanupSoundChannelBindings">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.sound_player.SoundPlayer-class.html#waitForSoundDone" class="summary-sig-name">waitForSoundDone</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">sound</span>)</span><br />
+      Block until sound is done playing on all channels on which it is 
+      currently playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.waitForSoundDone">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="singletonInstanceRunning"></a><span class="summary-name">singletonInstanceRunning</span> = <code title="False">False</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="supportedFormats"></a><span class="summary-name">supportedFormats</span> = <code title="['ogg', 'wav']"><code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">ogg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">wav</code><code class="variable-quote">'</code><code class="variable-group">]</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="play"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">play</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToPlay</span>,
+        <span class="sig-arg">blockTillDone</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">volume</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.play">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Play a file, or an already loaded Sound instance. Offers choice of 
+  blocking return until the sound is finished, or returning 
+  immediately.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToPlay</code></strong> ({string | Sound}) - Full path to .wav or .ogg file, or Sound instance.</li>
+        <li><strong class="pname"><code>blockTillDone</code></strong> (boolean) - True to delay return until sound is done playing.</li>
+        <li><strong class="pname"><code>volume</code></strong> (float) - Volume to play at. Float between 0.0 and 1.0. None: use current 
+          volume.</li>
+    </ul></dd>
+    <dt>Returns:</dt>
+        <dd>The sound instance.</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>IOError</strong></code> - if given sound file path does not exist, or some other playback 
+        error occurred.</li>
+        <li><code><strong class='fraise'>ValueError</strong></code> - if given volume is not between 0.0 and 1.0</li>
+        <li><code><strong class='fraise'>TypeError</strong></code> - if whatToPlay is not a filename (string), or Sound instance.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stop"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stop</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToStop</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.stop">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop either all currently playing sounds, or a particular sound. The 
+  sound to stop (parameter whatToStop) may be specified as a the full-path 
+  filename of the respective .wav/.ogg file, as a Sound instance, or as a 
+  Channel instance.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToStop</code></strong> ({NoneType | string | Sound | Channel}) - If None, top all currently playing sounds. If any a Sound 
+          instance, stop this sound on all channels on which it might 
+          currently be playing. If a Channel instance, stop only whatever 
+          is currently playing on this channel.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="pause"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pause</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToPause</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.pause">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Pause either all currently playing sounds, or a particular sound. The 
+  sound to pause (parameter whatToStop) may be specified as a the full-path
+  filename of the respective .wav/.ogg file, as a Sound instance, or as a 
+  Channel instance.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToPause</code></strong> ({NoneType | string | Sound | Channel | [Channel]}) - If None, top all currently playing sounds. If any a Sound 
+          instance, pause this sound on all channels on which it might 
+          currently be playing. If a Channel or array of channel instances,
+          pause whatever is currently playing on the given channel(s).</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if whatToPause is of illegal type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="unpause"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unpause</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToUnPause</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unpause">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Unpause either all currently playing sounds, or a particular sound. 
+  The sound to unpause (parameter whatToStop) may be specified as a the 
+  full-path filename of the respective .wav/.ogg file, as a Sound instance,
+  or as a Channel instance.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToUnPause</code></strong> ({NoneType | string | Sound | Channel}) - If None, unpause all currently playing sounds. If whatToUnPause 
+          is a Sound instance, pause this sound on all channels on which it
+          might currently be playing. If whatToUnPause is a Channel or 
+          array of channel instances, pause whatever is currently playing 
+          on the given channel(s).</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setSoundVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">volume</span>,
+        <span class="sig-arg">whatToSetVolFor</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.setSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set sound volume for a particular sound or channel. The entity for 
+  which to set the volume (i.e. whatToSetVolFor) may be the full-path 
+  filename of a .wav/.ogg file, a Sound instance, or a Channel instance. 
+  Here is the interaction between settings of Sound vs. Channel volume:</p>
+  <ul>
+    <li>
+      sound.set_volume(0.9)   # Now plays at 90% of full volume.
+    </li>
+    <li>
+      sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
+    </li>
+    <li>
+      channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
+    </li>
+  </ul>
+  <p>Passing in a filename will load the file, and set the volume of the 
+  corresponding Sound.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>volume</code></strong> (float) - Value between 0.0 and 1.0.</li>
+        <li><strong class="pname"><code>whatToSetVolFor</code></strong> ({NoneType | string | Sound | Channel}) - The soundfile, Sound, or Channel instance whose volume to set. If
+          None, sets volume for all sounds. (This setting is overridden by 
+          volume settings provided in calls to the play() method.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>OSError</strong></code> - if given filename that does not exist.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToGetVolFor</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get sound volume for a particular sound or channel. The entity for 
+  which to get the volume for (i.e. whatToSetVolFor) may be the full-path 
+  filename of a .wav/.ogg file, a Sound instance, or a Channel instance. 
+  Here is the interaction between settings of Sound vs. Channel volume:</p>
+  <ul>
+    <li>
+      sound.set_volume(0.9)   # Now plays at 90% of full volume.
+    </li>
+    <li>
+      sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
+    </li>
+    <li>
+      channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
+    </li>
+  </ul>
+  <p>Passing in a filename will load the file, and get the volume of the 
+  corresponding Sound.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToGetVolFor</code></strong> ({NoneType | string | Sound | Channel}) - The soundfile, Sound, or Channel instance whose volume to get. If
+          None, return global value setting</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>OSError</strong></code> - if given filename that does not exist.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="formatSupported"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">formatSupported</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">fileExtension</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.formatSupported">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Checks whether the given file extension implies a supported sound 
+  format.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>fileExtension</code></strong> (string) - file extension with or without leading period. Example: 
+          &quot;.ogg&quot;</li>
+    </ul></dd>
+    <dt>Returns: boolean</dt>
+        <dd>True if the format is supported, else False.</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if fileExtension is anything other than a string with length &gt; 
+        0.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="numChannels"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">numChannels</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.numChannels">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Number of sounds to play simultaneously. Controlled by module variable
+  NUM_SIMULTANEOUS_SOUNDS.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="loadSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">loadSound</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.loadSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create a Sound instance from the given file. Cache the sound, and 
+  initialize the LRU cache last-used time.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Full path to sound file (.wav/.ogg)</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>IOError</strong></code> - if file does not exist.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="checkCacheStatus"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">checkCacheStatus</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.checkCacheStatus">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Ensures that number of cached sounds does not exceed 
+  NUM_OF_CACHED_SOUNDS. If it does, half the cache is emptied in order of 
+  least-recently-used first.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="unloadSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unloadSound</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">sound</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unloadSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Remove Sound instance from cache and all other references.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>sound</code></strong> (Sound) - Sound instance to remove</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="playFile"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">playFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>,
+        <span class="sig-arg">volume</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.playFile">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private Method! Called by play(); Given a filename, load it into a 
+  Sound instance, if it is not already cached. Set the volume, if given, 
+  and play. It is assumed that the volume value, if given, has been 
+  verified by the caller to be between 0.0 and 1.0.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Name of sound file to play</li>
+        <li><strong class="pname"><code>volume</code></strong> (float) - Volume to play at: 0.0 to 1.0</li>
+    </ul></dd>
+    <dt>Returns: (Sound, Channel)</dt>
+        <dd>Sound and channel instances</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>OSError</strong></code> - if file does not exist.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopFile"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.stopFile">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private Method! Called by stop(); Stops currently playing sound from 
+  the given filename. Does nothing if this file is not currently 
+  playing.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Filename from which the Sound instance to be stopped was created.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - filename is not a string.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="pauseFile"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pauseFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.pauseFile">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private Method! Called by pause(); Pauses currently playing sound from
+  the given filename. Does nothing if this file is not currently 
+  playing.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Filename from which the Sound instance to be paused was created.</li>
+    </ul></dd>
+    <dt>Returns:</dt>
+        <dd>Sound instance</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - filename is not a string.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="unpauseFile"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unpauseFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.unpauseFile">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Unpauses currently paused sound from the given filename. Does nothing 
+  if this file is not currently playing or paused.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Filename from which the Sound instance to be unpaused was 
+          created.</li>
+    </ul></dd>
+    <dt>Returns: Sound</dt>
+        <dd>Sound instance</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - filename is not a string.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundFromFileName"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundFromFileName</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundFromFileName">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Given a sound file path name, return the corresponding Sound instance,
+  if the file was loaded. Else return None.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>filename</code></strong> (string) - Filename from which the Sound instance was created.</li>
+    </ul></dd>
+    <dt>Returns: {Sound | NoneType}</dt>
+        <dd>Sound instance created from the given file. None if file not yet 
+          loaded.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundFromChannel"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundFromChannel</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">channel</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getSoundFromChannel">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return Sound instance that is currently playing on the given Channel 
+  instance. None if channel is inactive.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>channel</code></strong> (Channel) - Channel to be investigated.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getChannelsFromSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getChannelsFromSound</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">sound</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.getChannelsFromSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return all channels on which the given Sound instance is currently 
+  playing.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>sound</code></strong> (Sound) - Sound instance to be hunted down.</li>
+    </ul></dd>
+    <dt>Returns: {[Channel] | NoneType}</dt>
+        <dd>Array of Channel instances, or None, if Sound is not currently 
+          playing on any channel.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addSoundToChannelBinding"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addSoundToChannelBinding</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">sound</span>,
+        <span class="sig-arg">channel</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.addSoundToChannelBinding">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Register that a Sound is beginning to play on a given Channel.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>sound</code></strong> (Sound) - Sound to bind</li>
+        <li><strong class="pname"><code>channel</code></strong> (Channel) - Channel to bind to</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="waitForSoundDone"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">waitForSoundDone</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">sound</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.sound_player-pysrc.html#SoundPlayer.waitForSoundDone">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Block until sound is done playing on all channels on which it is 
+  currently playing.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>sound</code></strong> (Sound) - Sound to monitor</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Jun 15 17:35:46 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

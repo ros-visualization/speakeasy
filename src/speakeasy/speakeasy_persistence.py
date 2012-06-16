@@ -168,32 +168,32 @@ class ButtonSavior(object):
         be instantiated with the data extracted from the XML
         of each button program.
         
-        Example structure:
-        <buttonProgramSet>
-          <buttonProgramSetTitle>Household Set</buttonProgramSetTitle>
-          <buttonSetting>
-            <label>Button 4</label>
-            <text>Utterance number 1</text>
-            <voice>David</voice>
-            <engine>cepstral</engine>
-            <playOnce>True</playOnce>
-          </buttonSetting>
-          <buttonSetting>
-            <label>Button 5</label>
-            <text>Utterance number 2</text>
-            <voice>David</voice>
-            <engine>cepstral</engine>
-            <playOnce>True</playOnce>
-          </buttonSetting>
-        </buttonProgramSet>
-        
+        Example structure::
+	        <buttonProgramSet>
+	          <buttonProgramSetTitle>Household Set</buttonProgramSetTitle>
+	          <buttonSetting>
+	            <label>Button 4</label>
+	            <text>Utterance number 1</text>
+	            <voice>David</voice>
+	            <engine>cepstral</engine>
+	            <playOnce>True</playOnce>
+	          </buttonSetting>
+	          <buttonSetting>
+	            <label>Button 5</label>
+	            <text>Utterance number 2</text>
+	            <voice>David</voice>
+	            <engine>cepstral</engine>
+	            <playOnce>True</playOnce>
+	          </buttonSetting>
+	        </buttonProgramSet>
+	        
         @param fileName: name of XML file.
         @type fileName: string
         @param buttonProgramClass: class whose instances are to be created to hold button settings.
         @type buttonProgramClass: ButtonProgram
         @return: A tuple containing the title of the button set, and an array of instances of
                 the passed-in class.
-        @returnt: (string, [ButtonProgram])
+        @rtype: (string, [ButtonProgram])
         @raise ValueError: if XML is bad. 
         '''
         try:

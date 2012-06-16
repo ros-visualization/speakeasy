@@ -283,10 +283,10 @@ class RoboComm(object):
         '''
         Return current music play state. These states are defined in music_player.py.
         For reference, at the time of this writing:
-            class PlayStatus:
-				STOPPED = 0;
-				PAUSED  = 1;
-				PLAYING = 2;
+        class PlayStatus:
+			- STOPPED = 0;
+			- PAUSED  = 1;
+			- PLAYING = 2;
         @param cachedOK: Set True if OK to use a previously cached status message.
         @type cachedOK: bool
         @return: Status of the music playback engine on the SpeakEasy node.

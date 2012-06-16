@@ -100,7 +100,7 @@ class TextToSpeechProvider(object):
         are available on the current machine. Exampele: ['festival', 'cepstral']
         @return: Array of text-to-speech engine names as appropriate for ROS t2s messages.
                  Order within the array is not necessarily the same between calls.
-        @ret
+        @rtype: [string]
                  
         '''
         return self.t2sEngines.keys();
@@ -109,13 +109,13 @@ class TextToSpeechProvider(object):
         '''
         Returns a dictionary of all available voices for each 
         text-to-speech engine. Keys are the engine names. Example:
-            Cepstral : ['David', 'Anna']
-            Festival : ['voice_kal_diphone']
+            1. Cepstral : ['David', 'Anna']
+            2. Festival : ['voice_kal_diphone']
         The default voice for each engine is guaranteed to be the
         first in the voice lists. Order of the remaining voices is 
         arbitrary.
         @return: Dictionary mapping text-to-speech engine names to lists of voice names.
-        @returnt: {string : [string]} 
+        @rtype: {string : [string]} 
         '''
         voiceListDict = {};
         for ttsEngineObj in self.t2sEngines.values():
@@ -152,7 +152,7 @@ class TextToSpeechProvider(object):
         Try to sense the underlying OS. Then identify the available
         text-to-speech engines. Return the default engine to be used.
         @return: Default engine instance.
-        @returnt: TextToSpeechEngine subclass
+        @rtype: TextToSpeechEngine subclass
         @raise ValueError: if no speech engine is found. 
         '''
         defaultEngine = None;
@@ -174,7 +174,7 @@ class TextToSpeechProvider(object):
         into Ubuntu. Cepstral is a for-pay engine.
         @return: Text-to-speech engine instance to use as default. None if no 
                  text-to-speech-engine is available.
-        @returnt: TexToSpeechEngine
+        @rtype: TexToSpeechEngine
         '''
         
         festivalPath = TextToSpeechProvider.which("text2wave");
@@ -204,7 +204,7 @@ class TextToSpeechProvider(object):
         text-to-speech engines are available.
         @return: Text-to-speech engine instance to use as default. None if no 
                  text-to-speech-engine is available.
-        @returnt: TexToSpeechEngine
+        @rtype: TexToSpeechEngine
         '''
         self.t2sEngines["mact2s"] = MacTextToSpeech();
         return self.t2sEngines["mact2s"];
@@ -220,7 +220,7 @@ class TextToSpeechProvider(object):
         executable of the given name (the program parameter). $PATH
         is given preference; it is searched first.
         @param program: Name of the executable with or without path
-        @type: string
+        @type program: string
         @return: None if no executable found, else full path to executable.
         '''
         def is_exe(fpath):
@@ -457,7 +457,7 @@ class Cepstral(TextToSpeechEngine):
 class MacTextToSpeech(TextToSpeechEngine):
     '''
     Wrapper for the Mac text to speech engine. 
-    The command line t2s command on the Mac works like this:
+    The command line t2s command on the Mac works like this::
           say [-v <voice>] [-f <inputFile>] [-o <aiffOutputFile>]
     '''
     

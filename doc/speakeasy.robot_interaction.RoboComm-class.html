@@ -1,0 +1,1644 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.robot_interaction.RoboComm</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;speakeasy ::
+        <a href="speakeasy.robot_interaction-module.html">Module&nbsp;robot_interaction</a> ::
+        Class&nbsp;RoboComm
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.robot_interaction.RoboComm-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class RoboComm</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">RoboComm</strong>
+</pre>
+
+<hr />
+<p>Provides all methods required to operate the SpeakEasy ROS node 
+  remotely. Intention is for GUIs or other programs to use one instance of 
+  this class to control all text-to-speech, sound effects, and music play 
+  functions if those functions are provided by a SpeakEasy ROS node. 
+  &lt;p&gt; For an exmple to use if these three functions are provided 
+  locally, without using ROS, see speakeasy_controller.py.</p>
+
+<!-- ==================== NESTED CLASSES ==================== -->
+<a name="section-NestedClasses"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Nested Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-NestedClasses"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.robot_interaction.RoboComm.ReplayDemon-class.html" class="summary-name">ReplayDemon</a><br />
+      Abstract class of all repeat demons: text-to-speech, sound effects,
+        and music.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.robot_interaction.RoboComm.SoundReplayDemon-class.html" class="summary-name">SoundReplayDemon</a><br />
+      Responsible for repeating sound effects at appropriate intervals.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.robot_interaction.RoboComm.MusicReplayDemon-class.html" class="summary-name">MusicReplayDemon</a><br />
+      Responsible for repeating songs at appropriate intervals.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.robot_interaction.RoboComm.SpeechReplayDemon-class.html" class="summary-name">SpeechReplayDemon</a><br />
+      Responsible for repeating text-to-speech utterances at appropriate 
+        intervals.
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Initialize sound to play at the robot.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#robotAvailable" class="summary-sig-name">robotAvailable</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return True if a SpeakEasy service is available, i.e.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.robotAvailable">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">SpeakEasyStatus</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getSpeakEasyNodeStatus" class="summary-sig-name">getSpeakEasyNodeStatus</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return a SpeakEasy status message instance as received from a live 
+      SpeakEasy node.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSpeakEasyNodeStatus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[string]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getSoundEffectNames" class="summary-sig-name">getSoundEffectNames</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return a list of the sound effects that the SpeakEasy node is 
+      offering.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSoundEffectNames">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[bool]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getSongNames" class="summary-sig-name">getSongNames</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return a list of the music files that the SpeakEasy node is offering.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSongNames">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[string]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getTextToSpeechEngineNames" class="summary-sig-name">getTextToSpeechEngineNames</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return array of text-to-speech engines that are available at the 
+      SpeakEasy node.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getTextToSpeechEngineNames">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[string]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getVoiceNames" class="summary-sig-name">getVoiceNames</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">ttsEngine</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return a list of text-to-speech voices that the SpeakEasy node 
+      provides.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getVoiceNames">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getNumSoundChannels" class="summary-sig-name">getNumSoundChannels</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return the number of simultaneous sound effects that the SpeakEasy 
+      node provides.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getNumSoundChannels">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">float</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getSoundVolume" class="summary-sig-name">getSoundVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return default sound effect volume level.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">float</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getMusicVolume" class="summary-sig-name">getMusicVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return default music volume level.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getMusicVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">PlayStatus</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getPlayStatus" class="summary-sig-name">getPlayStatus</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return current music play state.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getPlayStatus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getMusicBusy" class="summary-sig-name">getMusicBusy</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Convenience method to determine whether music is currently either 
+      playing or paused.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getMusicBusy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getTextToSpeechBusy" class="summary-sig-name">getTextToSpeechBusy</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">cachedOK</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return whether SpeakEasy node is currently generating speech from 
+      text.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getTextToSpeechBusy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#say" class="summary-sig-name">say</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">text</span>,
+        <span class="summary-sig-arg">voice</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">ttsEngine</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">numRepeats</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">repeatPeriod</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">blockTillDone</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Given a piece of text, generate corresponding speech at the SpeakEasy
+      node site.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.say">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#stopSaying" class="summary-sig-name">stopSaying</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop text-to-speech utterance.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopSaying">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#playSound" class="summary-sig-name">playSound</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">soundName</span>,
+        <span class="summary-sig-arg">volume</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">numRepeats</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">repeatPeriod</span>=<span class="summary-sig-default">0</span>)</span><br />
+      Play a sound effect at the SpeakEasy node.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.playSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#stopSound" class="summary-sig-name">stopSound</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop the all currently playing sound effects.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#pauseSound" class="summary-sig-name">pauseSound</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Pause the all currently playing sound effects.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.pauseSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#unPauseSound" class="summary-sig-name">unPauseSound</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Un-pause all currently paused sound effects.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.unPauseSound">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#setSoundVolume" class="summary-sig-name">setSoundVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">volume</span>,
+        <span class="summary-sig-arg">soundName</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Change the sound effect default volume.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#playMusic" class="summary-sig-name">playMusic</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">songName</span>,
+        <span class="summary-sig-arg">volume</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">playheadTime</span>=<span class="summary-sig-default">0.0</span>,
+        <span class="summary-sig-arg">timeReference</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">numRepeats</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">repeatPeriod</span>=<span class="summary-sig-default">0</span>)</span><br />
+      Play a piece of music (a sound file) at the SpeakEasy node.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.playMusic">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#stopMusic" class="summary-sig-name">stopMusic</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop currently playing music.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopMusic">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#pauseMusic" class="summary-sig-name">pauseMusic</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Pause currently playing music.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.pauseMusic">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#unPauseMusic" class="summary-sig-name">unPauseMusic</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Un-pause currently playing music.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.unPauseMusic">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#setMusicVolume" class="summary-sig-name">setMusicVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">vol</span>)</span><br />
+      Set default volume of music playback.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setMusicVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#setPlayhead" class="summary-sig-name">setPlayhead</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">playheadTime</span>,
+        <span class="summary-sig-arg">timeReference</span>=<span class="summary-sig-default">1</span>)</span><br />
+      Change the music playhead position to a particular time within a 
+      song.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setPlayhead">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">float</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.robot_interaction.RoboComm-class.html#getPlayhead" class="summary-sig-name">getPlayhead</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return song position in fractional seconds.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getPlayhead">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="registerSpeechRepeaterThread"></a><span class="summary-sig-name">registerSpeechRepeaterThread</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">speechThread</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.registerSpeechRepeaterThread">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="killSpeechRepeatThreads"></a><span class="summary-sig-name">killSpeechRepeatThreads</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">speechThreads</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.killSpeechRepeatThreads">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="registerSoundRepeaterThread"></a><span class="summary-sig-name">registerSoundRepeaterThread</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">soundThread</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.registerSoundRepeaterThread">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="killSoundRepeatThreads"></a><span class="summary-sig-name">killSoundRepeatThreads</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">soundThreads</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.killSoundRepeatThreads">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="registerMusicRepeaterThread"></a><span class="summary-sig-name">registerMusicRepeaterThread</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">musicThread</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.registerMusicRepeaterThread">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="killMusicRepeatThreads"></a><span class="summary-sig-name">killMusicRepeatThreads</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">musicThreads</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.killMusicRepeatThreads">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="unregisterRepeatThread"></a><span class="summary-sig-name">unregisterRepeatThread</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">threadObj</span>,
+        <span class="summary-sig-arg">threadList</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.unregisterRepeatThread">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="STATUS_MSG_TIMEOUT"></a><span class="summary-name">STATUS_MSG_TIMEOUT</span> = <code title="5">5</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="PLAYHEAD_MSG_TIMEOUT"></a><span class="summary-name">PLAYHEAD_MSG_TIMEOUT</span> = <code title="0.5">0.5</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Initialize sound to play at the robot. Initializes 
+  self.sound_file_names to a list of sound file names for use with 
+  play-sound calls to the Robot via ROS.</p>
+  <dl class="fields">
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>NotImplementedError</strong></code> - if ROS initialization failed.</li>
+        <li><code><strong class='fraise'>IOError</strong></code> - if SpeakEasy node is online, but service call to it failed.</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="robotAvailable"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">robotAvailable</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.robotAvailable">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return True if a SpeakEasy service is available, i.e. if a SpeakEasy 
+  ROS node is running. Else return False.</p>
+  <dl class="fields">
+    <dt>Returns: bool</dt>
+        <dd>Result of checking whether a live SpeakEasy node is detected.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSpeakEasyNodeStatus"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSpeakEasyNodeStatus</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSpeakEasyNodeStatus">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return a SpeakEasy status message instance as received from a live 
+  SpeakEasy node. See msg.SpeakEasyStatus.msg for field details.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: SpeakEasyStatus</dt>
+        <dd>Message instance if available, else None. Message instances are 
+          unavailable if no SpeakEasy node is running.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundEffectNames"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundEffectNames</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSoundEffectNames">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return a list of the sound effects that the SpeakEasy node is 
+  offering. These effects may be invoked via the playSound() method.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: [string]</dt>
+        <dd>Array of sound effect names.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSongNames"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSongNames</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSongNames">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return a list of the music files that the SpeakEasy node is offering. 
+  These songs may be played via the playMusic() method.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: [bool]</dt>
+        <dd>Array of music files.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getTextToSpeechEngineNames"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getTextToSpeechEngineNames</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getTextToSpeechEngineNames">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return array of text-to-speech engines that are available at the 
+  SpeakEasy node. Examples: Festival, the Linux open source engine, or 
+  Cepstral, the commercial engine.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: [string]</dt>
+        <dd>List of engine names.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getVoiceNames"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getVoiceNames</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">ttsEngine</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getVoiceNames">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return a list of text-to-speech voices that the SpeakEasy node 
+  provides. If a particular text-to-speech engine is specified, only that 
+  engine's voices are returned, else all voices of all available engines 
+  are returned in one list.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>ttsEngine</code></strong> (string) - Name of one available text-to-speech engine.</li>
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: [string]</dt>
+        <dd>List of voice names, or empty list. List may be empty either 
+          because the SpeakEasy node does not offer text-to-speech 
+          services, or because the node has terminated, and is no longer 
+          broadcasting status messages.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getNumSoundChannels"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getNumSoundChannels</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getNumSoundChannels">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the number of simultaneous sound effects that the SpeakEasy 
+  node provides. Note that SpeakEasy nodes can be configured to provide 
+  many sound effect channels, though this API does not provide such 
+  control. Default is eight.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: int</dt>
+        <dd>Number of sound effect channels.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return default sound effect volume level. Note that sound volume can 
+  be set on a case-by-case basis in calls to playSound();</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: float</dt>
+        <dd>Default sound volume as a number between 0.0 and 1.0.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getMusicVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getMusicVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getMusicVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return default music volume level. Note that music volume can be set 
+  on a case-by-case basis in calls to playMusic();</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: float</dt>
+        <dd>Default sound volume as a number between 0.0 and 1.0.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getPlayStatus"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getPlayStatus</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getPlayStatus">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return current music play state. These states are defined in 
+  music_player.py. For reference, at the time of this writing: class 
+  PlayStatus:</p>
+  <ul>
+    <li>
+      STOPPED = 0;
+    </li>
+    <li>
+      PAUSED  = 1;
+    </li>
+    <li>
+      PLAYING = 2;
+    </li>
+  </ul>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>cachedOK</code></strong> (bool) - Set True if OK to use a previously cached status message.</li>
+    </ul></dd>
+    <dt>Returns: PlayStatus</dt>
+        <dd>Status of the music playback engine on the SpeakEasy node.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getMusicBusy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getMusicBusy</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getMusicBusy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Convenience method to determine whether music is currently either 
+  playing or paused.</p>
+  <dl class="fields">
+    <dt>Returns: bool</dt>
+        <dd>True/False to indicate whether music status is currently 
+          PlayStatus.STOPPED.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getTextToSpeechBusy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getTextToSpeechBusy</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">cachedOK</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getTextToSpeechBusy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return whether SpeakEasy node is currently generating speech from 
+  text.</p>
+  <dl class="fields">
+    <dt>Returns: bool</dt>
+        <dd>True/False to indicate whether text-to-speech engine is busy.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="say"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">say</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">voice</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">ttsEngine</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">numRepeats</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">repeatPeriod</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">blockTillDone</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.say">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Given a piece of text, generate corresponding speech at the SpeakEasy 
+  node site.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>text</code></strong> (string) - Words to speak.</li>
+        <li><strong class="pname"><code>voice</code></strong> (string) - Name of text-to-speech voice to use.</li>
+        <li><strong class="pname"><code>ttsEngine</code></strong> (string) - Name of text-to-speech engine to use.</li>
+        <li><strong class="pname"><code>numRepeats</code></strong> (int) - Number of times the utterance is to be repeated after the first 
+          time. Use -1 if forever.</li>
+        <li><strong class="pname"><code>repeatPeriod</code></strong> (float) - Time period in fractional seconds to wait between repeated 
+          utterances.</li>
+        <li><strong class="pname"><code>blockTillDone</code></strong> (bool) - Request to return immediately, or block until the utterance if 
+          finished.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if one of the parameters is of incorrect type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopSaying"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopSaying</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopSaying">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop text-to-speech utterance. No effect if text-to-speech is 
+  currently inactive.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="playSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">playSound</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">soundName</span>,
+        <span class="sig-arg">volume</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">numRepeats</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">repeatPeriod</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.playSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Play a sound effect at the SpeakEasy node.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>soundName</code></strong> (string) - Name of the sound effect. (see getSoundEffectNames()).</li>
+        <li><strong class="pname"><code>volume</code></strong> (float.) - Loudness for the sound effect. If None, current volume is used. 
+          Volume must be in range 0.0 to 1.0</li>
+        <li><strong class="pname"><code>numRepeats</code></strong> (int) - Number of times the sound effect is to be repeated after the 
+          first time.  Use -1 to play forever.</li>
+        <li><strong class="pname"><code>repeatPeriod</code></strong> (float) - Time period in fractional seconds to wait between repeats.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if any parameter is of the wrong type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopSound</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop the all currently playing sound effects. Method has no effect if 
+  no sound is currently playing.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="pauseSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pauseSound</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.pauseSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Pause the all currently playing sound effects. Method has no effect if
+  no sound is currently playing.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="unPauseSound"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unPauseSound</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.unPauseSound">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Un-pause all currently paused sound effects. Method has no effect if 
+  no sound is currently paused.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="setSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setSoundVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">volume</span>,
+        <span class="sig-arg">soundName</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Change the sound effect default volume.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>volume</code></strong> (float) - New default volume for sound effects. Value must be in range 0.0 
+          to 1.0.</li>
+        <li><strong class="pname"><code>soundName</code></strong> (string) - Optionally the name of the sound whose volume is to be changed.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if any parameters are of incorrect type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="playMusic"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">playMusic</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">songName</span>,
+        <span class="sig-arg">volume</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">playheadTime</span>=<span class="sig-default">0.0</span>,
+        <span class="sig-arg">timeReference</span>=<span class="sig-default">1</span>,
+        <span class="sig-arg">numRepeats</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">repeatPeriod</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.playMusic">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Play a piece of music (a sound file) at the SpeakEasy node.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>songName</code></strong> (string) - Name of sound file. (See getSongNames()).</li>
+        <li><strong class="pname"><code>volume</code></strong> ({None | float}) - Loudness at which to play. Default uses current volume. Else must
+          be in range 0.0 to 1.0</li>
+        <li><strong class="pname"><code>playheadTime</code></strong> (float) - Offset in fractional seconds into where to start the song. 
+          Default: start at beginning.</li>
+        <li><strong class="pname"><code>timeReference</code></strong> (TimeReference) - If playheadTime is provided, specifies whether the given time is 
+          intended as absolute (relative to the beginning of the song), or 
+          relative to the current playhead position.</li>
+        <li><strong class="pname"><code>numRepeats</code></strong> (int) - Number of times the song is to be repeated after the first time. 
+          Use -1 to play forever.</li>
+        <li><strong class="pname"><code>repeatPeriod</code></strong> (float) - Time period in fractional seconds to wait between repeats.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if any parameters are of incorrect type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stopMusic"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopMusic</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.stopMusic">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Stop currently playing music. No effect if nothing playing.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="pauseMusic"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pauseMusic</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.pauseMusic">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Pause currently playing music. No effect if nothing playing.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="unPauseMusic"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unPauseMusic</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.unPauseMusic">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Un-pause currently playing music. No effect if nothing paused or 
+  playing.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="setMusicVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setMusicVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">vol</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setMusicVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set default volume of music playback.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>vol</code></strong> (float) - Loudness value between 0.0 and 1.0.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if any parameters are of incorrect type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setPlayhead"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setPlayhead</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">playheadTime</span>,
+        <span class="sig-arg">timeReference</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.setPlayhead">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Change the music playhead position to a particular time within a song.
+  Time may be specified absolute (i.e. relative to the start of the song), 
+  or relative to the current playhead. The playhead may be changed during 
+  playback, or while a song is paused.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>playheadTime</code></strong> (float) - New time where to position the playhead.</li>
+        <li><strong class="pname"><code>timeReference</code></strong> (TimeReference.) - TimeReference.ABSOLUTE or TimeReference.RELATIVE</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if any parameters are of incorrect type.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getPlayhead"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getPlayhead</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#RoboComm.getPlayhead">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return song position in fractional seconds. Return None if no music is
+  currently playing.</p>
+  <dl class="fields">
+    <dt>Returns: float</dt>
+        <dd>Position in fractional seconds.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Jun 15 17:35:45 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

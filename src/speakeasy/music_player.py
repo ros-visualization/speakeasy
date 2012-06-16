@@ -25,21 +25,21 @@ class MusicPlayer(object):
     which is optimized for dealing with lots of short sounds, this facility
     is for longer files, which are streamed, rather than loaded. Also in
     contrast to SoundPlayer, MusicPlayer can only play one song at a time.
-    <p> 
+
     For ogg files the method setPlayhead() allows clients to move foward
     and back within a song as it plays.
-    <p>
+
     Public methods:
-    <ul>
-	    <li>play()</li>
-	    <li>pause()</li>
-	    <li>unpause()</li>
-	    <li>setSoundVolume()</li>
-	    <li>getSoundVolume()</li>
-	    <li>setPlayhead()</li>
-	    <li>getPlayheadPosition()</li>
-	    <li>getPlayStatus()</li>
-	</ul>
+
+       1. play()
+       2. pause()
+       3. unpause()
+       4. setSoundVolume()
+       5. getSoundVolume()
+       6. setPlayhead()
+       7. getPlayheadPosition()
+       8. getPlayStatus()
+
 	Requires pygame.    
     '''
     
@@ -243,7 +243,7 @@ class MusicPlayer(object):
         '''
         Get currently set sound volume.
         @return: Volume number between 0.0 and 1.0
-        @returnt: float
+        @rtype: float
         '''
 
         try:
@@ -274,7 +274,7 @@ class MusicPlayer(object):
         @type secs: float
         @param timeReference: whether to interpret the secs parameter as absolute from the song start, or relative from current position.
                               Options are TimeRerence.ABSOLUTE and TimeRerence.RELATIVE
-        @type interpretation: TimeReference
+        @type timeReference: TimeReference
         @raise NotImplementedError: if called while playing song whose format does not support playhead setting in pygame. 
         '''
 
@@ -313,7 +313,7 @@ class MusicPlayer(object):
         Return number of (possibly fractional) seconds to where the current
         song is currently playing. If currently playing nothing, return 0.0.
         @return: number of fractional seconds where virtual playhead is positioned.
-        @returnt: float
+        @rtype: float
         '''
         if pygame.mixer.music.get_busy() != 1:
             return 0.0;
@@ -353,7 +353,7 @@ class MusicPlayer(object):
         @param timeout: Maximum time to wait in seconds.
         @type timeout: {int | float}
         @return: True if song ended, False if timeout occurred.
-        @returnt: boolean
+        @rtype: boolean
         '''
         if self.getPlayStatus() == PlayStatus.STOPPED:
             return;
@@ -382,7 +382,7 @@ class MusicPlayer(object):
         @param fileExtension: file extension with or without leading period. Example: ".ogg"
         @type fileExtension: string
         @return: True if the format is supported, else False.
-        @returnt: boolean
+        @rtype: boolean
         @raise ValueError: if fileExtension is anything other than a string with length > 0. 
         '''
         if (fileExtension is None) or (not isinstance(fileExtension, basestring)) or (len(fileExtension) == 0):

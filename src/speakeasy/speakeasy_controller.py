@@ -72,12 +72,9 @@ class ButtonProgram(object):
         @param voice: The voice to use for the utterance
         @type  voice: string
         @param ttsEngine: The text-to-speech engine to use. (e.g. "festival", or "cepstral"
-        @type string
+        @type  ttsEngine: string
         @param playOnce: Whether to play the utterance just once, or several times.
-        @type  bool
-        @param buttonLabel: Label visible on the button widget. If None, the label will be 
-                            extracted from the buttonObj.
-        @type string or None
+        @type  playOnce: bool
         '''
         self.buttonLabel = buttonLabel;
         self.textToSay   = textToSave;
@@ -148,10 +145,9 @@ class SpeakEasyController(object):
     '''
     Control logic behind the speakeasy GUI.
 	
-	Available voices:
-	Festival: 1.  Usually voice_kal_diphone (male) on Ubuntu installations
-	Cepstral: Depends on your installation.       
-            
+    Available voices:
+        1. Festival: Usually voice_kal_diphone (male) on Ubuntu installations
+        2. Cepstral: Depends on your installation. Voices are individually licensed.       
     '''
     
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
@@ -231,7 +227,7 @@ class SpeakEasyController(object):
         self.sound_file_names to a list of sound file names
         for use with SoundPlayer instance.
         @return: True if initialization succeeded, else False.
-        @returnt: boolean
+        @rtype: boolean
         '''
         if self.soundPlayer is None:
             self.soundPlayer = SoundPlayer();
@@ -311,7 +307,7 @@ class SpeakEasyController(object):
         @param stand_alone: False if referenced sounds are to be from the ROS environment.
         @type stand_alone: boolean
         @return: array of sound file basenames without extensions. E.g.: [rooster, birds, elephant]
-        @returnt: [string]
+        @rtype: [string]
         '''
 
         if stand_alone is None:

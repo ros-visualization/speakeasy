@@ -15,45 +15,54 @@ class SoundPlayer(object):
     '''
     Plays up to NUM_SIMULTANEOUS_SOUNDS .wav/.ogg files simultaneously. Allows pause/unpause on
     any of these sounds. (.ogg untested)
-    <p>
+    
     Theory of operation: The class uses the pygame module. This module involves Sound instances
     and Channel instances. A Sound is created from a .wav or .ogg file, and can play on one or 
     more Channel instances. 
-    <p>
+    
     All channels can simultaneously play, one Sound per channel. The
-	number of channels can be set via the module-global constant
-	NUM_SIMULTANEOUS_SOUNDS. Default is 8. Channels and Sounds are managed
-	by pygame.mixer. 
-	<p>
-	This class uses parameter polymorphism to unify all these concepts as
-	much as possible. The only public methods are
-	<code>play(), stop(), pause(), unpause(),set_volume(),
-	get_volume()</code>. Each of these methods takes either the path to
-	a sound file, a Sound instances, or a Channel instance. The
-	SoundPlayer takes care of creating Sound instances by loading them
-	from files, caching sounds, and tracking which Sounds are playing on
-	which Channel at any time. Callers of these methods need to deal only
-	with the sound file paths. These paths, when passed to, say, the
-	pause() method, will do the right thing; Sound instances are cached,
-	so they will not be loaded repeatedly.
-	<p>
-	Note that this wonderful collapsing of complex underlying pygame
-	concepts comes at a price in code ugliness.  Since Python does not
-	have parameter based polymorphism, methods must figure out incoming
-	parameter types via duck typing methods: Treat the parameters as some
-	type and see whether an error occurs. Terrible, but the 'pythonic' way.
-	<p>
+    number of channels can be set via the module-global constant
+    NUM_SIMULTANEOUS_SOUNDS. Default is 8. Channels and Sounds are managed
+    by pygame.mixer. 
+    
+    This class uses parameter polymorphism to unify all these concepts as
+    much as possible. The only public methods are
+    <code>play(), stop(), pause(), unpause(),set_volume(),
+    get_volume()</code>. Each of these methods takes either the path to
+    a sound file, a Sound instances, or a Channel instance. The
+    SoundPlayer takes care of creating Sound instances by loading them
+    from files, caching sounds, and tracking which Sounds are playing on
+    which Channel at any time. Callers of these methods need to deal only
+    with the sound file paths. These paths, when passed to, say, the
+    pause() method, will do the right thing; Sound instances are cached,
+    so they will not be loaded repeatedly.
+    
+    Note that this wonderful collapsing of complex underlying pygame
+    concepts comes at a price in code ugliness.  Since Python does not
+    have parameter based polymorphism, methods must figure out incoming
+    parameter types via duck typing methods: Treat the parameters as some
+    type and see whether an error occurs. Terrible, but the 'pythonic' way.
+    
+    
+    As background: The pygame API provides methods three entities:
+    Mixer, Channel, and Sound. The main methods are:
 	
-	As background: The pygame API provides methods three entities:
-	Mixer, Channel, and Sound. The main methods are:
-	
-	<ul>
-	    <li>Mixer:
-	        stop(),pause(),unpause(),get_num_channels(),set_num_channels()</li>
-	    <li>Channel: play(),stop(),pause(),unpause()</li>
-	    <li>Sound: play(),stop(),pause(),unpause()</li>
-	</ul>
-	<p>   
+        1. Mixer:
+               - stop()
+               - pause()
+               - unpause()
+               - get_num_channels()
+               - set_num_channels()
+        2. Channel: 
+               - play()
+               - stop()
+               - pause()
+               - unpause()
+        3. Sound: 
+               - play()
+               - stop()
+               - pause()
+               - unpause()
     '''
     
     # Used to enforce Singleton pattern:
@@ -249,7 +258,7 @@ class SoundPlayer(object):
         The sound to unpause (parameter whatToStop) may be specified as a 
         the full-path filename of the respective .wav/.ogg file, as a 
         Sound instance, or as a Channel instance. 
-        @param whatToPause: If None, unpause all currently playing sounds. If whatToUnPause
+        @param whatToUnPause: If None, unpause all currently playing sounds. If whatToUnPause
                             is a Sound instance, pause this sound on all channels on which
                             it might currently be playing. If whatToUnPause is a Channel or array of 
                             channel instances, pause whatever is currently playing 
@@ -310,9 +319,9 @@ class SoundPlayer(object):
         may be the full-path filename of a .wav/.ogg file, a Sound instance,
         or a Channel instance. Here is the interaction between settings
         of Sound vs. Channel volume:
-    		  sound.set_volume(0.9)   # Now plays at 90% of full volume.
-    		  sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
-    		  channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
+            - sound.set_volume(0.9)   # Now plays at 90% of full volume.
+            - sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
+            - channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
     	Passing in a filename will load the file, and set the volume of the 
     	corresponding Sound.
         @param volume: Value between 0.0 and 1.0.
@@ -379,15 +388,15 @@ class SoundPlayer(object):
         may be the full-path filename of a .wav/.ogg file, a Sound instance,
         or a Channel instance. Here is the interaction between settings
         of Sound vs. Channel volume:
-    		  sound.set_volume(0.9)   # Now plays at 90% of full volume.
-    		  sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
-    		  channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
+            - sound.set_volume(0.9)   # Now plays at 90% of full volume.
+            - sound.set_volume(0.6)   # Now plays at 60% (previous value replaced).
+            - channel.set_volume(0.5) # Now plays at 30% (0.6 * 0.5).
     	Passing in a filename will load the file, and get the volume of the 
     	corresponding Sound.
     	
-        @param whatToSetVolFor: The soundfile, Sound, or Channel instance whose volume to get.
+        @param whatToGetVolFor: The soundfile, Sound, or Channel instance whose volume to get.
                                 If None, return global value setting
-        @type whatToSetVolFor: {NoneType | string | Sound | Channel}
+        @type whatToGetVolFor: {NoneType | string | Sound | Channel}
         @raise OSError: if given filename that does not exist. 
         '''
 
@@ -438,7 +447,7 @@ class SoundPlayer(object):
         @param fileExtension: file extension with or without leading period. Example: ".ogg"
         @type fileExtension: string
         @return: True if the format is supported, else False.
-        @returnt: boolean
+        @rtype: boolean
         @raise ValueError: if fileExtension is anything other than a string with length > 0. 
         '''
         if (fileExtension is None) or (not isinstance(fileExtension, basestring)) or (len(fileExtension) == 0):
@@ -579,7 +588,7 @@ class SoundPlayer(object):
         @param volume: Volume to play at: 0.0 to 1.0
         @type volume: float
         @return: Sound and channel instances
-        @returnt: (Sound, Channel)
+        @rtype: (Sound, Channel)
         @raise OSError: if file does not exist. 
         '''
         if not isinstance(filename, basestring):
@@ -660,7 +669,7 @@ class SoundPlayer(object):
         @param filename: Filename from which the Sound instance to be unpaused was created.
         @type filename: string
         @return: Sound instance
-        @returnt: Sound
+        @rtype: Sound
         @raise TypeError: filename is not a string.
         '''
         
@@ -691,7 +700,7 @@ class SoundPlayer(object):
         @param filename: Filename from which the Sound instance was created.
         @type filename: string
         @return: Sound instance created from the given file. None if file not yet loaded.
-        @returnt: {Sound | NoneType}
+        @rtype: {Sound | NoneType}
         '''
         try:
             return self.loadedSounds[filename]
@@ -725,7 +734,7 @@ class SoundPlayer(object):
         @param sound: Sound instance to be hunted down.
         @type sound: Sound
         @return: Array of Channel instances, or None, if Sound is not currently playing on any channel.
-        @returnt: {[Channel] | NoneType}
+        @rtype: {[Channel] | NoneType}
         '''
         self.cleanupSoundChannelBindings();
         try:

@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.text_to_speech.TextToSpeechProvider</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;speakeasy ::
+        <a href="speakeasy.text_to_speech-module.html">Module&nbsp;text_to_speech</a> ::
+        Class&nbsp;TextToSpeechProvider
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class TextToSpeechProvider</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">TextToSpeechProvider</strong>
+</pre>
+
+<hr />
+<p>Abstraction for interacting with text-to-speech engines on Ubuntu, 
+  Mac, and (unimplemented:) Windows. Detects Festival and Cepstral engines 
+  on Ubuntu. Main public facilities: Speak an utterance immediately, given 
+  a string, and generate a .wav file from the text-to-speech 
+  conversion.</p>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      x.__init__(...) initializes x; see help(type(x)) for signature</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#sayToFile" class="summary-sig-name">sayToFile</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">text</span>,
+        <span class="summary-sig-arg">voiceName</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">t2sEngineName</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">destFileName</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Create a sound file with the result of turning the string passed in 
+      parameter 'text' to sound.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.sayToFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#say" class="summary-sig-name">say</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">text</span>,
+        <span class="summary-sig-arg">voiceName</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">t2sEngineName</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">blockTillDone</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Immediately speak the given string with the given voice on the given 
+      engine.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.say">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="stop"></a><span class="summary-sig-name">stop</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop text-to-speech that is currently playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.stop">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#busy" class="summary-sig-name">busy</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return True if any of the text-to-speech engines is currently 
+      synthesizing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.busy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="waitForSoundDone"></a><span class="summary-sig-name">waitForSoundDone</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Block until speech finished playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.waitForSoundDone">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[string]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#availableTextToSpeechEngines" class="summary-sig-name">availableTextToSpeechEngines</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns an array of text-to-speech engine names that are available on
+      the current machine.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.availableTextToSpeechEngines">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">{string : [string]}</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#availableVoices" class="summary-sig-name">availableVoices</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns a dictionary of all available voices for each text-to-speech 
+      engine.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.availableVoices">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#getEngineObj" class="summary-sig-name">getEngineObj</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">engineName</span>)</span><br />
+      From a text-to-speech engine name that may be None, return an engine 
+      object.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.getEngineObj">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">TextToSpeechEngine subclass</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#findAvailableTTSEngines" class="summary-sig-name">findAvailableTTSEngines</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Try to sense the underlying OS.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.findAvailableTTSEngines">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">TexToSpeechEngine</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#linuxTTSEngines" class="summary-sig-name">linuxTTSEngines</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Called if underlying machine is Linux.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.linuxTTSEngines">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">TexToSpeechEngine</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#macTTSEngines" class="summary-sig-name">macTTSEngines</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Called if underlying machine is Mac.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.macTTSEngines">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="windowsTTSEngines"></a><span class="summary-sig-name">windowsTTSEngines</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.windowsTTSEngines">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== STATIC METHODS ==================== -->
+<a name="section-StaticMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.text_to_speech.TextToSpeechProvider-class.html#which" class="summary-sig-name">which</a>(<span class="summary-sig-arg">program</span>)</span><br />
+      Implements the Unix 'which' shell command, extended to consider not 
+      just $PATH, but also $PYTHONPATH when searching for an executable of 
+      the given name (the program parameter).</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.which">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sayToFile"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">sayToFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">voiceName</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">t2sEngineName</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">destFileName</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.sayToFile">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create a sound file with the result of turning the string passed in 
+  parameter 'text' to sound. The given voice engine and voice are used. If 
+  no destination file is provided, a temporary file is created, and its 
+  filename is returned after the file is closed. The caller bears 
+  responsibility for removing that temporary file.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>text</code></strong> (string) - String to convert into sound.</li>
+        <li><strong class="pname"><code>t2sEngineName</code></strong> (string) - Name of text-to-speech engine: &quot;festival&quot;, 
+          &quot;cepstral&quot;, &quot;mact2s&quot;</li>
+        <li><strong class="pname"><code>voiceName</code></strong> (string) - Name of voice to use. Must be a voice supported by the given t2s 
+          engine.</li>
+        <li><strong class="pname"><code>destFileName</code></strong> (string) - Path into which the resulting sound should be directed. If not 
+          provided, a temp file is created.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>NotImplementedError</strong></code> - if voice is not supported by the given engine.</li>
+        <li><code><strong class='fraise'>ValueError</strong></code> - if given engine name does not correspond to any know text-to-speech
+        engine.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="say"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">say</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">voiceName</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">t2sEngineName</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">blockTillDone</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.say">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Immediately speak the given string with the given voice on the given 
+  engine. If voice or engine are not provided, defaults are used.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>text</code></strong> (string) - String to speak</li>
+        <li><strong class="pname"><code>voiceName</code></strong> (string) - Designation of the voice to use.</li>
+        <li><strong class="pname"><code>t2sEngineName</code></strong> (string) - Name of text-to-speech engine to use.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if unknown text-to-speech engine.</li>
+        <li><code><strong class='fraise'>OSError</strong></code> - if failure in running the text-to-speech command in underlying 
+        shell</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="busy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">busy</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.busy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return True if any of the text-to-speech engines is currently 
+  synthesizing. Else return False;</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="availableTextToSpeechEngines"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">availableTextToSpeechEngines</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.availableTextToSpeechEngines">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns an array of text-to-speech engine names that are available on 
+  the current machine. Exampele: ['festival', 'cepstral']</p>
+  <dl class="fields">
+    <dt>Returns: [string]</dt>
+        <dd>Array of text-to-speech engine names as appropriate for ROS t2s 
+          messages. Order within the array is not necessarily the same 
+          between calls.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="availableVoices"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">availableVoices</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.availableVoices">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns a dictionary of all available voices for each text-to-speech 
+  engine. Keys are the engine names. Example:</p>
+  <ol start="1">
+    <li>
+      Cepstral : ['David', 'Anna']
+    </li>
+    <li>
+      Festival : ['voice_kal_diphone']
+    </li>
+  </ol>
+  <p>The default voice for each engine is guaranteed to be the first in the
+  voice lists. Order of the remaining voices is arbitrary.</p>
+  <dl class="fields">
+    <dt>Returns: {string : [string]}</dt>
+        <dd>Dictionary mapping text-to-speech engine names to lists of voice 
+          names.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getEngineObj"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getEngineObj</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">engineName</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.getEngineObj">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>From a text-to-speech engine name that may be None, return an engine 
+  object.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>engineName</code></strong> (string) - Name of text-to-speech engine to use</li>
+    </ul></dd>
+    <dt>Returns:</dt>
+        <dd>Subclass of TextToSpeechEngine</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="findAvailableTTSEngines"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">findAvailableTTSEngines</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.findAvailableTTSEngines">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Try to sense the underlying OS. Then identify the available 
+  text-to-speech engines. Return the default engine to be used.</p>
+  <dl class="fields">
+    <dt>Returns: TextToSpeechEngine subclass</dt>
+        <dd>Default engine instance.</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if no speech engine is found.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="linuxTTSEngines"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">linuxTTSEngines</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.linuxTTSEngines">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Called if underlying machine is Linux. Explores which text-to-speech 
+  engines are available. Festival is built into Ubuntu. Cepstral is a 
+  for-pay engine.</p>
+  <dl class="fields">
+    <dt>Returns: TexToSpeechEngine</dt>
+        <dd>Text-to-speech engine instance to use as default. None if no 
+          text-to-speech-engine is available.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="macTTSEngines"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">macTTSEngines</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.macTTSEngines">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Called if underlying machine is Mac. Explores which text-to-speech 
+  engines are available.</p>
+  <dl class="fields">
+    <dt>Returns: TexToSpeechEngine</dt>
+        <dd>Text-to-speech engine instance to use as default. None if no 
+          text-to-speech-engine is available.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="which"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">which</span>(<span class="sig-arg">program</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.text_to_speech-pysrc.html#TextToSpeechProvider.which">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Implements the Unix 'which' shell command, extended to consider not 
+  just $PATH, but also $PYTHONPATH when searching for an executable of the 
+  given name (the program parameter). $PATH is given preference; it is 
+  searched first.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>program</code></strong> (string) - Name of the executable with or without path</li>
+    </ul></dd>
+    <dt>Returns:</dt>
+        <dd>None if no executable found, else full path to executable.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >SpeakEasy</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Jun 15 17:35:46 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
