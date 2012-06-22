@@ -60,6 +60,7 @@ class MusicPlayer(object):
         pygame.init();
         self.lock = threading.Lock();
         self.playStatus = PlayStatus.STOPPED;
+        self.currentAudioFormat = 'ogg';
         
         # Use the first available pygame user event number as 
         # a 'play ended naturally or via stop()' event:
