@@ -1,0 +1,177 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module speakeasy_persistence</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>speakeasy_persistence</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/wg/stor2a/paepcke/fuerte/stacks/speakeasy/src/speakeasy/speakeasy_persistence.py">/wg/stor2a/paepcke/fuerte/stacks/speakeasy/src/speakeasy/speakeasy_persistence.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="xml.etree.ElementTree.html">xml.etree.ElementTree</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="rospy.html">rospy</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="speakeasy_persistence.html#ButtonSavior">ButtonSavior</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speakeasy_persistence.html#Python2_7ElementTree">Python2_7ElementTree</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ButtonSavior">class <strong>ButtonSavior</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ButtonSavior-__init__"><strong>__init__</strong></a>(self)</dt></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="ButtonSavior-createXMLElement"><strong>createXMLElement</strong></a>(tagName, content<font color="#909090">=''</font>, attrDict<font color="#909090">={}</font>)</dt></dl>
+
+<dl><dt><a name="ButtonSavior-findDefaultButtonSetTitle"><strong>findDefaultButtonSetTitle</strong></a>()</dt></dl>
+
+<dl><dt><a name="ButtonSavior-reportError"><strong>reportError</strong></a>(msg)</dt></dl>
+
+<dl><dt><a name="ButtonSavior-retrieveFromFile"><strong>retrieveFromFile</strong></a>(fileName, buttonProgramClass)</dt><dd><tt>Given&nbsp;an&nbsp;absolute&nbsp;path&nbsp;to&nbsp;a&nbsp;button&nbsp;program&nbsp;XML&nbsp;file,<br>
+return&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;DOM&nbsp;tree&nbsp;program&nbsp;elements.<br>
+The&nbsp;caller&nbsp;passes&nbsp;in&nbsp;a&nbsp;class&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;class&nbsp;will<br>
+be&nbsp;instantiated&nbsp;with&nbsp;the&nbsp;data&nbsp;extracted&nbsp;from&nbsp;the&nbsp;XML<br>
+of&nbsp;each&nbsp;button&nbsp;program.<br>
+&nbsp;<br>
+Example&nbsp;structure:<br>
+&lt;buttonProgramSet&gt;<br>
+&nbsp;&nbsp;&lt;buttonProgramSetTitle&gt;Household&nbsp;Set&lt;/buttonProgramSetTitle&gt;<br>
+&nbsp;&nbsp;&lt;buttonSetting&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;label&gt;Button&nbsp;4&lt;/label&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;text&gt;Utterance&nbsp;number&nbsp;1&lt;/text&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;voice&gt;David&lt;/voice&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;engine&gt;cepstral&lt;/engine&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;playOnce&gt;True&lt;/playOnce&gt;<br>
+&nbsp;&nbsp;&lt;/buttonSetting&gt;<br>
+&nbsp;&nbsp;&lt;buttonSetting&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;label&gt;Button&nbsp;5&lt;/label&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;text&gt;Utterance&nbsp;number&nbsp;2&lt;/text&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;voice&gt;David&lt;/voice&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;engine&gt;cepstral&lt;/engine&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;playOnce&gt;True&lt;/playOnce&gt;<br>
+&nbsp;&nbsp;&lt;/buttonSetting&gt;<br>
+&lt;/buttonProgramSet&gt;<br>
+&nbsp;<br>
+@param&nbsp;fileName:&nbsp;name&nbsp;of&nbsp;XML&nbsp;file.<br>
+@type&nbsp;fileName:&nbsp;string<br>
+@param&nbsp;buttonProgramClass:&nbsp;class&nbsp;whose&nbsp;instances&nbsp;are&nbsp;to&nbsp;be&nbsp;created&nbsp;to&nbsp;hold&nbsp;button&nbsp;settings.<br>
+@type&nbsp;buttonProgramClass:&nbsp;ButtonProgram<br>
+@return:&nbsp;A&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;title&nbsp;of&nbsp;the&nbsp;button&nbsp;set,&nbsp;and&nbsp;an&nbsp;array&nbsp;of&nbsp;instances&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;passed-in&nbsp;class.<br>
+@returnt:&nbsp;(string,&nbsp;[ButtonProgram])<br>
+@raise&nbsp;ValueError:&nbsp;if&nbsp;XML&nbsp;is&nbsp;bad.</tt></dd></dl>
+
+<dl><dt><a name="ButtonSavior-saveToFile"><strong>saveToFile</strong></a>(buttonSettings, fileName, title<font color="#909090">=None</font>)</dt><dd><tt>Given&nbsp;an&nbsp;array&nbsp;of&nbsp;ButtonProgram&nbsp;objects,&nbsp;turn&nbsp;them&nbsp;to&nbsp;<br>
+XML&nbsp;and&nbsp;save&nbsp;them&nbsp;in&nbsp;a&nbsp;new&nbsp;file&nbsp;of&nbsp;the&nbsp;given&nbsp;name.<br>
+If&nbsp;the&nbsp;file&nbsp;exists,&nbsp;it&nbsp;will&nbsp;be&nbsp;overwritten.<br>
+@param&nbsp;buttonSettings:&nbsp;Array&nbsp;of&nbsp;ButtonProgram&nbsp;instances<br>
+@type&nbsp;&nbsp;buttonSettings:&nbsp;[ButtonProgram]<br>
+@param&nbsp;fileName:&nbsp;Name&nbsp;of&nbsp;file&nbsp;to&nbsp;which&nbsp;the&nbsp;XML&nbsp;is&nbsp;to&nbsp;be&nbsp;written.<br>
+@type&nbsp;fileName:&nbsp;string<br>
+@param&nbsp;title:&nbsp;An&nbsp;arbitrary&nbsp;name&nbsp;for&nbsp;this&nbsp;set<br>
+@type&nbsp;title:&nbsp;string</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>BUTTON_LABEL_TAG</strong> = 'label'</dl>
+
+<dl><dt><strong>BUTTON_PLAY_ONCE</strong> = 'playOnce'</dl>
+
+<dl><dt><strong>BUTTON_PROGRAM_SET_TAG</strong> = 'buttonProgramSet'</dl>
+
+<dl><dt><strong>BUTTON_PROGRAM_SET_TITLE_TAG</strong> = 'buttonProgramSetTitle'</dl>
+
+<dl><dt><strong>BUTTON_PROGRAM_TAG</strong> = 'buttonSetting'</dl>
+
+<dl><dt><strong>BUTTON_TEXT_TO_SAY_TAG</strong> = 'text'</dl>
+
+<dl><dt><strong>BUTTON_TTS_ENGINE</strong> = 'engine'</dl>
+
+<dl><dt><strong>BUTTON_VOICE_TAG</strong> = 'voice'</dl>
+
+<dl><dt><strong>SPEECH_SET_DIR</strong> = 'src/speakeasy/../../buttonPrograms'</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Python2_7ElementTree">class <strong>Python2_7ElementTree</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;facility&nbsp;is&nbsp;built&nbsp;in&nbsp;to&nbsp;Python&nbsp;2.7's&nbsp;ElementTree&nbsp;as<br>
+element.<a href="#Python2_7ElementTree-iter">iter</a>().&nbsp;Also&nbsp;built&nbsp;in&nbsp;with&nbsp;Python&nbsp;2.7&nbsp;is&nbsp;findall(tagName).<br>
+We&nbsp;need&nbsp;to&nbsp;use&nbsp;2.6&nbsp;for&nbsp;now,&nbsp;so&nbsp;we&nbsp;recreate&nbsp;the&nbsp;facilities<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Python2_7ElementTree-__init__"><strong>__init__</strong></a>(self, python2_6ElementTree)</dt><dd><tt>Pass&nbsp;in&nbsp;an&nbsp;element&nbsp;tree&nbsp;of&nbsp;the&nbsp;old&nbsp;kind.<br>
+@param&nbsp;python2_6ElementTree:&nbsp;ElementTree&nbsp;instance<br>
+@type&nbsp;python2_6ElementTree:&nbsp;ElementTree</tt></dd></dl>
+
+<dl><dt><a name="Python2_7ElementTree-closeIter"><strong>closeIter</strong></a>(self)</dt><dd><tt>Indicate&nbsp;that&nbsp;the&nbsp;iterator&nbsp;is&nbsp;no&nbsp;longer&nbsp;needed.<br>
+Only&nbsp;after&nbsp;calling&nbsp;this&nbsp;method&nbsp;can&nbsp;a&nbsp;new&nbsp;iterator<br>
+be&nbsp;obtained&nbsp;via&nbsp;<a href="#Python2_7ElementTree-iter">iter</a>().</tt></dd></dl>
+
+<dl><dt><a name="Python2_7ElementTree-hasNext"><strong>hasNext</strong></a>(self)</dt><dd><tt>Return&nbsp;True&nbsp;if&nbsp;at&nbsp;least&nbsp;one&nbsp;element&nbsp;has&nbsp;still&nbsp;not&nbsp;been&nbsp;<br>
+retrieved&nbsp;via&nbsp;the&nbsp;<a href="#Python2_7ElementTree-next">next</a>()&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="Python2_7ElementTree-iter"><strong>iter</strong></a>(self)</dt><dd><tt>Return&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;that&nbsp;supports&nbsp;methods&nbsp;<a href="#Python2_7ElementTree-next">next</a>(),&nbsp;<a href="#Python2_7ElementTree-hasNext">hasNext</a>(),&nbsp;and&nbsp;<a href="#Python2_7ElementTree-closeIter">closeIter</a>().</tt></dd></dl>
+
+<dl><dt><a name="Python2_7ElementTree-next"><strong>next</strong></a>(self)</dt><dd><tt>Return&nbsp;next&nbsp;subelement&nbsp;in&nbsp;xml&nbsp;tree.<br>
+@raise&nbsp;ValueError:&nbsp;if&nbsp;no&nbsp;more&nbsp;elements&nbsp;are&nbsp;available.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-closeTag"><strong>closeTag</strong></a>(tagName)</dt></dl>
+ <dl><dt><a name="-indent"><strong>indent</strong></a>(elem, level<font color="#909090">=0</font>)</dt></dl>
+ <dl><dt><a name="-openTag"><strong>openTag</strong></a>(tagName)</dt></dl>
+</td></tr></table>
+</body></html>
