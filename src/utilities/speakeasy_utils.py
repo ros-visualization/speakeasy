@@ -210,11 +210,27 @@ class SpeakeasyUtils(object):
         except subprocess.CalledProcessError as err:
             return default;
         
-#        try:
-#            return subprocess.check_output(["rospack", "find", packName]).strip();
-#        except subprocess.CalledProcessError as err:
-#            return default;
-         
+    #----------------------------------
+    # bashQuotify
+    #--------------
+        
+    @staticmethod
+    def bashQuotify(str):
+        '''
+        Bash does not tolerate single quotes within single-quoted strings.
+        Backslashing the embedded single quote does *not* work. Thus:
+        echo 'That's it' will lead to error as expected, but so will
+        echo 'That\'s it'. The solution is to replace all single quotes
+        with '\'' (all quotes are single quotes here).
+        
+        @param str: String in which to make single quotes safe. Ok not to 
+                    have any single quotes.
+        @type str: string
+        '''
+        
+        return str.replace("'", "'" + "\\" + "'" + "'");
+        
+        
 # ----------------------------  Testing ----------------------
 
 class UtilsTest(unittest.TestCase):
@@ -256,14 +272,21 @@ class UtilsTest(unittest.TestCase):
 #        self.assertTrue(SpeakeasyUtils.ensureType([], list), "List not recognized.")
 #        self.assertTrue(SpeakeasyUtils.ensureType({}, dict), "Dict not recognized.")
     
-    def testFindPackage(self):
-        path = SpeakeasyUtils.findPackage("rospy")
-        print path
-        realPath = os.path.abspath(os.path.join(os.getenv("ROS_ROOT") + "/..", "rospy"));
-        self.assertEqual(SpeakeasyUtils.findPackage("rospy"),
-                         realPath,
-                         "Could not find rospy package. findPackage returns '%s' instead of '%s'" % 
-                         (str(SpeakeasyUtils.findPackage("rospy")), realPath));
+#    def testFindPackage(self):
+#        path = SpeakeasyUtils.findPackage("rospy")
+#        print path
+#        realPath = os.path.abspath(os.path.join(os.getenv("ROS_ROOT") + "/..", "rospy"));
+#        self.assertEqual(SpeakeasyUtils.findPackage("rospy"),
+#                         realPath,
+#                         "Could not find rospy package. findPackage returns '%s' instead of '%s'" % 
+#                         (str(SpeakeasyUtils.findPackage("rospy")), realPath));
+        
+        
+    def testBashQuotify(self):
+        self.assertEqual(SpeakeasyUtils.bashQuotify("Foo"), "Foo", "Failed string without embedded single quote.");
+        self.assertEqual(SpeakeasyUtils.bashQuotify("Foo's bar"), "Foo'" + r"\'" + "'s bar", "Failed single embedded quote.");
+        
+        
         
 if __name__ == '__main__':
     

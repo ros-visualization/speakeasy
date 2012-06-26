@@ -266,7 +266,7 @@ class SoundPlayer(object):
         @type whatToUnPause: {NoneType | string | Sound | Channel}
         '''
         
-        with self.lock():
+        with self.lock:
             self.cleanupSoundChannelBindings();        
             
             if whatToUnPause is None:

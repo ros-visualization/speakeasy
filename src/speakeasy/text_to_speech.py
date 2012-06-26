@@ -311,6 +311,21 @@ class TextToSpeechEngine(object):
             except ValueError:
                 raise ValueError("Voice engine %s does not support a voice named %s." % (self.getEngineName(), str(voice)));
             return voice;
+
+    def bashQuotify(self, str):
+        '''
+        Bash does not tolerate single quotes within single-quoted strings.
+        Backslashing the embedded single quote does *not* work. Thus:
+        echo 'That's it' will lead to error as expected, but so will
+        echo 'That\'s it'. The solution is to replace all single quotes
+        with '\'' (all quotes are single quotes here).
+        
+        @param str: String in which to make single quotes safe. Ok not to 
+                    have any single quotes.
+        @type str: string
+        '''
+        
+        return str.replace("'", "'" + "\\" + "'" + "'");
         
         
 class Festival(TextToSpeechEngine):
@@ -330,11 +345,18 @@ class Festival(TextToSpeechEngine):
         self.txtfilename = self.txtfile.name
 
     def say(self, text, voice=None):
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        #******text = self.bashQuotify(text);
         # Too complicated to set a voice for now. Ignore that parameter.
         commandLine = 'echo "' + str(text) + '" | padsp festival --tts &';
         os.system(commandLine);
         
     def sayToFile(self, text, voice=None, destFileName=None):
+        
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        #*********text = self.bashQuotify(text);
         
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         if destFileName is None:
@@ -397,6 +419,11 @@ class Cepstral(TextToSpeechEngine):
         self.ttsEngineName = "cepstral";
 
     def say(self, text, voice=None):
+        
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        text = self.bashQuotify(text);
+        
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
         commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "' &";
@@ -406,6 +433,10 @@ class Cepstral(TextToSpeechEngine):
         os.system("killall --quiet " + str("swift.bin"));
         
     def sayToFile(self, text, voice=None, destFileName=None):
+
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        text = self.bashQuotify(text);
         
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         if destFileName is None:
@@ -474,11 +505,20 @@ class MacTextToSpeech(TextToSpeechEngine):
         self.ttsEngineName = "mact2s";
 
     def say(self, text, voice=None):
+        
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        text = self.bashQuotify(text);
+        
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         commandLine = 'say -v ' + str(voice) + ' "' + str(text) + '" &';
         os.system(commandLine);
 
     def sayToFile(self, text, voice=None, destFileName=None):
+        
+        # Ensure that embedded single quotes are properly 
+        # escaped for the Bash shell to deal with them:
+        text = self.bashQuotify(text);
         
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         if destFileName is None:
