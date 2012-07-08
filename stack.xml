@@ -1,0 +1,27 @@
+<stack>
+  <description brief="speakeasy">
+    SpeakEasy provides a unified API for text-to-speech, music, and sound effects
+    on Ubuntu. The package of the same name runs both with or without ROS.
+    Running with ROS, the audio engines (the underlying text-to-speech, music, and sound 
+    engines) are controlled by a ROS node that subscribes to control messages. In the
+    absence of ROS, the GUI, or Python programs that import the constituent modules,
+    use the audio engines on the machine where the respective application runs.
+    SpeakEasy is cognizant of both Festival, the built-in Ubuntu text-to-speech engine,
+    and Cepstral, a commercial engine.
+
+    SpeakEasy also provides a GUI that provides access to sound effects, and text-to-speech 
+    on both TTS engines. In addition, the GUI provides programmable button sets for
+    text-to-speech.
+
+    Clients can use modules music_player.py, sound_player.py, and text_to_speech.py 
+    independently of each other.
+
+  </description>
+  <author>Andreas Paepcke</author>
+  <license>BSD, LGPL, GPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/speakeasy</url>
+  <depend stack="python_qt_binding" />
+  <depend stack="ros" />
+
+</stack>

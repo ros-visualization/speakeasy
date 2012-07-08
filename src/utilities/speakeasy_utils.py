@@ -195,8 +195,18 @@ class SpeakeasyUtils(object):
         @type packName: Full path, or None is the package is not installed.
         @rtype: {string | None}
         '''
+        
+        # Python 2.7 introduces subprocess.check_output, which is 
+        # exactly what we want. For versions < 2.7 we need to use
+        # the older pipe mechanism:
         try:
             return subprocess.check_output(["rospack", "find", packName]).strip();
+        except AttributeError:
+            python26Result = subprocess.Popen(['rospack', 'find', packName], stdout=subprocess.PIPE).communicate()
+            if len(python26Result[0]) == 0:
+                return default;
+            else:
+                return python26Result[0].strip();
         except subprocess.CalledProcessError as err:
             return default;
         

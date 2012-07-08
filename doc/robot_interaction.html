@@ -1,0 +1,662 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module robot_interaction</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>robot_interaction</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/wg/stor2a/paepcke/fuerte/stacks/speakeasy/src/speakeasy/robot_interaction.py">/wg/stor2a/paepcke/fuerte/stacks/speakeasy/src/speakeasy/robot_interaction.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="roslib.html">roslib</a><br>
+<a href="rospy.html">rospy</a><br>
+</td><td width="25%" valign=top><a href="threading.html">threading</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top><a href="unittest.html">unittest</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="robot_interaction.html#RoboComm">RoboComm</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="robot_interaction.html#MusicCommands">MusicCommands</a>
+</font></dt><dt><font face="helvetica, arial"><a href="robot_interaction.html#SoundCommands">SoundCommands</a>
+</font></dt><dt><font face="helvetica, arial"><a href="robot_interaction.html#TTSCommands">TTSCommands</a>
+</font></dt><dt><font face="helvetica, arial"><a href="robot_interaction.html#TestGroup">TestGroup</a>
+</font></dt><dt><font face="helvetica, arial"><a href="unittest.case.html#TestCase">unittest.case.TestCase</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="robot_interaction.html#TestRobotInteraction">TestRobotInteraction</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MusicCommands">class <strong>MusicCommands</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Data and other attributes defined here:<br>
+<dl><dt><strong>PAUSE</strong> = 2</dl>
+
+<dl><dt><strong>PLAY</strong> = 0</dl>
+
+<dl><dt><strong>SET_PLAYHEAD</strong> = 5</dl>
+
+<dl><dt><strong>SET_VOL</strong> = 4</dl>
+
+<dl><dt><strong>STOP</strong> = 1</dl>
+
+<dl><dt><strong>UNPAUSE</strong> = 3</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RoboComm">class <strong>RoboComm</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Provides&nbsp;all&nbsp;methods&nbsp;required&nbsp;to&nbsp;operate&nbsp;the&nbsp;SpeakEasy&nbsp;ROS&nbsp;node&nbsp;remotely.<br>
+Intention&nbsp;is&nbsp;for&nbsp;GUIs&nbsp;or&nbsp;other&nbsp;programs&nbsp;to&nbsp;use&nbsp;one&nbsp;instance&nbsp;of&nbsp;this&nbsp;class<br>
+to&nbsp;control&nbsp;all&nbsp;text-to-speech,&nbsp;sound&nbsp;effects,&nbsp;and&nbsp;music&nbsp;play&nbsp;functions&nbsp;if<br>
+those&nbsp;functions&nbsp;are&nbsp;provided&nbsp;by&nbsp;a&nbsp;SpeakEasy&nbsp;ROS&nbsp;node.&nbsp;<br>
+&lt;p&gt;<br>
+For&nbsp;an&nbsp;exmple&nbsp;to&nbsp;use&nbsp;if&nbsp;these&nbsp;three&nbsp;functions&nbsp;are&nbsp;provided&nbsp;locally,&nbsp;without&nbsp;<br>
+using&nbsp;ROS,&nbsp;see&nbsp;speakeasy_controller.py.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RoboComm-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;sound&nbsp;to&nbsp;play&nbsp;at&nbsp;the&nbsp;robot.&nbsp;Initializes<br>
+self.<strong>sound_file_names</strong>&nbsp;to&nbsp;a&nbsp;list&nbsp;of&nbsp;sound&nbsp;file&nbsp;names<br>
+for&nbsp;use&nbsp;with&nbsp;play-sound&nbsp;calls&nbsp;to&nbsp;the&nbsp;Robot&nbsp;via&nbsp;ROS.<br>
+@raise&nbsp;NotImplementedError:&nbsp;if&nbsp;ROS&nbsp;initialization&nbsp;failed.<br>
+@raise&nbsp;IOError:&nbsp;if&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;online,&nbsp;but&nbsp;service&nbsp;call&nbsp;to&nbsp;it&nbsp;failed.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getMusicBusy"><strong>getMusicBusy</strong></a>(self)</dt><dd><tt>Convenience&nbsp;method&nbsp;to&nbsp;determine&nbsp;whether&nbsp;music&nbsp;is&nbsp;currently&nbsp;either<br>
+playing&nbsp;or&nbsp;paused.<br>
+@return:&nbsp;True/False&nbsp;to&nbsp;indicate&nbsp;whether&nbsp;music&nbsp;status&nbsp;is&nbsp;currently&nbsp;PlayStatus.STOPPED.<br>
+@rtype:&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getMusicVolume"><strong>getMusicVolume</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;default&nbsp;music&nbsp;volume&nbsp;level.&nbsp;Note&nbsp;that&nbsp;music&nbsp;volume&nbsp;can&nbsp;be&nbsp;set<br>
+on&nbsp;a&nbsp;case-by-case&nbsp;basis&nbsp;in&nbsp;calls&nbsp;to&nbsp;<a href="#RoboComm-playMusic">playMusic</a>();<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Default&nbsp;sound&nbsp;volume&nbsp;as&nbsp;a&nbsp;number&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0.<br>
+@rtype:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getNumSoundChannels"><strong>getNumSoundChannels</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;simultaneous&nbsp;sound&nbsp;effects&nbsp;that&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;provides.<br>
+Note&nbsp;that&nbsp;SpeakEasy&nbsp;nodes&nbsp;can&nbsp;be&nbsp;configured&nbsp;to&nbsp;provide&nbsp;many&nbsp;sound&nbsp;effect&nbsp;channels,<br>
+though&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;provide&nbsp;such&nbsp;control.&nbsp;Default&nbsp;is&nbsp;eight.<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Number&nbsp;of&nbsp;sound&nbsp;effect&nbsp;channels.<br>
+@rtype:&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getPlayStatus"><strong>getPlayStatus</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;current&nbsp;music&nbsp;play&nbsp;state.&nbsp;These&nbsp;states&nbsp;are&nbsp;defined&nbsp;in&nbsp;music_player.py.<br>
+For&nbsp;reference,&nbsp;at&nbsp;the&nbsp;time&nbsp;of&nbsp;this&nbsp;writing:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;PlayStatus:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STOPPED&nbsp;=&nbsp;0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PAUSED&nbsp;&nbsp;=&nbsp;1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PLAYING&nbsp;=&nbsp;2;<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Status&nbsp;of&nbsp;the&nbsp;music&nbsp;playback&nbsp;engine&nbsp;on&nbsp;the&nbsp;SpeakEasy&nbsp;node.<br>
+@rtype:&nbsp;PlayStatus</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getPlayhead"><strong>getPlayhead</strong></a>(self)</dt><dd><tt>Return&nbsp;song&nbsp;position&nbsp;in&nbsp;fractional&nbsp;seconds.&nbsp;Return&nbsp;None<br>
+if&nbsp;no&nbsp;music&nbsp;is&nbsp;currently&nbsp;playing.<br>
+@return:&nbsp;Position&nbsp;in&nbsp;fractional&nbsp;seconds.<br>
+@rtype:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getSongNames"><strong>getSongNames</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;music&nbsp;files&nbsp;that&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;offering.<br>
+These&nbsp;songs&nbsp;may&nbsp;be&nbsp;played&nbsp;via&nbsp;the&nbsp;<a href="#RoboComm-playMusic">playMusic</a>()&nbsp;method.<br>
+&nbsp;<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Array&nbsp;of&nbsp;music&nbsp;files.<br>
+@rtype:&nbsp;[bool]</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getSoundEffectNames"><strong>getSoundEffectNames</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;sound&nbsp;effects&nbsp;that&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;offering.<br>
+These&nbsp;effects&nbsp;may&nbsp;be&nbsp;invoked&nbsp;via&nbsp;the&nbsp;<a href="#RoboComm-playSound">playSound</a>()&nbsp;method.<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Array&nbsp;of&nbsp;sound&nbsp;effect&nbsp;names.<br>
+@rtype:&nbsp;[string]</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getSoundVolume"><strong>getSoundVolume</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;default&nbsp;sound&nbsp;effect&nbsp;volume&nbsp;level.&nbsp;Note&nbsp;that&nbsp;sound&nbsp;volume&nbsp;can&nbsp;be&nbsp;set<br>
+on&nbsp;a&nbsp;case-by-case&nbsp;basis&nbsp;in&nbsp;calls&nbsp;to&nbsp;<a href="#RoboComm-playSound">playSound</a>();<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Default&nbsp;sound&nbsp;volume&nbsp;as&nbsp;a&nbsp;number&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0.<br>
+@rtype:&nbsp;float</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getSpeakEasyNodeStatus"><strong>getSpeakEasyNodeStatus</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;a&nbsp;SpeakEasy&nbsp;status&nbsp;message&nbsp;instance&nbsp;as&nbsp;received&nbsp;from&nbsp;a&nbsp;live<br>
+SpeakEasy&nbsp;node.&nbsp;See&nbsp;msg.SpeakEasyStatus.msg&nbsp;for&nbsp;field&nbsp;details.<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;Message&nbsp;instance&nbsp;if&nbsp;available,&nbsp;else&nbsp;None.&nbsp;Message&nbsp;instances&nbsp;are&nbsp;unavailable&nbsp;if&nbsp;no&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;running.<br>
+@rtype:&nbsp;SpeakEasyStatus</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getTextToSpeechBusy"><strong>getTextToSpeechBusy</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;whether&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;currently&nbsp;generating&nbsp;speech&nbsp;from&nbsp;text.<br>
+@return:&nbsp;True/False&nbsp;to&nbsp;indicate&nbsp;whether&nbsp;text-to-speech&nbsp;engine&nbsp;is&nbsp;busy.<br>
+@rtype:&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getTextToSpeechEngineNames"><strong>getTextToSpeechEngineNames</strong></a>(self, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;array&nbsp;of&nbsp;text-to-speech&nbsp;engines&nbsp;that&nbsp;are&nbsp;available&nbsp;at&nbsp;the&nbsp;SpeakEasy&nbsp;node.<br>
+Examples:&nbsp;Festival,&nbsp;the&nbsp;Linux&nbsp;open&nbsp;source&nbsp;engine,&nbsp;or&nbsp;Cepstral,&nbsp;the&nbsp;commercial&nbsp;engine.<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;List&nbsp;of&nbsp;engine&nbsp;names.<br>
+@rtype:&nbsp;[string]</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-getVoiceNames"><strong>getVoiceNames</strong></a>(self, ttsEngine<font color="#909090">=None</font>, cachedOK<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;a&nbsp;list&nbsp;of&nbsp;text-to-speech&nbsp;voices&nbsp;that&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;provides.<br>
+If&nbsp;a&nbsp;particular&nbsp;text-to-speech&nbsp;engine&nbsp;is&nbsp;specified,&nbsp;only&nbsp;that&nbsp;engine's&nbsp;<br>
+voices&nbsp;are&nbsp;returned,&nbsp;else&nbsp;all&nbsp;voices&nbsp;of&nbsp;all&nbsp;available&nbsp;engines&nbsp;are<br>
+returned&nbsp;in&nbsp;one&nbsp;list.<br>
+@param&nbsp;ttsEngine:&nbsp;Name&nbsp;of&nbsp;one&nbsp;available&nbsp;text-to-speech&nbsp;engine.<br>
+@type&nbsp;ttsEngine:&nbsp;string<br>
+@param&nbsp;cachedOK:&nbsp;Set&nbsp;True&nbsp;if&nbsp;OK&nbsp;to&nbsp;use&nbsp;a&nbsp;previously&nbsp;cached&nbsp;status&nbsp;message.<br>
+@type&nbsp;cachedOK:&nbsp;bool<br>
+@return:&nbsp;List&nbsp;of&nbsp;voice&nbsp;names,&nbsp;or&nbsp;empty&nbsp;list.&nbsp;List&nbsp;may&nbsp;be&nbsp;empty&nbsp;either&nbsp;because<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;does&nbsp;not&nbsp;offer&nbsp;text-to-speech&nbsp;services,&nbsp;or&nbsp;because<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;node&nbsp;has&nbsp;terminated,&nbsp;and&nbsp;is&nbsp;no&nbsp;longer&nbsp;broadcasting&nbsp;status&nbsp;messages.<br>
+@rtype:&nbsp;[string]</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-killMusicRepeatThreads"><strong>killMusicRepeatThreads</strong></a>(self, musicThreads)</dt></dl>
+
+<dl><dt><a name="RoboComm-killSoundRepeatThreads"><strong>killSoundRepeatThreads</strong></a>(self, soundThreads)</dt></dl>
+
+<dl><dt><a name="RoboComm-killSpeechRepeatThreads"><strong>killSpeechRepeatThreads</strong></a>(self, speechThreads)</dt></dl>
+
+<dl><dt><a name="RoboComm-pauseMusic"><strong>pauseMusic</strong></a>(self)</dt><dd><tt>Pause&nbsp;currently&nbsp;playing&nbsp;music.&nbsp;No&nbsp;effect&nbsp;if&nbsp;nothing&nbsp;playing.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-pauseSound"><strong>pauseSound</strong></a>(self)</dt><dd><tt>Pause&nbsp;the&nbsp;all&nbsp;currently&nbsp;playing&nbsp;sound&nbsp;effects.&nbsp;Method&nbsp;has&nbsp;no&nbsp;effect&nbsp;if&nbsp;no&nbsp;sound&nbsp;is&nbsp;currently&nbsp;playing.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-playMusic"><strong>playMusic</strong></a>(self, songName, volume<font color="#909090">=None</font>, playheadTime<font color="#909090">=0.0</font>, timeReference<font color="#909090">=1</font>, numRepeats<font color="#909090">=0</font>, repeatPeriod<font color="#909090">=0</font>)</dt><dd><tt>Play&nbsp;a&nbsp;piece&nbsp;of&nbsp;music&nbsp;(a&nbsp;sound&nbsp;file)&nbsp;at&nbsp;the&nbsp;SpeakEasy&nbsp;node.<br>
+@param&nbsp;songName:&nbsp;Name&nbsp;of&nbsp;sound&nbsp;file.&nbsp;(See&nbsp;<a href="#RoboComm-getSongNames">getSongNames</a>()).&nbsp;<br>
+@type&nbsp;songName:&nbsp;string<br>
+@param&nbsp;volume:&nbsp;Loudness&nbsp;at&nbsp;which&nbsp;to&nbsp;play.&nbsp;Default&nbsp;uses&nbsp;current&nbsp;volume.&nbsp;Else&nbsp;must&nbsp;be&nbsp;in&nbsp;range&nbsp;0.0&nbsp;to&nbsp;1.0<br>
+@type&nbsp;volume:&nbsp;{None&nbsp;|&nbsp;float}<br>
+@param&nbsp;playheadTime:&nbsp;Offset&nbsp;in&nbsp;fractional&nbsp;seconds&nbsp;into&nbsp;where&nbsp;to&nbsp;start&nbsp;the&nbsp;song.&nbsp;Default:&nbsp;start&nbsp;at&nbsp;beginning.&nbsp;<br>
+@type&nbsp;playheadTime:&nbsp;float<br>
+@param&nbsp;timeReference:&nbsp;If&nbsp;playheadTime&nbsp;is&nbsp;provided,&nbsp;specifies&nbsp;whether&nbsp;the&nbsp;given&nbsp;time&nbsp;is&nbsp;intended&nbsp;as&nbsp;absolute&nbsp;(relative&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beginning&nbsp;of&nbsp;the&nbsp;song),&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;current&nbsp;playhead&nbsp;position.<br>
+@type&nbsp;timeReference:&nbsp;TimeReference<br>
+@param&nbsp;numRepeats:&nbsp;Number&nbsp;of&nbsp;times&nbsp;the&nbsp;song&nbsp;is&nbsp;to&nbsp;be&nbsp;repeated&nbsp;after&nbsp;the&nbsp;first&nbsp;time.&nbsp;Use&nbsp;-1&nbsp;to&nbsp;play&nbsp;forever.<br>
+@type&nbsp;numRepeats:&nbsp;int<br>
+@param&nbsp;repeatPeriod:&nbsp;Time&nbsp;period&nbsp;in&nbsp;fractional&nbsp;seconds&nbsp;to&nbsp;wait&nbsp;between&nbsp;repeats.<br>
+@type&nbsp;repeatPeriod:&nbsp;float<br>
+@raise&nbsp;TypeError:&nbsp;if&nbsp;any&nbsp;parameters&nbsp;are&nbsp;of&nbsp;incorrect&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-playSound"><strong>playSound</strong></a>(self, soundName, volume<font color="#909090">=None</font>, numRepeats<font color="#909090">=0</font>, repeatPeriod<font color="#909090">=0</font>)</dt><dd><tt>Play&nbsp;a&nbsp;sound&nbsp;effect&nbsp;at&nbsp;the&nbsp;SpeakEasy&nbsp;node.<br>
+@param&nbsp;soundName:&nbsp;Name&nbsp;of&nbsp;the&nbsp;sound&nbsp;effect.&nbsp;(see&nbsp;<a href="#RoboComm-getSoundEffectNames">getSoundEffectNames</a>()).<br>
+@type&nbsp;soundName:&nbsp;string<br>
+@param&nbsp;volume:&nbsp;Loudness&nbsp;for&nbsp;the&nbsp;sound&nbsp;effect.&nbsp;If&nbsp;None,&nbsp;current&nbsp;volume&nbsp;is&nbsp;used.&nbsp;Volume&nbsp;must&nbsp;be&nbsp;in&nbsp;range&nbsp;0.0&nbsp;to&nbsp;1.0<br>
+@type&nbsp;volume:&nbsp;float.<br>
+@param&nbsp;numRepeats:&nbsp;Number&nbsp;of&nbsp;times&nbsp;the&nbsp;sound&nbsp;effect&nbsp;is&nbsp;to&nbsp;be&nbsp;repeated&nbsp;after&nbsp;the&nbsp;first&nbsp;time.&nbsp;&nbsp;Use&nbsp;-1&nbsp;to&nbsp;play&nbsp;forever.<br>
+@type&nbsp;numRepeats:&nbsp;int<br>
+@param&nbsp;repeatPeriod:&nbsp;Time&nbsp;period&nbsp;in&nbsp;fractional&nbsp;seconds&nbsp;to&nbsp;wait&nbsp;between&nbsp;repeats.<br>
+@type&nbsp;repeatPeriod:&nbsp;float<br>
+@raise&nbsp;TypeError:&nbsp;if&nbsp;any&nbsp;parameter&nbsp;is&nbsp;of&nbsp;the&nbsp;wrong&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-registerMusicRepeaterThread"><strong>registerMusicRepeaterThread</strong></a>(self, musicThread)</dt></dl>
+
+<dl><dt><a name="RoboComm-registerSoundRepeaterThread"><strong>registerSoundRepeaterThread</strong></a>(self, soundThread)</dt></dl>
+
+<dl><dt><a name="RoboComm-registerSpeechRepeaterThread"><strong>registerSpeechRepeaterThread</strong></a>(self, speechThread)</dt></dl>
+
+<dl><dt><a name="RoboComm-robotAvailable"><strong>robotAvailable</strong></a>(self)</dt><dd><tt>Return&nbsp;True&nbsp;if&nbsp;a&nbsp;SpeakEasy&nbsp;service&nbsp;is&nbsp;available,&nbsp;i.e.&nbsp;if&nbsp;a&nbsp;SpeakEasy&nbsp;ROS<br>
+node&nbsp;is&nbsp;running.&nbsp;Else&nbsp;return&nbsp;False.<br>
+@return:&nbsp;Result&nbsp;of&nbsp;checking&nbsp;whether&nbsp;a&nbsp;live&nbsp;SpeakEasy&nbsp;node&nbsp;is&nbsp;detected.<br>
+@rtype:&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-say"><strong>say</strong></a>(self, text, voice<font color="#909090">=None</font>, ttsEngine<font color="#909090">=None</font>, numRepeats<font color="#909090">=0</font>, repeatPeriod<font color="#909090">=0</font>, blockTillDone<font color="#909090">=False</font>)</dt><dd><tt>Given&nbsp;a&nbsp;piece&nbsp;of&nbsp;text,&nbsp;generate&nbsp;corresponding&nbsp;speech&nbsp;at&nbsp;the&nbsp;SpeakEasy&nbsp;node&nbsp;site.<br>
+@param&nbsp;text:&nbsp;Words&nbsp;to&nbsp;speak.<br>
+@type&nbsp;text:&nbsp;string<br>
+@param&nbsp;voice:&nbsp;Name&nbsp;of&nbsp;text-to-speech&nbsp;voice&nbsp;to&nbsp;use.<br>
+@type&nbsp;voice:&nbsp;string<br>
+@param&nbsp;ttsEngine:&nbsp;Name&nbsp;of&nbsp;text-to-speech&nbsp;engine&nbsp;to&nbsp;use.<br>
+@type&nbsp;ttsEngine:&nbsp;string<br>
+@param&nbsp;numRepeats:&nbsp;Number&nbsp;of&nbsp;times&nbsp;the&nbsp;utterance&nbsp;is&nbsp;to&nbsp;be&nbsp;repeated&nbsp;after&nbsp;the&nbsp;first&nbsp;time.&nbsp;Use&nbsp;-1&nbsp;if&nbsp;forever.<br>
+@type&nbsp;numRepeats:&nbsp;int<br>
+@param&nbsp;repeatPeriod:&nbsp;Time&nbsp;period&nbsp;in&nbsp;fractional&nbsp;seconds&nbsp;to&nbsp;wait&nbsp;between&nbsp;repeated&nbsp;utterances.<br>
+@type&nbsp;repeatPeriod:&nbsp;float<br>
+@param&nbsp;blockTillDone:&nbsp;Request&nbsp;to&nbsp;return&nbsp;immediately,&nbsp;or&nbsp;block&nbsp;until&nbsp;the&nbsp;utterance&nbsp;if&nbsp;finished.<br>
+@type&nbsp;blockTillDone:&nbsp;bool<br>
+@raises&nbsp;TypeError:&nbsp;if&nbsp;one&nbsp;of&nbsp;the&nbsp;parameters&nbsp;is&nbsp;of&nbsp;incorrect&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-setMusicVolume"><strong>setMusicVolume</strong></a>(self, vol)</dt><dd><tt>Set&nbsp;default&nbsp;volume&nbsp;of&nbsp;music&nbsp;playback.<br>
+@param&nbsp;vol:&nbsp;Loudness&nbsp;value&nbsp;between&nbsp;0.0&nbsp;and&nbsp;1.0.<br>
+@type&nbsp;vol:&nbsp;float<br>
+@raise&nbsp;TypeError:&nbsp;if&nbsp;any&nbsp;parameters&nbsp;are&nbsp;of&nbsp;incorrect&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-setPlayhead"><strong>setPlayhead</strong></a>(self, playheadTime, timeReference<font color="#909090">=1</font>)</dt><dd><tt>Change&nbsp;the&nbsp;music&nbsp;playhead&nbsp;position&nbsp;to&nbsp;a&nbsp;particular&nbsp;time&nbsp;within&nbsp;a&nbsp;song.<br>
+Time&nbsp;may&nbsp;be&nbsp;specified&nbsp;absolute&nbsp;(i.e.&nbsp;relative&nbsp;to&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;song),&nbsp;<br>
+or&nbsp;relative&nbsp;to&nbsp;the&nbsp;current&nbsp;playhead.&nbsp;The&nbsp;playhead&nbsp;may&nbsp;be&nbsp;changed&nbsp;during<br>
+playback,&nbsp;or&nbsp;while&nbsp;a&nbsp;song&nbsp;is&nbsp;paused.<br>
+@param&nbsp;playheadTime:&nbsp;New&nbsp;time&nbsp;where&nbsp;to&nbsp;position&nbsp;the&nbsp;playhead.<br>
+@type&nbsp;playheadTime:&nbsp;float<br>
+@param&nbsp;timeReference:&nbsp;TimeReference.ABSOLUTE&nbsp;or&nbsp;TimeReference.RELATIVE<br>
+@type&nbsp;timeReference:&nbsp;TimeReference.<br>
+@raise&nbsp;TypeError:&nbsp;if&nbsp;any&nbsp;parameters&nbsp;are&nbsp;of&nbsp;incorrect&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-setSoundVolume"><strong>setSoundVolume</strong></a>(self, volume, soundName<font color="#909090">=None</font>)</dt><dd><tt>Change&nbsp;the&nbsp;sound&nbsp;effect&nbsp;default&nbsp;volume.<br>
+@param&nbsp;volume:&nbsp;New&nbsp;default&nbsp;volume&nbsp;for&nbsp;sound&nbsp;effects.&nbsp;Value&nbsp;must&nbsp;be&nbsp;in&nbsp;range&nbsp;0.0&nbsp;to&nbsp;1.0.<br>
+@type&nbsp;volume:&nbsp;float<br>
+@param&nbsp;soundName:&nbsp;Optionally&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;sound&nbsp;whose&nbsp;volume&nbsp;is&nbsp;to&nbsp;be&nbsp;changed.<br>
+@type&nbsp;soundName:&nbsp;string<br>
+@raises&nbsp;TypeError:&nbsp;if&nbsp;any&nbsp;parameters&nbsp;are&nbsp;of&nbsp;incorrect&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-stopMusic"><strong>stopMusic</strong></a>(self)</dt><dd><tt>Stop&nbsp;currently&nbsp;playing&nbsp;music.&nbsp;No&nbsp;effect&nbsp;if&nbsp;nothing&nbsp;playing.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-stopSaying"><strong>stopSaying</strong></a>(self)</dt><dd><tt>Stop&nbsp;text-to-speech&nbsp;utterance.&nbsp;No&nbsp;effect&nbsp;if&nbsp;text-to-speech&nbsp;is&nbsp;currently&nbsp;inactive.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-stopSound"><strong>stopSound</strong></a>(self)</dt><dd><tt>Stop&nbsp;the&nbsp;all&nbsp;currently&nbsp;playing&nbsp;sound&nbsp;effects.&nbsp;Method&nbsp;has&nbsp;no&nbsp;effect&nbsp;if&nbsp;no&nbsp;sound&nbsp;is&nbsp;currently&nbsp;playing.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-unPauseMusic"><strong>unPauseMusic</strong></a>(self)</dt><dd><tt>Un-pause&nbsp;currently&nbsp;playing&nbsp;music.&nbsp;No&nbsp;effect&nbsp;if&nbsp;nothing&nbsp;paused&nbsp;or&nbsp;playing.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-unPauseSound"><strong>unPauseSound</strong></a>(self)</dt><dd><tt>Un-pause&nbsp;all&nbsp;currently&nbsp;paused&nbsp;sound&nbsp;effects.&nbsp;Method&nbsp;has&nbsp;no&nbsp;effect&nbsp;if&nbsp;no&nbsp;sound&nbsp;is&nbsp;currently&nbsp;paused.</tt></dd></dl>
+
+<dl><dt><a name="RoboComm-unregisterRepeatThread"><strong>unregisterRepeatThread</strong></a>(self, threadObj, threadList)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>MusicReplayDemon</strong> = &lt;class 'robot_interaction.MusicReplayDemon'&gt;<dd><tt>Responsible&nbsp;for&nbsp;repeating&nbsp;songs&nbsp;at&nbsp;appropriate&nbsp;intervals.&nbsp;Runs&nbsp;as&nbsp;thread.</tt></dl>
+
+<dl><dt><strong>PLAYHEAD_MSG_TIMEOUT</strong> = 0.5</dl>
+
+<dl><dt><strong>ReplayDemon</strong> = &lt;class 'robot_interaction.ReplayDemon'&gt;<dd><tt>Abstract&nbsp;class&nbsp;of&nbsp;all&nbsp;repeat&nbsp;demons:&nbsp;text-to-speech,&nbsp;sound&nbsp;effects,&nbsp;and&nbsp;music.</tt></dl>
+
+<dl><dt><strong>STATUS_MSG_TIMEOUT</strong> = 5</dl>
+
+<dl><dt><strong>SoundReplayDemon</strong> = &lt;class 'robot_interaction.SoundReplayDemon'&gt;<dd><tt>Responsible&nbsp;for&nbsp;repeating&nbsp;sound&nbsp;effects&nbsp;at&nbsp;appropriate&nbsp;intervals.&nbsp;Runs&nbsp;as&nbsp;thread.</tt></dl>
+
+<dl><dt><strong>SpeechReplayDemon</strong> = &lt;class 'robot_interaction.SpeechReplayDemon'&gt;<dd><tt>Responsible&nbsp;for&nbsp;repeating&nbsp;text-to-speech&nbsp;utterances&nbsp;at&nbsp;appropriate&nbsp;intervals.&nbsp;Runs&nbsp;as&nbsp;thread.</tt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SoundCommands">class <strong>SoundCommands</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Data and other attributes defined here:<br>
+<dl><dt><strong>PAUSE</strong> = 2</dl>
+
+<dl><dt><strong>PLAY</strong> = 0</dl>
+
+<dl><dt><strong>SET_VOL</strong> = 4</dl>
+
+<dl><dt><strong>STOP</strong> = 1</dl>
+
+<dl><dt><strong>UNPAUSE</strong> = 3</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TTSCommands">class <strong>TTSCommands</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Data and other attributes defined here:<br>
+<dl><dt><strong>SAY</strong> = 0</dl>
+
+<dl><dt><strong>STOP</strong> = 1</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TestGroup">class <strong>TestGroup</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Data and other attributes defined here:<br>
+<dl><dt><strong>MUSIC</strong> = 3</dl>
+
+<dl><dt><strong>PLAYHEAD</strong> = 4</dl>
+
+<dl><dt><strong>SOUND</strong> = 2</dl>
+
+<dl><dt><strong>STATUS_MSGS</strong> = 0</dl>
+
+<dl><dt><strong>TTS</strong> = 1</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="TestRobotInteraction">class <strong>TestRobotInteraction</strong></a>(<a href="unittest.case.html#TestCase">unittest.case.TestCase</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="robot_interaction.html#TestRobotInteraction">TestRobotInteraction</a></dd>
+<dd><a href="unittest.case.html#TestCase">unittest.case.TestCase</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="TestRobotInteraction-setUp"><strong>setUp</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-tearDown"><strong>tearDown</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-testNumChannels"><strong>testNumChannels</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.STATUS_MSGS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;status&nbsp;message&nbsp;processing.')</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-testPlayStatus"><strong>testPlayStatus</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.STATUS_MSGS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;status&nbsp;message&nbsp;processing.')</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-testSay"><strong>testSay</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.TTS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;text-to-speech&nbsp;processing.')</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-testSongAndSoundNames"><strong>testSongAndSoundNames</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.STATUS_MSGS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;status&nbsp;message&nbsp;processing.')</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-testVoiceAndTtsEngineNames"><strong>testVoiceAndTtsEngineNames</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.STATUS_MSGS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;status&nbsp;message&nbsp;processing.')</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-testVolumeGetting"><strong>testVolumeGetting</strong></a>(self)</dt><dd><tt>#unittest.skipUnless(<a href="#TestGroup">TestGroup</a>.STATUS_MSGS&nbsp;in&nbsp;groupsToTest,&nbsp;'Not&nbsp;testing&nbsp;for&nbsp;status&nbsp;message&nbsp;processing.')</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="unittest.case.html#TestCase">unittest.case.TestCase</a>:<br>
+<dl><dt><a name="TestRobotInteraction-__call__"><strong>__call__</strong></a>(self, *args, **kwds)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-__eq__"><strong>__eq__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-__hash__"><strong>__hash__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-__init__"><strong>__init__</strong></a>(self, methodName<font color="#909090">='runTest'</font>)</dt><dd><tt>Create&nbsp;an&nbsp;instance&nbsp;of&nbsp;the&nbsp;class&nbsp;that&nbsp;will&nbsp;use&nbsp;the&nbsp;named&nbsp;test<br>
+method&nbsp;when&nbsp;executed.&nbsp;Raises&nbsp;a&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;instance&nbsp;does<br>
+not&nbsp;have&nbsp;a&nbsp;method&nbsp;with&nbsp;the&nbsp;specified&nbsp;name.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-__ne__"><strong>__ne__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-__repr__"><strong>__repr__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-__str__"><strong>__str__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-addCleanup"><strong>addCleanup</strong></a>(self, function, *args, **kwargs)</dt><dd><tt>Add&nbsp;a&nbsp;function,&nbsp;with&nbsp;arguments,&nbsp;to&nbsp;be&nbsp;called&nbsp;when&nbsp;the&nbsp;test&nbsp;is<br>
+completed.&nbsp;Functions&nbsp;added&nbsp;are&nbsp;called&nbsp;on&nbsp;a&nbsp;LIFO&nbsp;basis&nbsp;and&nbsp;are<br>
+called&nbsp;after&nbsp;tearDown&nbsp;on&nbsp;test&nbsp;failure&nbsp;or&nbsp;success.<br>
+&nbsp;<br>
+Cleanup&nbsp;items&nbsp;are&nbsp;called&nbsp;even&nbsp;if&nbsp;setUp&nbsp;fails&nbsp;(unlike&nbsp;tearDown).</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-addTypeEqualityFunc"><strong>addTypeEqualityFunc</strong></a>(self, typeobj, function)</dt><dd><tt>Add&nbsp;a&nbsp;type&nbsp;specific&nbsp;assertEqual&nbsp;style&nbsp;function&nbsp;to&nbsp;compare&nbsp;a&nbsp;type.<br>
+&nbsp;<br>
+This&nbsp;method&nbsp;is&nbsp;for&nbsp;use&nbsp;by&nbsp;<a href="unittest.case.html#TestCase">TestCase</a>&nbsp;subclasses&nbsp;that&nbsp;need&nbsp;to&nbsp;register<br>
+their&nbsp;own&nbsp;type&nbsp;equality&nbsp;functions&nbsp;to&nbsp;provide&nbsp;nicer&nbsp;error&nbsp;messages.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;typeobj:&nbsp;The&nbsp;data&nbsp;type&nbsp;to&nbsp;call&nbsp;this&nbsp;function&nbsp;on&nbsp;when&nbsp;both&nbsp;values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;are&nbsp;of&nbsp;the&nbsp;same&nbsp;type&nbsp;in&nbsp;<a href="#TestRobotInteraction-assertEqual">assertEqual</a>().<br>
+&nbsp;&nbsp;&nbsp;&nbsp;function:&nbsp;The&nbsp;callable&nbsp;taking&nbsp;two&nbsp;arguments&nbsp;and&nbsp;an&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg=&nbsp;argument&nbsp;that&nbsp;raises&nbsp;self.<strong>failureException</strong>&nbsp;with&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;useful&nbsp;error&nbsp;message&nbsp;when&nbsp;the&nbsp;two&nbsp;arguments&nbsp;are&nbsp;not&nbsp;equal.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertAlmostEqual"><strong>assertAlmostEqual</strong></a>(self, first, second, places<font color="#909090">=None</font>, msg<font color="#909090">=None</font>, delta<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;unequal&nbsp;as&nbsp;determined&nbsp;by&nbsp;their<br>
+difference&nbsp;rounded&nbsp;to&nbsp;the&nbsp;given&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places<br>
+(default&nbsp;7)&nbsp;and&nbsp;comparing&nbsp;to&nbsp;zero,&nbsp;or&nbsp;by&nbsp;comparing&nbsp;that&nbsp;the<br>
+between&nbsp;the&nbsp;two&nbsp;objects&nbsp;is&nbsp;more&nbsp;than&nbsp;the&nbsp;given&nbsp;delta.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;decimal&nbsp;places&nbsp;(from&nbsp;zero)&nbsp;are&nbsp;usually&nbsp;not&nbsp;the&nbsp;same<br>
+as&nbsp;significant&nbsp;digits&nbsp;(measured&nbsp;from&nbsp;the&nbsp;most&nbsp;signficant&nbsp;digit).<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;two&nbsp;objects&nbsp;compare&nbsp;equal&nbsp;then&nbsp;they&nbsp;will&nbsp;automatically<br>
+compare&nbsp;almost&nbsp;equal.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertAlmostEquals"><strong>assertAlmostEquals</strong></a> = assertAlmostEqual(self, first, second, places<font color="#909090">=None</font>, msg<font color="#909090">=None</font>, delta<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;unequal&nbsp;as&nbsp;determined&nbsp;by&nbsp;their<br>
+difference&nbsp;rounded&nbsp;to&nbsp;the&nbsp;given&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places<br>
+(default&nbsp;7)&nbsp;and&nbsp;comparing&nbsp;to&nbsp;zero,&nbsp;or&nbsp;by&nbsp;comparing&nbsp;that&nbsp;the<br>
+between&nbsp;the&nbsp;two&nbsp;objects&nbsp;is&nbsp;more&nbsp;than&nbsp;the&nbsp;given&nbsp;delta.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;decimal&nbsp;places&nbsp;(from&nbsp;zero)&nbsp;are&nbsp;usually&nbsp;not&nbsp;the&nbsp;same<br>
+as&nbsp;significant&nbsp;digits&nbsp;(measured&nbsp;from&nbsp;the&nbsp;most&nbsp;signficant&nbsp;digit).<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;two&nbsp;objects&nbsp;compare&nbsp;equal&nbsp;then&nbsp;they&nbsp;will&nbsp;automatically<br>
+compare&nbsp;almost&nbsp;equal.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertDictContainsSubset"><strong>assertDictContainsSubset</strong></a>(self, expected, actual, msg<font color="#909090">=None</font>)</dt><dd><tt>Checks&nbsp;whether&nbsp;actual&nbsp;is&nbsp;a&nbsp;superset&nbsp;of&nbsp;expected.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertDictEqual"><strong>assertDictEqual</strong></a>(self, d1, d2, msg<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertEqual"><strong>assertEqual</strong></a>(self, first, second, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;unequal&nbsp;as&nbsp;determined&nbsp;by&nbsp;the&nbsp;'=='<br>
+operator.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertEquals"><strong>assertEquals</strong></a> = assertEqual(self, first, second, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;unequal&nbsp;as&nbsp;determined&nbsp;by&nbsp;the&nbsp;'=='<br>
+operator.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertFalse"><strong>assertFalse</strong></a>(self, expr, msg<font color="#909090">=None</font>)</dt><dd><tt>Check&nbsp;that&nbsp;the&nbsp;expression&nbsp;is&nbsp;false.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertGreater"><strong>assertGreater</strong></a>(self, a, b, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;&gt;&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertGreaterEqual"><strong>assertGreaterEqual</strong></a>(self, a, b, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;&gt;=&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIn"><strong>assertIn</strong></a>(self, member, container, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;in&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIs"><strong>assertIs</strong></a>(self, expr1, expr2, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;is&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIsInstance"><strong>assertIsInstance</strong></a>(self, obj, cls, msg<font color="#909090">=None</font>)</dt><dd><tt>Same&nbsp;as&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(isinstance(obj,&nbsp;cls)),&nbsp;with&nbsp;a&nbsp;nicer<br>
+default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIsNone"><strong>assertIsNone</strong></a>(self, obj, msg<font color="#909090">=None</font>)</dt><dd><tt>Same&nbsp;as&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(obj&nbsp;is&nbsp;None),&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIsNot"><strong>assertIsNot</strong></a>(self, expr1, expr2, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;is&nbsp;not&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertIsNotNone"><strong>assertIsNotNone</strong></a>(self, obj, msg<font color="#909090">=None</font>)</dt><dd><tt>Included&nbsp;for&nbsp;symmetry&nbsp;with&nbsp;assertIsNone.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertItemsEqual"><strong>assertItemsEqual</strong></a>(self, expected_seq, actual_seq, msg<font color="#909090">=None</font>)</dt><dd><tt>An&nbsp;unordered&nbsp;sequence&nbsp;specific&nbsp;comparison.&nbsp;It&nbsp;asserts&nbsp;that<br>
+actual_seq&nbsp;and&nbsp;expected_seq&nbsp;have&nbsp;the&nbsp;same&nbsp;element&nbsp;counts.<br>
+Equivalent&nbsp;to::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#TestRobotInteraction-assertEqual">assertEqual</a>(Counter(iter(actual_seq)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Counter(iter(expected_seq)))<br>
+&nbsp;<br>
+Asserts&nbsp;that&nbsp;each&nbsp;element&nbsp;has&nbsp;the&nbsp;same&nbsp;count&nbsp;in&nbsp;both&nbsp;sequences.<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;[0,&nbsp;1,&nbsp;1]&nbsp;and&nbsp;[1,&nbsp;0,&nbsp;1]&nbsp;compare&nbsp;equal.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;[0,&nbsp;0,&nbsp;1]&nbsp;and&nbsp;[0,&nbsp;1]&nbsp;compare&nbsp;unequal.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertLess"><strong>assertLess</strong></a>(self, a, b, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;&lt;&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertLessEqual"><strong>assertLessEqual</strong></a>(self, a, b, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;&lt;=&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertListEqual"><strong>assertListEqual</strong></a>(self, list1, list2, msg<font color="#909090">=None</font>)</dt><dd><tt>A&nbsp;list-specific&nbsp;equality&nbsp;assertion.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list1:&nbsp;The&nbsp;first&nbsp;list&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list2:&nbsp;The&nbsp;second&nbsp;list&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msg:&nbsp;Optional&nbsp;message&nbsp;to&nbsp;use&nbsp;on&nbsp;failure&nbsp;instead&nbsp;of&nbsp;a&nbsp;list&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differences.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertMultiLineEqual"><strong>assertMultiLineEqual</strong></a>(self, first, second, msg<font color="#909090">=None</font>)</dt><dd><tt>Assert&nbsp;that&nbsp;two&nbsp;multi-line&nbsp;strings&nbsp;are&nbsp;equal.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotAlmostEqual"><strong>assertNotAlmostEqual</strong></a>(self, first, second, places<font color="#909090">=None</font>, msg<font color="#909090">=None</font>, delta<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;equal&nbsp;as&nbsp;determined&nbsp;by&nbsp;their<br>
+difference&nbsp;rounded&nbsp;to&nbsp;the&nbsp;given&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places<br>
+(default&nbsp;7)&nbsp;and&nbsp;comparing&nbsp;to&nbsp;zero,&nbsp;or&nbsp;by&nbsp;comparing&nbsp;that&nbsp;the<br>
+between&nbsp;the&nbsp;two&nbsp;objects&nbsp;is&nbsp;less&nbsp;than&nbsp;the&nbsp;given&nbsp;delta.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;decimal&nbsp;places&nbsp;(from&nbsp;zero)&nbsp;are&nbsp;usually&nbsp;not&nbsp;the&nbsp;same<br>
+as&nbsp;significant&nbsp;digits&nbsp;(measured&nbsp;from&nbsp;the&nbsp;most&nbsp;signficant&nbsp;digit).<br>
+&nbsp;<br>
+Objects&nbsp;that&nbsp;are&nbsp;equal&nbsp;automatically&nbsp;fail.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotAlmostEquals"><strong>assertNotAlmostEquals</strong></a> = assertNotAlmostEqual(self, first, second, places<font color="#909090">=None</font>, msg<font color="#909090">=None</font>, delta<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;equal&nbsp;as&nbsp;determined&nbsp;by&nbsp;their<br>
+difference&nbsp;rounded&nbsp;to&nbsp;the&nbsp;given&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places<br>
+(default&nbsp;7)&nbsp;and&nbsp;comparing&nbsp;to&nbsp;zero,&nbsp;or&nbsp;by&nbsp;comparing&nbsp;that&nbsp;the<br>
+between&nbsp;the&nbsp;two&nbsp;objects&nbsp;is&nbsp;less&nbsp;than&nbsp;the&nbsp;given&nbsp;delta.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;decimal&nbsp;places&nbsp;(from&nbsp;zero)&nbsp;are&nbsp;usually&nbsp;not&nbsp;the&nbsp;same<br>
+as&nbsp;significant&nbsp;digits&nbsp;(measured&nbsp;from&nbsp;the&nbsp;most&nbsp;signficant&nbsp;digit).<br>
+&nbsp;<br>
+Objects&nbsp;that&nbsp;are&nbsp;equal&nbsp;automatically&nbsp;fail.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotEqual"><strong>assertNotEqual</strong></a>(self, first, second, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;equal&nbsp;as&nbsp;determined&nbsp;by&nbsp;the&nbsp;'=='<br>
+operator.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotEquals"><strong>assertNotEquals</strong></a> = assertNotEqual(self, first, second, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;if&nbsp;the&nbsp;two&nbsp;objects&nbsp;are&nbsp;equal&nbsp;as&nbsp;determined&nbsp;by&nbsp;the&nbsp;'=='<br>
+operator.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotIn"><strong>assertNotIn</strong></a>(self, member, container, msg<font color="#909090">=None</font>)</dt><dd><tt>Just&nbsp;like&nbsp;<a href="#TestRobotInteraction-assertTrue">assertTrue</a>(a&nbsp;not&nbsp;in&nbsp;b),&nbsp;but&nbsp;with&nbsp;a&nbsp;nicer&nbsp;default&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotIsInstance"><strong>assertNotIsInstance</strong></a>(self, obj, cls, msg<font color="#909090">=None</font>)</dt><dd><tt>Included&nbsp;for&nbsp;symmetry&nbsp;with&nbsp;assertIsInstance.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertNotRegexpMatches"><strong>assertNotRegexpMatches</strong></a>(self, text, unexpected_regexp, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;the&nbsp;test&nbsp;if&nbsp;the&nbsp;text&nbsp;matches&nbsp;the&nbsp;regular&nbsp;expression.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertRaises"><strong>assertRaises</strong></a>(self, excClass, callableObj<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Fail&nbsp;unless&nbsp;an&nbsp;exception&nbsp;of&nbsp;class&nbsp;excClass&nbsp;is&nbsp;thrown<br>
+by&nbsp;callableObj&nbsp;when&nbsp;invoked&nbsp;with&nbsp;arguments&nbsp;args&nbsp;and&nbsp;keyword<br>
+arguments&nbsp;kwargs.&nbsp;If&nbsp;a&nbsp;different&nbsp;type&nbsp;of&nbsp;exception&nbsp;is<br>
+thrown,&nbsp;it&nbsp;will&nbsp;not&nbsp;be&nbsp;caught,&nbsp;and&nbsp;the&nbsp;test&nbsp;case&nbsp;will&nbsp;be<br>
+deemed&nbsp;to&nbsp;have&nbsp;suffered&nbsp;an&nbsp;error,&nbsp;exactly&nbsp;as&nbsp;for&nbsp;an<br>
+unexpected&nbsp;exception.<br>
+&nbsp;<br>
+If&nbsp;called&nbsp;with&nbsp;callableObj&nbsp;omitted&nbsp;or&nbsp;None,&nbsp;will&nbsp;return&nbsp;a<br>
+context&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;used&nbsp;like&nbsp;this::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;<a href="#TestRobotInteraction-assertRaises">assertRaises</a>(SomeException):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do_something()<br>
+&nbsp;<br>
+The&nbsp;context&nbsp;manager&nbsp;keeps&nbsp;a&nbsp;reference&nbsp;to&nbsp;the&nbsp;exception&nbsp;as<br>
+the&nbsp;'exception'&nbsp;attribute.&nbsp;This&nbsp;allows&nbsp;you&nbsp;to&nbsp;inspect&nbsp;the<br>
+exception&nbsp;after&nbsp;the&nbsp;assertion::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;<a href="#TestRobotInteraction-assertRaises">assertRaises</a>(SomeException)&nbsp;as&nbsp;cm:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do_something()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the_exception&nbsp;=&nbsp;cm.exception<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#TestRobotInteraction-assertEqual">assertEqual</a>(the_exception.error_code,&nbsp;3)</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertRaisesRegexp"><strong>assertRaisesRegexp</strong></a>(self, expected_exception, expected_regexp, callable_obj<font color="#909090">=None</font>, *args, **kwargs)</dt><dd><tt>Asserts&nbsp;that&nbsp;the&nbsp;message&nbsp;in&nbsp;a&nbsp;raised&nbsp;exception&nbsp;matches&nbsp;a&nbsp;regexp.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;expected_exception:&nbsp;Exception&nbsp;class&nbsp;expected&nbsp;to&nbsp;be&nbsp;raised.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;expected_regexp:&nbsp;Regexp&nbsp;(re&nbsp;pattern&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;string)&nbsp;expected<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;be&nbsp;found&nbsp;in&nbsp;error&nbsp;message.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;callable_obj:&nbsp;Function&nbsp;to&nbsp;be&nbsp;called.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;args:&nbsp;Extra&nbsp;args.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;kwargs:&nbsp;Extra&nbsp;kwargs.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertRegexpMatches"><strong>assertRegexpMatches</strong></a>(self, text, expected_regexp, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;the&nbsp;test&nbsp;unless&nbsp;the&nbsp;text&nbsp;matches&nbsp;the&nbsp;regular&nbsp;expression.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertSequenceEqual"><strong>assertSequenceEqual</strong></a>(self, seq1, seq2, msg<font color="#909090">=None</font>, seq_type<font color="#909090">=None</font>)</dt><dd><tt>An&nbsp;equality&nbsp;assertion&nbsp;for&nbsp;ordered&nbsp;sequences&nbsp;(like&nbsp;lists&nbsp;and&nbsp;tuples).<br>
+&nbsp;<br>
+For&nbsp;the&nbsp;purposes&nbsp;of&nbsp;this&nbsp;function,&nbsp;a&nbsp;valid&nbsp;ordered&nbsp;sequence&nbsp;type&nbsp;is&nbsp;one<br>
+which&nbsp;can&nbsp;be&nbsp;indexed,&nbsp;has&nbsp;a&nbsp;length,&nbsp;and&nbsp;has&nbsp;an&nbsp;equality&nbsp;operator.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;seq1:&nbsp;The&nbsp;first&nbsp;sequence&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;seq2:&nbsp;The&nbsp;second&nbsp;sequence&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;seq_type:&nbsp;The&nbsp;expected&nbsp;datatype&nbsp;of&nbsp;the&nbsp;sequences,&nbsp;or&nbsp;None&nbsp;if&nbsp;no<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datatype&nbsp;should&nbsp;be&nbsp;enforced.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msg:&nbsp;Optional&nbsp;message&nbsp;to&nbsp;use&nbsp;on&nbsp;failure&nbsp;instead&nbsp;of&nbsp;a&nbsp;list&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differences.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertSetEqual"><strong>assertSetEqual</strong></a>(self, set1, set2, msg<font color="#909090">=None</font>)</dt><dd><tt>A&nbsp;set-specific&nbsp;equality&nbsp;assertion.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set1:&nbsp;The&nbsp;first&nbsp;set&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set2:&nbsp;The&nbsp;second&nbsp;set&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msg:&nbsp;Optional&nbsp;message&nbsp;to&nbsp;use&nbsp;on&nbsp;failure&nbsp;instead&nbsp;of&nbsp;a&nbsp;list&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differences.<br>
+&nbsp;<br>
+assertSetEqual&nbsp;uses&nbsp;ducktyping&nbsp;to&nbsp;support&nbsp;different&nbsp;types&nbsp;of&nbsp;sets,&nbsp;and<br>
+is&nbsp;optimized&nbsp;for&nbsp;sets&nbsp;specifically&nbsp;(parameters&nbsp;must&nbsp;support&nbsp;a<br>
+difference&nbsp;method).</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertTrue"><strong>assertTrue</strong></a>(self, expr, msg<font color="#909090">=None</font>)</dt><dd><tt>Check&nbsp;that&nbsp;the&nbsp;expression&nbsp;is&nbsp;true.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assertTupleEqual"><strong>assertTupleEqual</strong></a>(self, tuple1, tuple2, msg<font color="#909090">=None</font>)</dt><dd><tt>A&nbsp;tuple-specific&nbsp;equality&nbsp;assertion.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple1:&nbsp;The&nbsp;first&nbsp;tuple&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple2:&nbsp;The&nbsp;second&nbsp;tuple&nbsp;to&nbsp;compare.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msg:&nbsp;Optional&nbsp;message&nbsp;to&nbsp;use&nbsp;on&nbsp;failure&nbsp;instead&nbsp;of&nbsp;a&nbsp;list&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;differences.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-assert_"><strong>assert_</strong></a> = assertTrue(self, expr, msg<font color="#909090">=None</font>)</dt><dd><tt>Check&nbsp;that&nbsp;the&nbsp;expression&nbsp;is&nbsp;true.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-countTestCases"><strong>countTestCases</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-debug"><strong>debug</strong></a>(self)</dt><dd><tt>Run&nbsp;the&nbsp;test&nbsp;without&nbsp;collecting&nbsp;errors&nbsp;in&nbsp;a&nbsp;TestResult</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-defaultTestResult"><strong>defaultTestResult</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-doCleanups"><strong>doCleanups</strong></a>(self)</dt><dd><tt>Execute&nbsp;all&nbsp;cleanup&nbsp;functions.&nbsp;Normally&nbsp;called&nbsp;for&nbsp;you&nbsp;after<br>
+tearDown.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-fail"><strong>fail</strong></a>(self, msg<font color="#909090">=None</font>)</dt><dd><tt>Fail&nbsp;immediately,&nbsp;with&nbsp;the&nbsp;given&nbsp;message.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-failIf"><strong>failIf</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failIfAlmostEqual"><strong>failIfAlmostEqual</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failIfEqual"><strong>failIfEqual</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failUnless"><strong>failUnless</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failUnlessAlmostEqual"><strong>failUnlessAlmostEqual</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failUnlessEqual"><strong>failUnlessEqual</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-failUnlessRaises"><strong>failUnlessRaises</strong></a> = deprecated_func(*args, **kwargs)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-id"><strong>id</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-run"><strong>run</strong></a>(self, result<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="TestRobotInteraction-shortDescription"><strong>shortDescription</strong></a>(self)</dt><dd><tt>Returns&nbsp;a&nbsp;one-line&nbsp;description&nbsp;of&nbsp;the&nbsp;test,&nbsp;or&nbsp;None&nbsp;if&nbsp;no<br>
+description&nbsp;has&nbsp;been&nbsp;provided.<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;implementation&nbsp;of&nbsp;this&nbsp;method&nbsp;returns&nbsp;the&nbsp;first&nbsp;line&nbsp;of<br>
+the&nbsp;specified&nbsp;test&nbsp;method's&nbsp;docstring.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-skipTest"><strong>skipTest</strong></a>(self, reason)</dt><dd><tt>Skip&nbsp;this&nbsp;test.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="unittest.case.html#TestCase">unittest.case.TestCase</a>:<br>
+<dl><dt><a name="TestRobotInteraction-setUpClass"><strong>setUpClass</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt><dd><tt>Hook&nbsp;method&nbsp;for&nbsp;setting&nbsp;up&nbsp;class&nbsp;fixture&nbsp;before&nbsp;running&nbsp;tests&nbsp;in&nbsp;the&nbsp;class.</tt></dd></dl>
+
+<dl><dt><a name="TestRobotInteraction-tearDownClass"><strong>tearDownClass</strong></a>(cls)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt><dd><tt>Hook&nbsp;method&nbsp;for&nbsp;deconstructing&nbsp;the&nbsp;class&nbsp;fixture&nbsp;after&nbsp;running&nbsp;all&nbsp;tests&nbsp;in&nbsp;the&nbsp;class.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="unittest.case.html#TestCase">unittest.case.TestCase</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="unittest.case.html#TestCase">unittest.case.TestCase</a>:<br>
+<dl><dt><strong>failureException</strong> = &lt;type 'exceptions.AssertionError'&gt;<dd><tt>Assertion&nbsp;failed.</tt></dl>
+
+<dl><dt><strong>longMessage</strong> = False</dl>
+
+<dl><dt><strong>maxDiff</strong> = 640</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ROS_IMPORT_OK</strong> = True<br>
+<strong>groupsToTest</strong> = [0]</td></tr></table>
+</body></html>
