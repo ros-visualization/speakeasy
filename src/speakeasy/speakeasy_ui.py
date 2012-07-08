@@ -120,14 +120,17 @@ class DialogService(object):
         
         # All-purpose error popup message:
         # Used by self.showErrorMsgByErrorCode(<errorCode>), 
-        # or self.showErrorMsg(<string>).
+        # or self.showErrorMsg(<string>). Returns a
+        # QErrorMessage without parent, but with QWindowFlags set
+	    # properly to be a dialog popup box:
         self.errorMsgPopup = QErrorMessage.qtHandler();
+       	# Re-parent the popup, retaining the window flags set
+        # by the qtHandler:
+        self.errorMsgPopup.setParent(parent, self.errorMsgPopup.windowFlags());
         self.errorMsgPopup.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
-        self.infoMsg = QMessageBox();
+        
+        self.infoMsg = QMessageBox(parent=parent);
         self.infoMsg.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
-#        if parent is not None:
-#            self.errorMsgPopup.setParent(parent);
-
     
     #----------------------------------
     # showErrorMsg

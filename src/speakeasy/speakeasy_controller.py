@@ -150,6 +150,8 @@ class SpeakEasyController(object):
         2. Cepstral: Depends on your installation. Voices are individually licensed.       
     '''
     
+    VERSION = '1.0';
+    
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
     soundPaths = {}
     # Mapping sound file basenames to their full file names:
@@ -188,6 +190,7 @@ class SpeakEasyController(object):
             robotInit = self.initROSOperation();
 
         self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
+        self.gui.setWindowTitle("SpeakEasy (V" + SpeakEasyController.VERSION + ")");
         self.dialogService = DialogService(self.gui);
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
@@ -399,6 +402,11 @@ class SpeakEasyController(object):
             else:
                 self.roboComm.say(text, voice=voice, ttsEngine=ttsEngine, numRepeats=SpeakEasyController.FOREVER, repeatPeriod=self.gui.getPlayRepeatPeriod());
         return;
+   
+    #----------------------------------
+    #   
+    #--------------
+   
     
     #----------------------------------
     # actionRecorderButtons
@@ -817,7 +825,13 @@ if __name__ == "__main__":
             except:
                 print("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
             speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
-        
+    else:
+        try:
+            rospy.loginfo("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
+        except:
+            print("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
+        speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
+            
     # Enter Qt application main loop
     sys.exit(app.exec_());
         
