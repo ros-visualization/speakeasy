@@ -251,7 +251,8 @@ class SpeakEasyGUI(QMainWindow):
                           
                           'PLAY_LOCALLY' : 'Play locally',
                           'PLAY_AT_ROBOT' : 'Play at robot',
-                          'TEXT_COMPLETION' : 'Text completion', 
+                          'PASTE' : 'Paste', 
+                          'CLEAR' : 'Clear', 
                           } 
         
     # ---------------------- Application Background styling --------------------     
@@ -386,8 +387,6 @@ class SpeakEasyGUI(QMainWindow):
         self.buildSoundButtons(appLayout);
         self.buildButtonSetControls(appLayout);
         self.buildOptionsRadioButtons(appLayout);
-        
-        #self.connectSignalsToWidgets();        
         
         appWidget.setLayout(appLayout);
         
@@ -689,26 +688,42 @@ class SpeakEasyGUI(QMainWindow):
                                    behavior=CheckboxGroupBehavior.RADIO_BUTTONS);
                                    #behavior=CheckboxGroupBehavior.CHECKBOXES);
                                    
-        (self.textCompleteGroup, textCompleteButtonLayout, self.textCompleteRadioButtonsDict) =\
-            self.buildRadioButtons([SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
-                                   Orientation.HORIZONTAL,
-                                   Alignment.LEFT,
-                                   activeButtons=[SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']],
-                                   behavior=CheckboxGroupBehavior.CHECKBOXES);
-        # TODO: implement text completion:
-        self.textCompleteRadioButtonsDict[SpeakEasyGUI.interactionWidgets['TEXT_COMPLETION']].setEnabled(False)
-
-                                   
         # Style all the radio buttons:
         for playLocalityButton in self.playLocalityRadioButtonsDict.values():
             playLocalityButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
-        for textCompletionButton in self.textCompleteRadioButtonsDict.values():
-            textCompletionButton.setStyleSheet(SpeakEasyGUI.voiceButtonStylesheet); 
-                                   
         hbox.addLayout(playLocalityButtonLayout);
         hbox.addStretch(1);
-        hbox.addLayout(textCompleteButtonLayout);
+        self.buildConvenienceButtons(hbox);
         layout.addLayout(hbox);
+
+    #----------------------------------
+    # buildConvenienceButtons
+    #--------------
+        
+    def buildConvenienceButtons(self, layout):
+        '''
+        Creates buttons meant for accessibility convenience.
+        Example: Paste.
+        Places all in a row, though the layout is a 
+        QGridLayout. Adds QGridLayout to the passed-in 
+        layout.
+        
+        Sets instance variables:
+        1. C{self.convenienceButtonDict}
+         
+        @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
+        @type  layout: QLayout
+        '''
+        
+        (buttonGridLayout, self.convenienceButtonDict) =\
+            SpeakEasyGUI.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PASTE'],
+                                          SpeakEasyGUI.interactionWidgets['CLEAR'],
+                                          ],
+                                         2); # Two columns
+        for buttonObj in self.convenienceButtonDict.values():
+            buttonObj.setStyleSheet(SpeakEasyGUI.recorderButtonStylesheet);
+            buttonObj.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
+        layout.addLayout(buttonGridLayout);                                 
         
     #----------------------------------
     # buildHorizontalDivider 
@@ -946,15 +961,21 @@ class SpeakEasyGUI(QMainWindow):
     # setWhereToPlay 
     #--------------
     
-    def setWhereToPlay(self, whereToPlay):
+    def setWhereToPlay(self, playLocation):
         '''
         Set the option radio button that determines where sound is produced,
-        locally, or at the robot.
+        locally, or at the robot. No action is taken. This method merely sets
+        the appropriate radio button.
         @param whereToPlay: PlayLocation.LOCALLY, or PlayLocation.ROBOT
         @type whereToPlay: PlayLocation
         '''
-        self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets[whereToPlay]].setChecked(True);
         
+        if playLocation == PlayLocation.LOCALLY:
+            radioButton = self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']];
+        else:
+            radioButton = self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_AT_ROBOT']];
+        radioButton.setChecked(True);
+            
     #----------------------------------
     # setButtonLabel 
     #--------------

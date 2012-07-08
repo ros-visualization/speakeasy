@@ -2,13 +2,16 @@
 
 # TODO:
 #   - Robot ops with new msg
-#   - Word completion
 #   - Switch live between local and remote ops. 
+
+# Note: Unfortunately, this code was written before I knew about QtCreator. So 
+#       all of the UI is created in code (see file speakeasy_ui.py).
 
 import roslib; roslib.load_manifest('speakeasy');
 
 import sys
 import os
+import signal
 import time
 import subprocess
 import re
@@ -151,6 +154,7 @@ class SpeakEasyController(object):
     '''
     
     VERSION = '1.0';
+    PID_PUBLICATION_FILE = "/tmp/speakeasyPID";
     
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
     soundPaths = {}
@@ -188,9 +192,10 @@ class SpeakEasyController(object):
             localInit = self.initLocalOperation();
         else: # Robot operation
             robotInit = self.initROSOperation();
-
+            
         self.gui = SpeakEasyGUI(stand_alone=self.stand_alone, sound_effect_labels=self.sound_file_names);
         self.gui.setWindowTitle("SpeakEasy (V" + SpeakEasyController.VERSION + ")");
+        
         self.dialogService = DialogService(self.gui);
         # Handler that makes program button temporarily
         # look different to indicate entry into program mode:
@@ -207,7 +212,7 @@ class SpeakEasyController(object):
             self.dialogService.showErrorMsg("Application was set to control sound on robot, but: %s. Switching to local operation." %
                                             str(self.rosInitException));
 
-        if stand_alone:
+        if self.stand_alone:
             self.gui.setWhereToPlay(PlayLocation.LOCALLY);
         else:
             self.gui.setWhereToPlay(PlayLocation.ROBOT);
@@ -218,6 +223,28 @@ class SpeakEasyController(object):
         self.programs = {};
         self.connectWidgetsToActions()
         self.installDefaultSpeechSet();
+        
+        # Accept SIGUSR1 and SIGUSR2 from other processes
+        # to initiate PASTE and CLEAR operations, of the 
+        # text area, respectively:
+        signal.signal(signal.SIGUSR1, self.handleOS_SIGUSR1_2);
+        signal.signal(signal.SIGUSR2, self.handleOS_SIGUSR1_2);
+        # Let other processes know out pid: 
+        self.publishPID();
+
+    #----------------------------------
+    # shutdown 
+    #--------------
+
+    def shutdown(self):
+        '''
+        Delete the PID pub file. Not crucial, but nice to let other
+        processes know that SpeakEasy is no longer running.
+        '''
+        try:
+            os.remove(SpeakEasyController.PID_PUBLICATION_FILE);
+        except:
+            pass
 
     #----------------------------------
     # initLocalOperation 
@@ -290,6 +317,11 @@ class SpeakEasyController(object):
                 radioButton.clicked.connect(partial(self.actionWhereToPlayRadioButton, PlayLocation.LOCALLY));
         
         self.gui.replayPeriodSpinBox.valueChanged.connect(self.actionRepeatPeriodChanged);
+        pasteButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['PASTE']];
+        pasteButton.clicked.connect(self.actionPaste);
+        clearButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['CLEAR']];
+        clearButton.clicked.connect(self.actionClear);
+        
         
     def connectProgramButtonsToActions(self):
         for programButton in self.gui.programButtonDict.values():
@@ -687,6 +719,23 @@ class SpeakEasyController(object):
         # If the repeat period is changed on its spinbox,
         # automatically select 'Play repeatedly':
         self.gui.setPlayRepeatedlyChecked();
+    
+    #----------------------------------
+    # actionClear
+    #--------------
+    
+    def actionClear(self):
+        self.gui.speechInputFld.clear();
+    
+    #----------------------------------
+    # actionPaste 
+    #--------------
+        
+    def actionPaste(self):
+        # Also called by handleOS_SIGUSR1_2
+        textArea = self.gui.speechInputFld;
+        currCursor = textArea.textCursor();
+        currCursor.insertText(QApplication.clipboard().text());
         
     #----------------------------------
     # installDefaultSpeechSet
@@ -751,6 +800,24 @@ class SpeakEasyController(object):
                 continue;
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
+    
+    #----------------------------------
+    # publishPID 
+    #--------------
+    
+    def publishPID(self):
+        with open(SpeakEasyController.PID_PUBLICATION_FILE,'w') as fd:
+            fd.write(str(os.getpid()));
+
+    #----------------------------------
+    # handleOS_SIGUSR1_2 
+    #--------------
+
+    def handleOS_SIGUSR1_2(self, signum, stack):
+        if signum == signal.SIGUSR1:
+            self.actionPaste;
+        elif signum == signal.SIGUSR2:
+            self.actionClear();
     
     # --------------------------------------------   Replay Demon -------------------------------
     
