@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="speakeasy-module.html">Package&nbsp;speakeasy</a> ::
+        <a href="speakeasy.buttonSetPopupSelector_ui-module.html">Module&nbsp;buttonSetPopupSelector_ui</a> ::
+        Class&nbsp;ButtonSetPopupSelector
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class ButtonSetPopupSelector</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+PyQt4.QtGui.QDialog --+
+                      |
+                     <strong class="uidshort">ButtonSetPopupSelector</strong>
+</pre>
+
+<hr />
+<p>An interactive dialog that displays successive sets of buttons. When 
+  each set is displayed, user may ask for the next available set, the 
+  previous. already seen set, or the user may accept the currently 
+  displayed set. A cancel is available as well.</p>
+  <p>The call and return protocol is as follows:</p>
+  <ul>
+    <li>
+      The caller creates a fresh dialog instance of this class, passing an 
+      iterator. The iterator's next() method returns an array of 
+      ButtonProgram instances each time it is called. (When the iterator is
+      exhausted, the user is able to use a 'Previous' button to view the 
+      previously seen sets again).
+    </li>
+    <li>
+      The caller invokes the exec_() method on the dialog instance.
+    </li>
+    <li>
+      The exec_() method returns:
+      <ul>
+        <li>
+          -1, if the iterator yielded no button label arrays at all.
+        </li>
+        <li>
+          0, if the user canceled, and
+        </li>
+        <li>
+          1 if the user accepted one of the sets.
+        </li>
+      </ul>
+    </li>
+    <li>
+      If the exec_() method returned 1, the caller may obtain an array with
+      the ButtonProgram instances of the currently showing (and therefore 
+      accepted) buttons. The array is obtained from the dialog instance via
+      method getCurrentlyShowingSetLabels(self).
+    </li>
+  </ul>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonProgramArrayIterator</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#exec_" class="summary-sig-name">exec_</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      If the prior initialization revealed that the caller does not deliver
+      any sets of button labels at all, then return -1, without displaying 
+      any dialog.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.exec_">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[ButtonProgram]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#getCurrentlyShowingSet" class="summary-sig-name">getCurrentlyShowingSet</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns an array of ButtonProgram instances that are currently 
+      showing on the dialog, or were showing when the user clicked OK.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.getCurrentlyShowingSet">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">[string]</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#getCurrentlyShowingSetLabels" class="summary-sig-name">getCurrentlyShowingSetLabels</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns an array of labels of buttons that are currently showing on 
+      the dialog, or were showing when the user clicked OK.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.getCurrentlyShowingSetLabels">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#offerNewButtonSet" class="summary-sig-name">offerNewButtonSet</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Responsible for displaying the next, or previous set of buttons.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.offerNewButtonSet">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="flipNextPrevDirection"></a><span class="summary-sig-name">flipNextPrevDirection</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Called when no more button label sets are available either in the 
+      next, or previous direction.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.flipNextPrevDirection">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#clearDialogPane" class="summary-sig-name">clearDialogPane</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Cleans out the dialog's layout.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clearDialogPane">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#buildButtonSet" class="summary-sig-name">buildButtonSet</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonLabelArray</span>)</span><br />
+      Constructs one set of buttons, based on passed in button labels.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.buildButtonSet">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#addChoiceButtons" class="summary-sig-name">addChoiceButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Appends the existing Next/Previous/Cancel/OK buttons into the 
+      passed-in layout.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.addChoiceButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#setNextPrevButtonsEnabledness" class="summary-sig-name">setNextPrevButtonsEnabledness</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Examines the instance variables 
+      &lt;code&gt;shownLabelArrays&lt;/code&gt; and 
+      &lt;/code&gt;currentlyShowingSetIndex&lt;/code&gt; to determine 
+      whether the Next or Previous buttons should be enabled.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.setNextPrevButtonsEnabledness">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="enableActionButton"></a><span class="summary-sig-name">enableActionButton</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonObj</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.enableActionButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="disableActionButton"></a><span class="summary-sig-name">disableActionButton</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonObj</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.disableActionButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#clickedNextButton" class="summary-sig-name">clickedNextButton</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Handler for Next button clicks.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedNextButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#clickedPrevButton" class="summary-sig-name">clickedPrevButton</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Handler for Next button clicks.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedPrevButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="clickedCancelButton"></a><span class="summary-sig-name">clickedCancelButton</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedCancelButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="clickedOKButton"></a><span class="summary-sig-name">clickedOKButton</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedOKButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.buttonSetPopupSelector_ui.ButtonSetPopupSelector-class.html#terminateWithWarning" class="summary-sig-name">terminateWithWarning</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Called when no button sets are available from the caller at all.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.terminateWithWarning">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="exec_"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">exec_</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.exec_">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>If the prior initialization revealed that the caller does not deliver 
+  any sets of button labels at all, then return -1, without displaying any 
+  dialog.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>-1 if no button sets available. 1 if user accepted one of the 
+          button label sets as the one they want, or 0, if the user 
+          cancelled.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getCurrentlyShowingSet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getCurrentlyShowingSet</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.getCurrentlyShowingSet">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns an array of ButtonProgram instances that are currently showing
+  on the dialog, or were showing when the user clicked OK.</p>
+  <dl class="fields">
+    <dt>Returns: [ButtonProgram]</dt>
+        <dd>Array of ButtonProgram instances.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getCurrentlyShowingSetLabels"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getCurrentlyShowingSetLabels</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.getCurrentlyShowingSetLabels">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns an array of labels of buttons that are currently showing on 
+  the dialog, or were showing when the user clicked OK.</p>
+  <dl class="fields">
+    <dt>Returns: [string]</dt>
+        <dd>Array of labels.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="offerNewButtonSet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">offerNewButtonSet</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.offerNewButtonSet">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Responsible for displaying the next, or previous set of buttons. 
+  During successive calls to this method, the method obtains new button 
+  label sets from the caller's iterator until the iterator is exhausted. 
+  The sets are collected in &lt;code&gt;self.shownLabelArrays&lt;/code&gt;.
+  The method is also responsible for showing previously shown sets again. 
+  The direction is controlled by the handlers of the Previous and Next 
+  buttons. They set instance variable 
+  &lt;code&gt;currentNextPrevDirection&lt;/code&gt;.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="clearDialogPane"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">clearDialogPane</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clearDialogPane">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Cleans out the dialog's layout. Does not destroy the control buttons 
+  (Next, Previous, Cancel, and OK), but does trigger deletion of all the 
+  button objects in the button grid. Attempts to None out references to UI 
+  widgets to enable garbage collection.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildButtonSet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildButtonSet</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">buttonLabelArray</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.buildButtonSet">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Constructs one set of buttons, based on passed in button labels.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>buttonLabelArray</code></strong> ([string]) - Array of button labels.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addChoiceButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addChoiceButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.addChoiceButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Appends the existing Next/Previous/Cancel/OK buttons into the 
+  passed-in layout.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong></li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setNextPrevButtonsEnabledness"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setNextPrevButtonsEnabledness</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.setNextPrevButtonsEnabledness">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Examines the instance variables 
+  &lt;code&gt;shownLabelArrays&lt;/code&gt; and 
+  &lt;/code&gt;currentlyShowingSetIndex&lt;/code&gt; to determine whether 
+  the Next or Previous buttons should be enabled. Acts on the result.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="clickedNextButton"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">clickedNextButton</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedNextButton">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Handler for Next button clicks. Triggers show of next button set in 
+  order.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="clickedPrevButton"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">clickedPrevButton</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.clickedPrevButton">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Handler for Next button clicks. Triggers show of previous button set 
+  in order.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="terminateWithWarning"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">terminateWithWarning</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.buttonSetPopupSelector_ui-pysrc.html#ButtonSetPopupSelector.terminateWithWarning">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Called when no button sets are available from the caller at all. 
+  Records this event in instance variable 
+  &lt;code&gt;noAvailableSets&lt;/code&gt;, and returns.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Jul  9 16:03:08 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

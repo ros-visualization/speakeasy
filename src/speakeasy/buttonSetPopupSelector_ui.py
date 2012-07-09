@@ -20,25 +20,24 @@ class ButtonSetPopupSelector(QDialog):
     next available set, the previous. already seen set, or the
     user may accept the currently displayed set. A cancel is 
     available as well. 
-    </p>
+    
     The call and return protocol is as follows:
-    <ul>
-      <li>The caller creates a fresh dialog instance of this class,
-          passing an iterator. The iterator's next() method returns 
-          an array of ButtonProgram instances each time it is called. (When the
-          iterator is exhausted, the user is able to use a 'Previous'
-          button to view the previously seen sets again).</li>
-      <li>The caller invokes the exec_() method on the dialog instance.</li>
-      <li>The exec_() method returns:
-          <ul>
-              <li>-1, if the iterator yielded no button label arrays at all.</li>
-              <li>0, if the user canceled, and </li>
-              <li>1 if the user accepted one of the sets.
-          </ul></li>
-      <li>If the exec_() method returned 1, the caller may obtain an array with the
-          ButtonProgram instances of the currently showing (and therefore accepted) buttons.
-          The array is obtained from the dialog instance via method getCurrentlyShowingSetLabels(self).</li> 
-    </ul>
+
+      - The caller creates a fresh dialog instance of this class,
+        passing an iterator. The iterator's next() method returns 
+        an array of ButtonProgram instances each time it is called. (When the
+        iterator is exhausted, the user is able to use a 'Previous'
+        button to view the previously seen sets again).
+      - The caller invokes the exec_() method on the dialog instance.
+      - The exec_() method returns:
+          
+              - -1, if the iterator yielded no button label arrays at all.
+              - 0, if the user canceled, and 
+              - 1 if the user accepted one of the sets.
+
+      - If the exec_() method returned 1, the caller may obtain an array with the
+        ButtonProgram instances of the currently showing (and therefore accepted) buttons.
+        The array is obtained from the dialog instance via method getCurrentlyShowingSetLabels(self). 
     '''
     #------------------------------------------------------   Public  Methods ---------------------------
     
@@ -95,7 +94,7 @@ class ButtonSetPopupSelector(QDialog):
         displaying any dialog.
         @return: -1 if no button sets available. 1 if user accepted one of the button
                  label sets as the one they want, or 0, if the user cancelled.
-        @returnt: int
+        @rtype: int
         '''
         if self.noAvailableSets:
             return -1;
@@ -106,7 +105,7 @@ class ButtonSetPopupSelector(QDialog):
         Returns an array of ButtonProgram instances that are currently showing on
         the dialog, or were showing when the user clicked OK.
         @return: Array of ButtonProgram instances.
-        @returnt: [ButtonProgram]
+        @rtype: [ButtonProgram]
         '''
         return self.buttonProgramArrays[self.currentlyShowingSetIndex];
 
@@ -115,7 +114,7 @@ class ButtonSetPopupSelector(QDialog):
         Returns an array of labels of buttons that are currently showing on
         the dialog, or were showing when the user clicked OK.
         @return: Array of labels.
-        @returnt: [string]
+        @rtype: [string]
         '''
         allLabels = [];
         for buttonProgram in self.buttonProgramArrays[self.currentlyShowingSetIndex]:
@@ -265,8 +264,9 @@ class ButtonSetPopupSelector(QDialog):
         '''
         Constructs one set of buttons, based on passed in 
         button labels.
+        
         @param buttonLabelArray: Array of button labels.
-        @type: [string]
+        @type buttonLabelArray: [string]
         '''
 
         # If we never made the root layout, make it now:

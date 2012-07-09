@@ -159,12 +159,12 @@ class SpeakEasyGUI(QMainWindow):
     One instance of this class builds the entire sound play UI.
     Instance variable that hold widgets of interest to controllers:
     
-    - C{speechInputFld}
-    - C{onceOrRepeatDict}
-    - C{voicesRadioButtonsDict}
-    - C{recorderDict}
-    - C{programButtonDict}
-    - C{soundButtonDict}
+	    - C{speechInputFld}
+	    - C{onceOrRepeatDict}
+	    - C{voicesRadioButtonsDict}
+	    - C{recorderDict}
+	    - C{programButtonDict}
+	    - C{soundButtonDict}
 
     '''
 
@@ -486,7 +486,7 @@ class SpeakEasyGUI(QMainWindow):
         to the passed-in layout.
         
         Sets instance variables:
-        1. C{self.speechInputFld}
+            1. C{self.speechInputFld}
          
         @param layout: Layout object to which the label/txt-field C{hbox} is to be added.
         @type  layout: QLayout
@@ -517,8 +517,8 @@ class SpeakEasyGUI(QMainWindow):
         that hbox layout to the passed-in layout.
         
         Sets instance variables:
-        1. C{self.onceOrRepeatDict}
-        2. C{self.voicesRadioButtonsDict}
+            1. C{self.onceOrRepeatDict}
+            2. C{self.voicesRadioButtonsDict}
          
         @param layout: Layout object to which the label/txt-field C{hbox} is to be added.
         @type  layout: QLayout
@@ -581,7 +581,7 @@ class SpeakEasyGUI(QMainWindow):
         layout.
         
         Sets instance variables:
-        1. C{self.recorderDict}
+            1. C{self.recorderDict}
          
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
@@ -609,7 +609,7 @@ class SpeakEasyGUI(QMainWindow):
         layout.
         
         Sets instance variables:
-        1. C{self.programButtonDict}
+            1. C{self.programButtonDict}
          
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
@@ -640,7 +640,7 @@ class SpeakEasyGUI(QMainWindow):
         layout.
         
         Sets instance variables:
-        1. C{self.soundButtonDict}
+            1. C{self.soundButtonDict}
          
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
@@ -709,7 +709,7 @@ class SpeakEasyGUI(QMainWindow):
         layout.
         
         Sets instance variables:
-        1. C{self.convenienceButtonDict}
+            1. C{self.convenienceButtonDict}
          
         @param layout: Layout object to which the label/txt-field C{QGridlayout} is to be added.
         @type  layout: QLayout
@@ -764,14 +764,15 @@ class SpeakEasyGUI(QMainWindow):
         @type activeButtons: [string]
         @param behavior: Indicates whether the button group is to behave like Radio Buttons, or like Checkboxes.
         @type behavior: CheckboxGroupBehavior
-        @return 1. The button group that contains the related buttons. Caller: ensure that 
-                   this object does not go out of scope. 
-                2. The button layout, which callers will need to add to
-                   their own layouts.
-                3. and a dictionary mapping button names to button objects that
-                   were created within this method. This dict is needed by the
-                   controller.
-        @returnt (QButtonGroup, QLayout, dict<string,QRadioButton>).
+        @return 
+            1. The button group that contains the related buttons. Caller: ensure that 
+               this object does not go out of scope. 
+            2. The button layout, which callers will need to add to
+               their own layouts.
+            3. and a dictionary mapping button names to button objects that
+               were created within this method. This dict is needed by the
+               controller.
+        @rtype (QButtonGroup, QLayout, dict<string,QRadioButton>).
         '''
         
         # Button control management group. It has no visible
@@ -839,7 +840,7 @@ class SpeakEasyGUI(QMainWindow):
         @type numColumns: int
         @return: 1. a grid layout with the button objects inside.
                  2. a dictionary mapping button labels to button objects.
-        @returnt: QGridLayout 
+        @rtype: QGridLayout 
         '''
 
         buttonLayout = QGridLayout();
@@ -876,7 +877,7 @@ class SpeakEasyGUI(QMainWindow):
         Returns None if user canceled out, or a string
         with the new button label. 
         @return: None if user canceled, else string from input field.
-        @returnt: {None | string}
+        @rtype: {None | string}
         
         '''
         prompt = "New label for this button:";
@@ -950,7 +951,7 @@ class SpeakEasyGUI(QMainWindow):
         '''
         Returns which of the play location options is selected: Locally or Robot.
         @return: Selection of where sound and text-to-speech output is to occur.
-        @returnt: PlayLocation
+        @rtype: PlayLocation
         '''
         if self.playLocalityRadioButtonsDict[SpeakEasyGUI.interactionWidgets['PLAY_LOCALLY']].isChecked():
             return PlayLocation.LOCALLY;
@@ -966,8 +967,8 @@ class SpeakEasyGUI(QMainWindow):
         Set the option radio button that determines where sound is produced,
         locally, or at the robot. No action is taken. This method merely sets
         the appropriate radio button.
-        @param whereToPlay: PlayLocation.LOCALLY, or PlayLocation.ROBOT
-        @type whereToPlay: PlayLocation
+        @param playLocation: PlayLocation.LOCALLY, or PlayLocation.ROBOT
+        @type playLocation: PlayLocation
         '''
         
         if playLocation == PlayLocation.LOCALLY:

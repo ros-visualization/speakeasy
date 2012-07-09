@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.music_player.MusicPlayer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="speakeasy-module.html">Package&nbsp;speakeasy</a> ::
+        <a href="speakeasy.music_player-module.html">Module&nbsp;music_player</a> ::
+        Class&nbsp;MusicPlayer
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.music_player.MusicPlayer-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class MusicPlayer</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">MusicPlayer</strong>
+</pre>
+
+<hr />
+<p>Plays music files, currently ogg and wav. In contrast to SoundPlayer, 
+  which is optimized for dealing with lots of short sounds, this facility 
+  is for longer files, which are streamed, rather than loaded. Also in 
+  contrast to SoundPlayer, MusicPlayer can only play one song at a 
+  time.</p>
+  <p>For ogg files the method setPlayhead() allows clients to move foward 
+  and back within a song as it plays.</p>
+  <p>Public methods:</p>
+  <ol start="1">
+    <li>
+      play()
+    </li>
+    <li>
+      pause()
+    </li>
+    <li>
+      unpause()
+    </li>
+    <li>
+      setSoundVolume()
+    </li>
+    <li>
+      getSoundVolume()
+    </li>
+    <li>
+      setPlayhead()
+    </li>
+    <li>
+      getPlayheadPosition()
+    </li>
+    <li>
+      getPlayStatus()
+      <p>Requires pygame.</p>
+    </li>
+  </ol>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      x.__init__(...) initializes x; see x.__class__.__doc__ for signature</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#play" class="summary-sig-name">play</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">whatToPlay</span>,
+        <span class="summary-sig-arg">repeats</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">startTime</span>=<span class="summary-sig-default">0.0</span>,
+        <span class="summary-sig-arg">blockTillDone</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">volume</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Play an .mp3 or .ogg file, or File class instance.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.play">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="stop"></a><span class="summary-sig-name">stop</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Stop music if any is playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.stop">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="pause"></a><span class="summary-sig-name">pause</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Pause either currently playing song, if any.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.pause">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="unpause"></a><span class="summary-sig-name">unpause</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Unpause a paused song.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.unpause">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#setSoundVolume" class="summary-sig-name">setSoundVolume</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">volume</span>)</span><br />
+      Set sound playback volume.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.setSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">float</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#getSoundVolume" class="summary-sig-name">getSoundVolume</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get currently set sound volume.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.getSoundVolume">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#setPlayhead" class="summary-sig-name">setPlayhead</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">secs</span>,
+        <span class="summary-sig-arg">timeReference</span>=<span class="summary-sig-default">1</span>)</span><br />
+      Set playhead to 'secs' seconds into the currently playing song.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.setPlayhead">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">float</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#getPlayheadPosition" class="summary-sig-name">getPlayheadPosition</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return number of (possibly fractional) seconds to where the current 
+      song is currently playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.getPlayheadPosition">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getPlayStatus"></a><span class="summary-sig-name">getPlayStatus</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return one of PlayStatus.STOPPED, PlayStatus.PLAYING, 
+      PlayStatus.PAUSED to reflect what the player is currently doing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.getPlayStatus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#waitForSongDone" class="summary-sig-name">waitForSongDone</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">timeout</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Block until song is done playing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.waitForSongDone">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.music_player.MusicPlayer-class.html#formatSupported" class="summary-sig-name">formatSupported</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">fileExtension</span>)</span><br />
+      Checks whether the given file extension implies a supported sound 
+      format.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.formatSupported">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="singletonInstanceRunning"></a><span class="summary-name">singletonInstanceRunning</span> = <code title="False">False</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="supportedFormats"></a><span class="summary-name">supportedFormats</span> = <code title="['ogg', 'wav']"><code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">ogg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">wav</code><code class="variable-quote">'</code><code class="variable-group">]</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>x.__init__(...) initializes x; see x.__class__.__doc__ for 
+  signature</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="play"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">play</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">whatToPlay</span>,
+        <span class="sig-arg">repeats</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">startTime</span>=<span class="sig-default">0.0</span>,
+        <span class="sig-arg">blockTillDone</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">volume</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.play">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Play an .mp3 or .ogg file, or File class instance. Note that pygame 
+  does not support startTime for .wav files. They will play, but startTime 
+  is ignored. Offers choice of blocking return until the music is finished,
+  or returning immediately.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>whatToPlay</code></strong> ({string | File}) - Full path to .wav or .ogg file, or File instance.</li>
+        <li><strong class="pname"><code>repeats</code></strong> (int) - Number of times to repeat song after the first time. If -1: 
+          repeat forever, or until another song is played.</li>
+        <li><strong class="pname"><code>startTime</code></strong> (float) - Time in seconds into the song to start the playback.</li>
+        <li><strong class="pname"><code>blockTillDone</code></strong> (boolean) - True to delay return until music is done playing.</li>
+        <li><strong class="pname"><code>volume</code></strong> (float) - How loudly to play (0.0 to 1.0). None: current volume.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>IOError</strong></code> - if given music file path does not exist, or some other playback 
+        error occurred.</li>
+        <li><code><strong class='fraise'>ValueError</strong></code> - if given volume is not between 0.0 and 1.0</li>
+        <li><code><strong class='fraise'>TypeError</strong></code> - if whatToPlay is not a filename (string), or Sound instance.</li>
+        <li><code><strong class='fraise'>NotImplementedError</strong></code> - if startTime is other than 0.0, but the underlying music engine 
+        does not support start time control.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setSoundVolume</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">volume</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.setSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set sound playback volume.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>volume</code></strong> (float) - Value between 0.0 and 1.0.</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>TypeError</strong></code> - if volume is not a float.</li>
+        <li><code><strong class='fraise'>ValueError</strong></code> - if volume is not between 0.0 and 1.0</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getSoundVolume"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getSoundVolume</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.getSoundVolume">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get currently set sound volume.</p>
+  <dl class="fields">
+    <dt>Returns: float</dt>
+        <dd>Volume number between 0.0 and 1.0</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setPlayhead"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setPlayhead</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">secs</span>,
+        <span class="sig-arg">timeReference</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.setPlayhead">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set playhead to 'secs' seconds into the currently playing song. If 
+  nothing is being played, this method has no effect. If a song is 
+  currently paused, the song will be unpaused, continuing to play at the 
+  new playhead position.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>secs</code></strong> (float) - number of (possibly fractional) seconds to start into the song.</li>
+        <li><strong class="pname"><code>timeReference</code></strong> (TimeReference) - whether to interpret the secs parameter as absolute from the song
+          start, or relative from current position. Options are 
+          TimeRerence.ABSOLUTE and TimeRerence.RELATIVE</li>
+    </ul></dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>NotImplementedError</strong></code> - if called while playing song whose format does not support playhead
+        setting in pygame.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getPlayheadPosition"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getPlayheadPosition</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.getPlayheadPosition">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return number of (possibly fractional) seconds to where the current 
+  song is currently playing. If currently playing nothing, return 0.0.</p>
+  <dl class="fields">
+    <dt>Returns: float</dt>
+        <dd>number of fractional seconds where virtual playhead is 
+          positioned.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="waitForSongDone"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">waitForSongDone</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">timeout</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.waitForSongDone">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Block until song is done playing. Used in play() method.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>timeout</code></strong> ({int | float}) - Maximum time to wait in seconds.</li>
+    </ul></dd>
+    <dt>Returns: boolean</dt>
+        <dd>True if song ended, False if timeout occurred.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="formatSupported"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">formatSupported</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">fileExtension</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.music_player-pysrc.html#MusicPlayer.formatSupported">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Checks whether the given file extension implies a supported sound 
+  format.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>fileExtension</code></strong> (string) - file extension with or without leading period. Example: 
+          &quot;.ogg&quot;</li>
+    </ul></dd>
+    <dt>Returns: boolean</dt>
+        <dd>True if the format is supported, else False.</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ValueError</strong></code> - if fileExtension is anything other than a string with length &gt; 
+        0.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Jul  9 16:03:08 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

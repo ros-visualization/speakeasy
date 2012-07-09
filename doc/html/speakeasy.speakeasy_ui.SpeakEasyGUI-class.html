@@ -1,0 +1,1636 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>speakeasy.speakeasy_ui.SpeakEasyGUI</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="speakeasy-module.html">Package&nbsp;speakeasy</a> ::
+        <a href="speakeasy.speakeasy_ui-module.html">Module&nbsp;speakeasy_ui</a> ::
+        Class&nbsp;SpeakEasyGUI
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class SpeakEasyGUI</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+PyQt4.QtGui.QMainWindow --+
+                          |
+                         <strong class="uidshort">SpeakEasyGUI</strong>
+</pre>
+
+<hr />
+<p>One instance of this class builds the entire sound play UI. Instance 
+  variable that hold widgets of interest to controllers:</p>
+  <ul>
+    <li>
+      <code>speechInputFld</code>
+    </li>
+    <li>
+      <code>onceOrRepeatDict</code>
+    </li>
+    <li>
+      <code>voicesRadioButtonsDict</code>
+    </li>
+    <li>
+      <code>recorderDict</code>
+    </li>
+    <li>
+      <code>programButtonDict</code>
+    </li>
+    <li>
+      <code>soundButtonDict</code>
+    </li>
+  </ul>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">parent</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">mirrored</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">stand_alone</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">sound_effect_labels</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="programButtonIterator"></a><span class="summary-sig-name">programButtonIterator</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">gridLayout</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.programButtonIterator">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="replaceProgramButtons"></a><span class="summary-sig-name">replaceProgramButtons</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonProgramsArray</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.replaceProgramButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="addTitle"></a><span class="summary-sig-name">addTitle</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.addTitle">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#addTxtInputFld" class="summary-sig-name">addTxtInputFld</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates text input field label and text field in a horizontal box 
+      layout.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.addTxtInputFld">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#addOnceOrRepeat_And_VoiceRadioButtons" class="summary-sig-name">addOnceOrRepeat_And_VoiceRadioButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates radio buttons for selecting whether a sound is to play once, 
+      or repeatedly until stopped.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.addOnceOrRepeat_And_VoiceRadioButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildTapeRecorderButtons" class="summary-sig-name">buildTapeRecorderButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates tape recorder buttons (Play Text, Stop,etc.).</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildTapeRecorderButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildProgramButtons" class="summary-sig-name">buildProgramButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates grid of buttons for saving sounds.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildProgramButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildSoundButtons" class="summary-sig-name">buildSoundButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates grid of buttons for playing canned sounds.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildSoundButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="buildButtonSetControls"></a><span class="summary-sig-name">buildButtonSetControls</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildButtonSetControls">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="buildOptionsRadioButtons"></a><span class="summary-sig-name">buildOptionsRadioButtons</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildOptionsRadioButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildConvenienceButtons" class="summary-sig-name">buildConvenienceButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span><br />
+      Creates buttons meant for accessibility convenience.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildConvenienceButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="buildHorizontalDivider"></a><span class="summary-sig-name">buildHorizontalDivider</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">layout</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildHorizontalDivider">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildRadioButtons" class="summary-sig-name">buildRadioButtons</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">labelTextArray</span>,
+        <span class="summary-sig-arg">orientation</span>,
+        <span class="summary-sig-arg">alignment</span>,
+        <span class="summary-sig-arg">activeButtons</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">behavior</span>=<span class="summary-sig-default">CheckboxGroupBehavior.RADIO_BUTTONS</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildRadioButtons">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">{None | string}</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#getNewButtonLabel" class="summary-sig-name">getNewButtonLabel</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Requests a new button label from the user.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.getNewButtonLabel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="playOnceChecked"></a><span class="summary-sig-name">playOnceChecked</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.playOnceChecked">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="setPlayOnceChecked"></a><span class="summary-sig-name">setPlayOnceChecked</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.setPlayOnceChecked">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="playRepeatedlyChecked"></a><span class="summary-sig-name">playRepeatedlyChecked</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.playRepeatedlyChecked">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="setPlayRepeatedlyChecked"></a><span class="summary-sig-name">setPlayRepeatedlyChecked</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.setPlayRepeatedlyChecked">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getPlayRepeatPeriod"></a><span class="summary-sig-name">getPlayRepeatPeriod</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.getPlayRepeatPeriod">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">string</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#activeVoice" class="summary-sig-name">activeVoice</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return the official name of the voice that is currently checked in 
+      the UI.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.activeVoice">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">PlayLocation</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#whereToPlay" class="summary-sig-name">whereToPlay</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns which of the play location options is selected: Locally or 
+      Robot.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.whereToPlay">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#setWhereToPlay" class="summary-sig-name">setWhereToPlay</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">playLocation</span>)</span><br />
+      Set the option radio button that determines where sound is produced, 
+      locally, or at the robot.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.setWhereToPlay">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="setButtonLabel"></a><span class="summary-sig-name">setButtonLabel</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonObj</span>,
+        <span class="summary-sig-arg">label</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.setButtonLabel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#blinkButton" class="summary-sig-name">blinkButton</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">buttonObj</span>,
+        <span class="summary-sig-arg">turnOn</span>)</span><br />
+      Used to make a program button blink in some way to indicate that it 
+      is changing into programming mode.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.blinkButton">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== STATIC METHODS ==================== -->
+<a name="section-StaticMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Static Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-StaticMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">QGridLayout</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#buildButtonGrid" class="summary-sig-name">buildButtonGrid</a>(<span class="summary-sig-arg">labelTextArray</span>,
+        <span class="summary-sig-arg">numColumns</span>)</span><br />
+      Creates a grid of QPushButton widgets.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildButtonGrid">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="PROGRAM_BUTTON_HOLD_TIME"></a><span class="summary-name">PROGRAM_BUTTON_HOLD_TIME</span> = <code title="3.0">3.0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="PROGRAM_BUTTON_LOOK_CHANGE_DURATION"></a><span class="summary-name">PROGRAM_BUTTON_LOOK_CHANGE_DURATION</span> = <code title="0.2">0.2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="BUTTON_MIN_HEIGHT"></a><span class="summary-name">BUTTON_MIN_HEIGHT</span> = <code title="30">30</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="BUTTON_LABEL_FONT_SIZE"></a><span class="summary-name">BUTTON_LABEL_FONT_SIZE</span> = <code title="16">16</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="RADIO_BUTTON_LABEL_FONT_SIZE"></a><span class="summary-name">RADIO_BUTTON_LABEL_FONT_SIZE</span> = <code title="16">16</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="EDIT_FIELD_TEXT_SIZE"></a><span class="summary-name">EDIT_FIELD_TEXT_SIZE</span> = <code title="18">18</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NUM_OF_PROGRAM_BUTTON_COLUMNS"></a><span class="summary-name">NUM_OF_PROGRAM_BUTTON_COLUMNS</span> = <code title="4">4</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NUM_OF_SOUND_BUTTON_COLUMNS"></a><span class="summary-name">NUM_OF_SOUND_BUTTON_COLUMNS</span> = <code title="4">4</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#voices" class="summary-name">voices</a> = <code title="{'VOICE_1': 'voice_kal_diphone', 'VOICE_2': 'David', 'VOICE_3': 'Amy',\
+ 'VOICE_4': 'Shouty', 'VOICE_5': 'Whispery',}">{'VOICE_1': 'voice_kal_diphone', 'VOICE_2': 'David', <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#interactionWidgets" class="summary-name">interactionWidgets</a> = <code title="{'PLAY_ONCE': 'Play once', 'PLAY_REPEATEDLY': 'Play repeatedly', 'PLAY\
+_REPEATEDLY_PERIOD': 'Pause between plays', 'VOICE_1': 'Machine', 'VOI\
+CE_2': 'David', 'VOICE_3': 'Amy', 'VOICE_4': 'Shout', 'VOICE_5': 'Whis\
+per', 'PLAY_TEXT': 'Play Text', 'STOP': 'Stop', 'STOP_ALL': 'Stop All'\
+, 'SPEECH_1': 'Speech 1', 'SPEECH_2': 'Speech 2', 'SPEECH_3': 'Speech \
+3', 'SPEECH_4': 'Speech 4', 'SPEECH_5': 'Speech 5', 'SPEECH_6': 'Speec\
+h 6', 'SPEECH_7': 'Speech 7', 'SPEECH_8': 'Speech 8', 'SPEECH_9': 'Spe\
+ech 9', 'SPEECH_10': 'Speech 10', 'SPEECH_11': 'Speech 11', 'SPEECH_12\
+...">{'PLAY_ONCE': 'Play once', 'PLAY_REPEATED<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="veryLightBlue"></a><span class="summary-name">veryLightBlue</span> = <code title="QColor(230, 255, 255)">QColor(230, 255, 255)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#stylesheetAppBG" class="summary-name">stylesheetAppBG</a> = <code title="'QDialog {background-color: %s}' % veryLightBlue.name()">'QDialog {background-color: %s}' % veryLight<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#defaultStylesheet" class="summary-name">defaultStylesheet</a> = <code title="'QDialog {background-color: %s}' % veryLightBlue.name()">'QDialog {background-color: %s}' % veryLig<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="defaultStylesheetName"></a><span class="summary-name">defaultStylesheetName</span> = <code title="&quot;Default&quot;">&quot;Default&quot;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="editFieldBGColor"></a><span class="summary-name">editFieldBGColor</span> = <code title="QColor(12, 21, 109)">QColor(12, 21, 109)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="editFieldTextColor"></a><span class="summary-name">editFieldTextColor</span> = <code title="QColor(244, 244, 246)">QColor(244, 244, 246)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#inputFldStylesheet" class="summary-name">inputFldStylesheet</a> = <code title="'TextPanel {background-color: '+ editFieldBGColor.name()+ '; color: '+\
+ editFieldTextColor.name()+ '; font-size: '+ str(EDIT_FIELD_TEXT_SIZE)\
++ 'pt'+ '}'">'TextPanel {background-color: '+ editFiel<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="recorderButtonBGColor"></a><span class="summary-name">recorderButtonBGColor</span> = <code title="QColor(176, 220, 245)">QColor(176, 220, 245)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="recorderButtonDisabledBGColor"></a><span class="summary-name">recorderButtonDisabledBGColor</span> = <code title="QColor(187, 200, 208)">QColor(187, 200, 208)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="recorderButtonTextColor"></a><span class="summary-name">recorderButtonTextColor</span> = <code title="QColor(0, 0, 0)">QColor(0, 0, 0)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="programButtonBGColor"></a><span class="summary-name">programButtonBGColor</span> = <code title="QColor(117, 150, 169)">QColor(117, 150, 169)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="programButtonTextColor"></a><span class="summary-name">programButtonTextColor</span> = <code title="QColor(251, 247, 247)">QColor(251, 247, 247)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="soundButtonBGColor"></a><span class="summary-name">soundButtonBGColor</span> = <code title="QColor(110, 134, 211)">QColor(110, 134, 211)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="soundButtonTextColor"></a><span class="summary-name">soundButtonTextColor</span> = <code title="QColor(251, 247, 247)">QColor(251, 247, 247)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#recorderButtonStylesheet" class="summary-name">recorderButtonStylesheet</a> = <code title="'QPushButton {background-color: '+ recorderButtonBGColor.name()+ '; co\
+lor: '+ recorderButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LA\
+BEL_FONT_SIZE)+ 'px'+ '}'">'QPushButton {background-color: '+ <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#recorderButtonDisabledStylesheet" class="summary-name">recorderButtonDisabledStylesheet</a> = <code title="'QPushButton {background-color: '+ recorderButtonDisabledBGColor.name(\
+)+ '; color: '+ recorderButtonTextColor.name()+ '; font-size: '+ str(B\
+UTTON_LABEL_FONT_SIZE)+ 'px'+ '}'">'QPushButton {background-co<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#programButtonStylesheet" class="summary-name">programButtonStylesheet</a> = <code title="'QPushButton {background-color: '+ programButtonBGColor.name()+ '; col\
+or: '+ programButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABE\
+L_FONT_SIZE)+ 'px'+ '}'">'QPushButton {background-color: '+ p<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#programButtonModeTransitionStylesheet" class="summary-name">programButtonModeTransitionStylesheet</a> = <code title="'QPushButton {background-color: '+ editFieldBGColor.name()+ '; color: \
+'+ programButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABEL_FO\
+NT_SIZE)+ 'px'+ '}'">'QPushButton {backgrou<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#soundButtonStylesheet" class="summary-name">soundButtonStylesheet</a> = <code title="'QPushButton {background-color: '+ soundButtonBGColor.name()+ '; color\
+: '+ soundButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABEL_FO\
+NT_SIZE)+ 'px'+ '}'">'QPushButton {background-color: '+ sou<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="playOnceRepeatButtonBGColor"></a><span class="summary-name">playOnceRepeatButtonBGColor</span> = <code title="QColor(121, 229, 230)">QColor(121, 229, 230)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="voicesButtonBGColor"></a><span class="summary-name">voicesButtonBGColor</span> = <code title="QColor(97, 164, 165)">QColor(97, 164, 165)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#playOnceRepeatButtonStylesheet" class="summary-name">playOnceRepeatButtonStylesheet</a> = <code title="'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s\
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo\
+r.name()">'font-size: '+ str(RADIO_BUTT<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#playRepeatSpinboxStylesheet" class="summary-name">playRepeatSpinboxStylesheet</a> = <code title="'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s\
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo\
+r.name()">'font-size: '+ str(RADIO_BUTTON_<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="speakeasy.speakeasy_ui.SpeakEasyGUI-class.html#voiceButtonStylesheet" class="summary-name">voiceButtonStylesheet</a> = <code title="'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s\
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo\
+r.name()">'font-size: '+ str(RADIO_BUTTON_LABEL_<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="hideButtonSignal"></a><span class="summary-name">hideButtonSignal</span> = <code title="pyqtSignal(QPushButton)">pyqtSignal(QPushButton)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="showButtonSignal"></a><span class="summary-name">showButtonSignal</span> = <code title="pyqtSignal(QPushButton)">pyqtSignal(QPushButton)</code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="addTxtInputFld"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addTxtInputFld</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.addTxtInputFld">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates text input field label and text field in a horizontal box 
+  layout. Adds that hbox layout to the passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.speechInputFld</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field <code>hbox</code> is 
+          to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addOnceOrRepeat_And_VoiceRadioButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addOnceOrRepeat_And_VoiceRadioButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.addOnceOrRepeat_And_VoiceRadioButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates radio buttons for selecting whether a sound is to play once, 
+  or repeatedly until stopped. Also adds radio buttons for selecting 
+  voices. Places all in a horizontal box layout. Adds that hbox layout to 
+  the passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.onceOrRepeatDict</code>
+    </li>
+    <li>
+      <code>self.voicesRadioButtonsDict</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field <code>hbox</code> is 
+          to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildTapeRecorderButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildTapeRecorderButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildTapeRecorderButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates tape recorder buttons (Play Text, Stop,etc.). Places all in a 
+  row, though the layout is a QGridLayout. Adds QGridLayout to the 
+  passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.recorderDict</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field 
+          <code>QGridlayout</code> is to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildProgramButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildProgramButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildProgramButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates grid of buttons for saving sounds. Adds the resulting 
+  QGridLayout to the passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.programButtonDict</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field 
+          <code>QGridlayout</code> is to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildSoundButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildSoundButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildSoundButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates grid of buttons for playing canned sounds. Adds the resulting 
+  QGridLayout to the passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.soundButtonDict</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field 
+          <code>QGridlayout</code> is to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildConvenienceButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildConvenienceButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">layout</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildConvenienceButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates buttons meant for accessibility convenience. Example: Paste. 
+  Places all in a row, though the layout is a QGridLayout. Adds QGridLayout
+  to the passed-in layout.</p>
+  <p>Sets instance variables:</p>
+  <ol start="1">
+    <li>
+      <code>self.convenienceButtonDict</code>
+    </li>
+  </ol>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>layout</code></strong> (QLayout) - Layout object to which the label/txt-field 
+          <code>QGridlayout</code> is to be added.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildRadioButtons"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildRadioButtons</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">labelTextArray</span>,
+        <span class="sig-arg">orientation</span>,
+        <span class="sig-arg">alignment</span>,
+        <span class="sig-arg">activeButtons</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">behavior</span>=<span class="sig-default">CheckboxGroupBehavior.RADIO_BUTTONS</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildRadioButtons">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>labelTextArray</code></strong> ([string]) - Names of buttons</li>
+        <li><strong class="pname"><code>orientation</code></strong> (Orientation) - Whether to arrange the buttons vertically or horizontally.</li>
+        <li><strong class="pname"><code>alignment</code></strong> (Alignment) - whether buttons should be aligned Left/Center/Right for 
+          horizontal, Top/Center/Bottom for vertical:/c</li>
+        <li><strong class="pname"><code>activeButtons</code></strong> ([string]) - Name of the buttons that is to be checked initially. Or None.</li>
+        <li><strong class="pname"><code>behavior</code></strong> (CheckboxGroupBehavior @return
+          <ol start="1">
+            <li>
+              The button group that contains the related buttons. Caller: 
+              ensure that this object does not go out of scope.
+            </li>
+            <li>
+              The button layout, which callers will need to add to their 
+              own layouts.
+            </li>
+            <li>
+              and a dictionary mapping button names to button objects that 
+              were created within this method. This dict is needed by the 
+              controller.
+            </li>
+          </ol>
+          <p>@rtype (QButtonGroup, QLayout, 
+          dict&lt;string,QRadioButton&gt;).</p>) - Indicates whether the button group is to behave like Radio 
+          Buttons, or like Checkboxes.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="buildButtonGrid"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">buildButtonGrid</span>(<span class="sig-arg">labelTextArray</span>,
+        <span class="sig-arg">numColumns</span>)</span>
+    <br /><em class="fname">Static Method</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.buildButtonGrid">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Creates a grid of QPushButton widgets. They will be</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>labelTextArray</code></strong> ([string]) - Button labels.</li>
+        <li><strong class="pname"><code>numColumns</code></strong> (int) - The desired width of the button grid.</li>
+    </ul></dd>
+    <dt>Returns: QGridLayout</dt>
+        <dd>1. a grid layout with the button objects inside.
+          <ol start="2">
+            <li>
+              a dictionary mapping button labels to button objects.
+            </li>
+          </ol></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getNewButtonLabel"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getNewButtonLabel</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.getNewButtonLabel">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Requests a new button label from the user. Returns None if user 
+  canceled out, or a string with the new button label.</p>
+  <dl class="fields">
+    <dt>Returns: {None | string}</dt>
+        <dd>None if user canceled, else string from input field.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="activeVoice"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">activeVoice</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.activeVoice">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return the official name of the voice that is currently checked in the
+  UI. This is the name that will be recognized by the underlying 
+  text-to-speech engine(s).</p>
+  <dl class="fields">
+    <dt>Returns: string</dt>
+        <dd>Name of voice as per the SpeakEasyGUI.voices dict.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="whereToPlay"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">whereToPlay</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.whereToPlay">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns which of the play location options is selected: Locally or 
+  Robot.</p>
+  <dl class="fields">
+    <dt>Returns: PlayLocation</dt>
+        <dd>Selection of where sound and text-to-speech output is to occur.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setWhereToPlay"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setWhereToPlay</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">playLocation</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.setWhereToPlay">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Set the option radio button that determines where sound is produced, 
+  locally, or at the robot. No action is taken. This method merely sets the
+  appropriate radio button.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>playLocation</code></strong> (PlayLocation) - PlayLocation.LOCALLY, or PlayLocation.ROBOT</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="blinkButton"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">blinkButton</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">buttonObj</span>,
+        <span class="sig-arg">turnOn</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="speakeasy.speakeasy_ui-pysrc.html#SpeakEasyGUI.blinkButton">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Used to make a program button blink in some way to indicate that it is
+  changing into programming mode. Since this method is triggered by a timer
+  thread, it cannot make any GUI changes. Instead, it sends a signal to 
+  have the GUI thread place the button into an alternative look. It then 
+  schedules a call to itself for a short time later. At that point it sends
+  a signal to the GUI thread to return the button to its usual look:</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>buttonObj</code></strong> (QPushButton) - The button to be blinked</li>
+        <li><strong class="pname"><code>turnOn</code></strong> (bool) - Indicates whether to turn the button back into its normal state, 
+          or whether to make it take on its alternate look.</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== -->
+<a name="section-ClassVariableDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variable Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariableDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="voices"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">voices</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{'VOICE_1': 'voice_kal_diphone', 'VOICE_2': 'David', 'VOICE_3': 'Amy',<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ 'VOICE_4': 'Shouty', 'VOICE_5': 'Whispery',}
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="interactionWidgets"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">interactionWidgets</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{'PLAY_ONCE': 'Play once', 'PLAY_REPEATEDLY': 'Play repeatedly', 'PLAY<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+_REPEATEDLY_PERIOD': 'Pause between plays', 'VOICE_1': 'Machine', 'VOI<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+CE_2': 'David', 'VOICE_3': 'Amy', 'VOICE_4': 'Shout', 'VOICE_5': 'Whis<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+per', 'PLAY_TEXT': 'Play Text', 'STOP': 'Stop', 'STOP_ALL': 'Stop All'<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+, 'SPEECH_1': 'Speech 1', 'SPEECH_2': 'Speech 2', 'SPEECH_3': 'Speech <span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+3', 'SPEECH_4': 'Speech 4', 'SPEECH_5': 'Speech 5', 'SPEECH_6': 'Speec<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+h 6', 'SPEECH_7': 'Speech 7', 'SPEECH_8': 'Speech 8', 'SPEECH_9': 'Spe<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ech 9', 'SPEECH_10': 'Speech 10', 'SPEECH_11': 'Speech 11', 'SPEECH_12<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="stylesheetAppBG"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">stylesheetAppBG</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QDialog {background-color: %s}' % veryLightBlue.name()
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="defaultStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">defaultStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QDialog {background-color: %s}' % veryLightBlue.name()
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="inputFldStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">inputFldStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'TextPanel {background-color: '+ editFieldBGColor.name()+ '; color: '+<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ editFieldTextColor.name()+ '; font-size: '+ str(EDIT_FIELD_TEXT_SIZE)<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
++ 'pt'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="recorderButtonStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">recorderButtonStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QPushButton {background-color: '+ recorderButtonBGColor.name()+ '; co<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+lor: '+ recorderButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LA<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+BEL_FONT_SIZE)+ 'px'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="recorderButtonDisabledStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">recorderButtonDisabledStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QPushButton {background-color: '+ recorderButtonDisabledBGColor.name(<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+)+ '; color: '+ recorderButtonTextColor.name()+ '; font-size: '+ str(B<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+UTTON_LABEL_FONT_SIZE)+ 'px'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="programButtonStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">programButtonStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QPushButton {background-color: '+ programButtonBGColor.name()+ '; col<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+or: '+ programButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABE<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+L_FONT_SIZE)+ 'px'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="programButtonModeTransitionStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">programButtonModeTransitionStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QPushButton {background-color: '+ editFieldBGColor.name()+ '; color: <span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+'+ programButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABEL_FO<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+NT_SIZE)+ 'px'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="soundButtonStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">soundButtonStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'QPushButton {background-color: '+ soundButtonBGColor.name()+ '; color<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+: '+ soundButtonTextColor.name()+ '; font-size: '+ str(BUTTON_LABEL_FO<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+NT_SIZE)+ 'px'+ '}'
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="playOnceRepeatButtonStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">playOnceRepeatButtonStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+r.name()
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="playRepeatSpinboxStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">playRepeatSpinboxStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+r.name()
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="voiceButtonStylesheet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">voiceButtonStylesheet</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+'font-size: '+ str(RADIO_BUTTON_LABEL_FONT_SIZE)+ 'px'+ '; color: '+ s<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+oundButtonTextColor.name()+ '; background-color: '+ voicesButtonBGColo<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+r.name()
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Jul  9 16:03:08 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

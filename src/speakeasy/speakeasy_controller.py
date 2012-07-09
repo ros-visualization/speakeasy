@@ -350,7 +350,8 @@ class SpeakEasyController(object):
             self.actionClear();
         elif sigNumStr == str(SpeakEasyController.REMOTE_PASTE_AND_SPEAK_SIG):
             self.actionPaste()
-            self.actionRecorderButtons(self.gui.interactionWidgets['PLAY_TEXT']);
+            playButton = self.gui.recorderButtonDict[self.gui.interactionWidgets['PLAY_TEXT']];  
+            self.actionRecorderButtons(playButton);
         
     def connectProgramButtonsToActions(self):
         for programButton in self.gui.programButtonDict.values():

@@ -22,3 +22,5 @@ src/speakeasy/tapper/QTCreatorFiles/tapeRecorder/tapeRecorder.pro.user
 sounds/music/.nfs00000000002f635b00000c29
 src/speakeasy/tapper/QTCreatorFiles/saySomething/saySomething.pro.user
 *.pro.user
+sounds/music/.nfs00000000032804a700000003
+src/utilities/speakeasy_utils.py.orig
