@@ -12,6 +12,7 @@ import roslib; roslib.load_manifest('speakeasy');
 import sys
 import os
 import signal
+import socket
 import time
 import subprocess
 import re
@@ -21,7 +22,8 @@ from functools import partial;
 from threading import Timer;
 
 from python_qt_binding import QtBindingHelper;
-from PyQt4.QtGui import QApplication
+from PyQt4.QtGui import QApplication;
+from PyQt4.QtCore import QSocketNotifier, QTimer, Slot;
 
 from utilities.speakeasy_utils import SpeakeasyUtils; 
 
@@ -164,12 +166,18 @@ class SpeakEasyController(object):
     # Constant for repeating play of sound/music/voice forever: 
     FOREVER = -1;
     
-    def __init__(self, dirpath, stand_alone=None):
+    # Unix signals for use with clearing text remotely, and with
+    # pasting and speech-triggering from remote:
+    REMOTE_CLEAR_TEXT_SIG = signal.SIGUSR1;
+    REMOTE_PASTE_AND_SPEAK_SIG = signal.SIGUSR2;
+    
+    def __init__(self, dirpath, unix_sig_notify_read_socket=None, stand_alone=None):
 
         if stand_alone is None:
             stand_alone = (DEFAULT_PLAY_LOCATION == PlayLocation.LOCALLY);
         originalStandAlone = stand_alone
-        
+
+        self.unix_sig_notify_read_socket = unix_sig_notify_read_socket;        
         self.stand_alone = stand_alone;
         self.gui = None;
         self.soundPlayer = None;
@@ -221,14 +229,17 @@ class SpeakEasyController(object):
         
         # No speech buttons programmed yet:
         self.programs = {};
-        self.connectWidgetsToActions()
-        self.installDefaultSpeechSet();
         
         # Accept SIGUSR1 and SIGUSR2 from other processes
         # to initiate PASTE and CLEAR operations, of the 
-        # text area, respectively:
-        signal.signal(signal.SIGUSR1, self.handleOS_SIGUSR1_2);
-        signal.signal(signal.SIGUSR2, self.handleOS_SIGUSR1_2);
+        # text area, respectively. Done via a socket from 
+        # outside the application, which we connect to a QSocketNofifier
+        # (see __main__ below):
+        self.unixSigNotifier = QSocketNotifier(self.unix_sig_notify_read_socket.fileno(), QSocketNotifier.Read)
+        
+        self.connectWidgetsToActions()
+        self.installDefaultSpeechSet();
+        
         # Let other processes know out pid: 
         self.publishPID();
 
@@ -317,11 +328,29 @@ class SpeakEasyController(object):
                 radioButton.clicked.connect(partial(self.actionWhereToPlayRadioButton, PlayLocation.LOCALLY));
         
         self.gui.replayPeriodSpinBox.valueChanged.connect(self.actionRepeatPeriodChanged);
+
         pasteButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['PASTE']];
         pasteButton.clicked.connect(self.actionPaste);
         clearButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['CLEAR']];
         clearButton.clicked.connect(self.actionClear);
         
+        # Remote control of clearing text field, and speaking what's in the
+        # text field from other applications. Handled via Unix signals SIGUSR1
+        # and SIGUSR2. These are caught in handleOS_SIGUSR1_2() in __main__. The
+        # handler writes the respective signal number to the socket, which triggerse
+        # a socket notifier. We connect that notifier to a handler:
+        self.unixSigNotifier.activated.connect(self.actionUnixSigReceived);
+    
+    @Slot(int)    
+    def actionUnixSigReceived(self, socket):
+        # Read the signal number (32 is the buff size):
+        (sigNumStr, socketAddr) = self.unix_sig_notify_read_socket.recvfrom(32);
+        sigNumStr = sigNumStr.strip();
+        if sigNumStr == str(SpeakEasyController.REMOTE_CLEAR_TEXT_SIG):
+            self.actionClear();
+        elif sigNumStr == str(SpeakEasyController.REMOTE_PASTE_AND_SPEAK_SIG):
+            self.actionPaste()
+            self.actionRecorderButtons(self.gui.interactionWidgets['PLAY_TEXT']);
         
     def connectProgramButtonsToActions(self):
         for programButton in self.gui.programButtonDict.values():
@@ -875,6 +904,15 @@ class SpeakEasyController(object):
         
 if __name__ == "__main__":
 
+    # Create socket pair to communicate between the
+    # Unix signal handler and the Qt event loop:
+    rsock, wsock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
+ 
+    # Handler for SIGUSR1 and SIGUSR2
+    def sigusr1_2_handler(signum, stack):
+       print 'Received Signal:', signum
+       wsock.send(str(signum) + "\n");
+    
     app = QApplication(sys.argv);
         
     # To find the sounds, we need the absolute directory
@@ -882,23 +920,35 @@ if __name__ == "__main__":
     scriptDir = os.path.dirname(os.path.abspath(sys.argv[0]));
     #speakeasyController = SpeakEasyController(scriptDir, stand_alone=False);
     #speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
+    
     if len(sys.argv) > 1:
         if sys.argv[1] == 'local':
             print "Starting SpeakEasy in local (i.e. non-ROS) mode."
-            speakeasyController = SpeakEasyController(scriptDir, stand_alone=True);
+            speakeasyController = SpeakEasyController(scriptDir, unix_sig_notify_read_socket=rsock, stand_alone=True);
         else:
             try:
                 rospy.loginfo("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
             except:
                 print("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
-            speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
+            speakeasyController = SpeakEasyController(scriptDir, unix_sig_notify_read_socket=rsock, stand_alone=None);
     else:
         try:
             rospy.loginfo("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
         except:
             print("Will attempt to start SpeakEasy in ROS mode. If fail, switch to local mode. Possibly a few seconds delay...");
-        speakeasyController = SpeakEasyController(scriptDir, stand_alone=None);
-            
+        speakeasyController = SpeakEasyController(scriptDir, unix_sig_notify_read_socket=rsock, stand_alone=None);
+
+    # Attach Unix signals USR1/USR2 to the sigusr1_2_handler().
+    # (These signals are separate from the Qt signals!):
+    signal.signal(signal.SIGUSR1, sigusr1_2_handler)
+    signal.signal(signal.SIGUSR2, sigusr1_2_handler)  
+    # Unix signals are delivered to Qt only when Qt 
+    # leaves its event loop. Force that to happen
+    # every half second: 
+    timer = QTimer()
+    timer.start(500)
+    timer.timeout.connect(lambda: None)   
+
     # Enter Qt application main loop
     sys.exit(app.exec_());
         
