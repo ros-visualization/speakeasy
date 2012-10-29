@@ -824,6 +824,8 @@ class SpeakEasyController(object):
         suffix = 1;
         newFileName = "buttonProgram1.xml";
         for filename in os.listdir(ButtonSavior.SPEECH_SET_DIR):
+            if filename == 'default.xml':
+                continue;
             if filename == newFileName:
                 suffix += 1;
                 newFileName = "buttonProgram" + str(suffix) + ".xml";

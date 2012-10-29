@@ -57,6 +57,8 @@ class TextToSpeechProvider(object):
         @type voiceName: string
         @param t2sEngineName: Name of text-to-speech engine to use.
         @type t2sEngineName: string
+        @param blockTillDone: If true, method will sleep till speech done, then method returns.
+        @type blockTillDone: boolean
         @raise ValueError: if unknown text-to-speech engine.
         @raise OSError: if failure in running the text-to-speech command in underlying shell 
         '''

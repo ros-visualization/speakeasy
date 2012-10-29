@@ -14,9 +14,6 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
-  <!-- Home link -->
-      <th>&nbsp;&nbsp;&nbsp;<a
-        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -58,11 +55,11 @@
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class TestRobotInteraction</h1><p class="nomargin-top"><span class="codelink"><a href="speakeasy.robot_interaction-pysrc.html#TestRobotInteraction">source&nbsp;code</a></span></p>
 <pre class="base-tree">
-       object --+    
-                |    
-unittest.TestCase --+
-                    |
-                   <strong class="uidshort">TestRobotInteraction</strong>
+            object --+    
+                     |    
+unittest.case.TestCase --+
+                         |
+                        <strong class="uidshort">TestRobotInteraction</strong>
 </pre>
 
 <hr />
@@ -85,7 +82,7 @@ unittest.TestCase --+
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.TestCase</code></b>:
+    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b>:
       <code><a href="exceptions.AssertionError-class.html">failureException</a></code>
       </p>
     </td>
@@ -240,7 +237,7 @@ unittest.TestCase --+
   </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.TestCase</code></b>:
+    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b>:
       <code>__call__</code>,
       <code>__eq__</code>,
       <code>__hash__</code>,
@@ -248,21 +245,47 @@ unittest.TestCase --+
       <code>__ne__</code>,
       <code>__repr__</code>,
       <code>__str__</code>,
+      <code>addCleanup</code>,
+      <code>addTypeEqualityFunc</code>,
       <code>assertAlmostEqual</code>,
       <code>assertAlmostEquals</code>,
+      <code>assertDictContainsSubset</code>,
+      <code>assertDictEqual</code>,
       <code>assertEqual</code>,
       <code>assertEquals</code>,
       <code>assertFalse</code>,
+      <code>assertGreater</code>,
+      <code>assertGreaterEqual</code>,
+      <code>assertIn</code>,
+      <code>assertIs</code>,
+      <code>assertIsInstance</code>,
+      <code>assertIsNone</code>,
+      <code>assertIsNot</code>,
+      <code>assertIsNotNone</code>,
+      <code>assertItemsEqual</code>,
+      <code>assertLess</code>,
+      <code>assertLessEqual</code>,
+      <code>assertListEqual</code>,
+      <code>assertMultiLineEqual</code>,
       <code>assertNotAlmostEqual</code>,
       <code>assertNotAlmostEquals</code>,
       <code>assertNotEqual</code>,
       <code>assertNotEquals</code>,
+      <code>assertNotIn</code>,
+      <code>assertNotIsInstance</code>,
+      <code>assertNotRegexpMatches</code>,
       <code>assertRaises</code>,
+      <code>assertRaisesRegexp</code>,
+      <code>assertRegexpMatches</code>,
+      <code>assertSequenceEqual</code>,
+      <code>assertSetEqual</code>,
       <code>assertTrue</code>,
+      <code>assertTupleEqual</code>,
       <code>assert_</code>,
       <code>countTestCases</code>,
       <code>debug</code>,
       <code>defaultTestResult</code>,
+      <code>doCleanups</code>,
       <code>fail</code>,
       <code>failIf</code>,
       <code>failIfAlmostEqual</code>,
@@ -273,10 +296,16 @@ unittest.TestCase --+
       <code>failUnlessRaises</code>,
       <code>id</code>,
       <code>run</code>,
-      <code>shortDescription</code>
+      <code>shortDescription</code>,
+      <code>skipTest</code>
       </p>
-    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.TestCase</code></b> (private):
-      <code>_exc_info</code>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b> (private):
+      <code>_addSkip</code>,
+      <code>_baseAssertEqual</code>,
+      <code>_deprecate</code>,
+      <code>_formatMessage</code>,
+      <code>_getAssertEqualityFunc</code>,
+      <code>_truncateMessage</code>
       </p></div>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
@@ -289,6 +318,62 @@ unittest.TestCase --+
       <code>__sizeof__</code>,
       <code>__subclasshook__</code>
       </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS METHODS ==================== -->
+<a name="section-ClassMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b>:
+      <code>setUpClass</code>,
+      <code>tearDownClass</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b>:
+      <code>longMessage</code>,
+      <code>maxDiff</code>
+      </p>
+    <div class="private">    <p class="indent-wrapped-lines"><b>Inherited from <code>unittest.case.TestCase</code></b> (private):
+      <code>_classSetupFailed</code>,
+      <code>_diffThreshold</code>
+      </p></div>
     </td>
   </tr>
 </table>
@@ -352,7 +437,7 @@ unittest.TestCase --+
   <p>Hook method for setting up the test fixture before exercising it.</p>
   <dl class="fields">
     <dt>Overrides:
-        unittest.TestCase.setUp
+        unittest.case.TestCase.setUp
         <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
@@ -375,7 +460,7 @@ unittest.TestCase --+
   <p>Hook method for deconstructing the test fixture after testing it.</p>
   <dl class="fields">
     <dt>Overrides:
-        unittest.TestCase.tearDown
+        unittest.case.TestCase.tearDown
         <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
@@ -386,9 +471,6 @@ unittest.TestCase --+
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
-  <!-- Home link -->
-      <th>&nbsp;&nbsp;&nbsp;<a
-        href="speakeasy-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -408,7 +490,7 @@ unittest.TestCase --+
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Mon Jul  9 16:03:08 2012
+    Generated by Epydoc 3.0.1 on Mon Oct  8 10:31:32 2012
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
