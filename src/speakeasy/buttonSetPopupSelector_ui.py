@@ -152,6 +152,9 @@ class ButtonSetPopupSelector(QDialog):
                 return;
             self.currentlyShowingSetIndex -= 1;
             self.buildButtonSet(self.getCurrentlyShowingSetLabels());
+            #***************
+            self.setButtonSetTitleInWindow(self.currentlyShowingSetIndex + 1);
+            #***************
             self.setNextPrevButtonsEnabledness();
             return;
         
@@ -180,6 +183,9 @@ class ButtonSetPopupSelector(QDialog):
             # Save that list of button names:
             self.shownLabelArrays.append(buttonLabelArray);
             self.currentlyShowingSetIndex += 1;
+            #**********
+            self.setButtonSetTitleInWindow(self.currentlyShowingSetIndex + 1);
+            #**********
             self.buildButtonSet(buttonLabelArray);
             self.setNextPrevButtonsEnabledness();
             return;
@@ -191,12 +197,16 @@ class ButtonSetPopupSelector(QDialog):
                 return;
             # No more button sets available from caller's iterator:
             self.currentlyShowingSetIndex += 1;
+            #**********
+            self.setButtonSetTitleInWindow(self.currentlyShowingSetIndex + 1);
+            #**********
         
         if self.currentlyShowingSetIndex >= len(self.shownLabelArrays):
-            # Neither are there more new sets, or are be going
+            # Neither are there more new sets, nor are we going
             # through the already shown sets going forward a second
             # time. So reverse direction to go backwards through the
-            # the already shown sets:     
+            # the already shown sets:
+            self.setButtonSetTitleInWindow(-1)
             self.flipNextPrevDirection();
             return;
 
@@ -204,6 +214,19 @@ class ButtonSetPopupSelector(QDialog):
         self.setNextPrevButtonsEnabledness();
 
         return;
+        
+    def setButtonSetTitleInWindow(self, buttonSetIndex):
+        '''
+        Given a button set number, displays a help text in the 'pick button set' dialog.
+        :param buttonSetIndex: number of button set (1-based by convention, but 0 is legal).
+                               set to -1 if wish to indicate absence of a relevant set. Will show
+                               as 'Showing button set --'.
+        :type buttonSetIndex: int
+        '''
+        if buttonSetIndex > -1:
+            self.setWindowTitle('Showing button set %d' % buttonSetIndex);
+        else:
+            self.setWindowTitle('Showing button set --');
         
     def flipNextPrevDirection(self):
         '''

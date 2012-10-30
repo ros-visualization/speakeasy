@@ -22,7 +22,7 @@ from functools import partial;
 from threading import Timer;
 
 from python_qt_binding import QtBindingHelper;
-from PyQt4.QtGui import QApplication;
+from PyQt4.QtGui import QApplication, QMessageBox, QPushButton;
 from PyQt4.QtCore import QSocketNotifier, QTimer, Slot;
 
 from utilities.speakeasy_utils import SpeakeasyUtils; 
@@ -43,6 +43,7 @@ from speakeasy_ui import standardLookHandler;
 from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
+from speakeasy import speakeasy_persistence
 
 #TODO: Delete:
 ## Try importing ROS related modules. Remember whether
@@ -155,7 +156,7 @@ class SpeakEasyController(object):
         2. Cepstral: Depends on your installation. Voices are individually licensed.       
     '''
     
-    VERSION = '1.0';
+    VERSION = '1.1';
     PID_PUBLICATION_FILE = "/tmp/speakeasyPID";
     
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
@@ -229,6 +230,8 @@ class SpeakEasyController(object):
         
         # No speech buttons programmed yet:
         self.programs = {};
+
+        self.currentButtonSetFile = os.path.join(speakeasy_persistence.ButtonSavior.SPEECH_SET_DIR,'default.xml');
         
         # Accept SIGUSR1 and SIGUSR2 from other processes
         # to initiate PASTE and CLEAR operations, of the 
@@ -692,13 +695,29 @@ class SpeakEasyController(object):
                 break;
         
         # Save this array of programs as XML:
-        fileName = self.getNewSpeechSetName();
-        ButtonSavior.saveToFile(buttonProgramArray, fileName, title=os.path.basename(fileName));
-        try:
-            shutil.copy(fileName, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"));
-        except:
-            rospy.logerr("Could not copy new program XML file to default.xml.");
-        self.dialogService.showInfoMessage("New speech set created.");
+        makeNewFile = self.dialogService.newButtonSetOrUpdateCurrent();
+        if makeNewFile == DialogService.ButtonSaveResult.CANCEL:
+            return;
+        if makeNewFile == DialogService.ButtonSaveResult.NEW_SET:
+            fileName = self.getNewSpeechSetName();
+            ButtonSavior.saveToFile(buttonProgramArray, fileName, title=os.path.basename(fileName));
+            self.currentButtonSetFile = fileName;
+            buttonSetNum = self.getSpeechSetFromSpeechFileName(fileName);
+            self.dialogService.showInfoMessage("New speech set %d created." % buttonSetNum);
+        elif makeNewFile == DialogService.ButtonSaveResult.UPDATE_CURRENT:
+            fileName = self.currentButtonSetFile;
+            ButtonSavior.saveToFile(buttonProgramArray, fileName, title=os.path.basename(fileName));
+            if os.path.basename(fileName) != 'default.xml':
+                buttonSetNum = self.getSpeechSetFromSpeechFileName(self.currentButtonSetFile);
+                self.dialogService.showInfoMessage("Saved to speech button set %d." % buttonSetNum);
+            else:
+                self.dialogService.showInfoMessage("Saved to speech button set 'default.xml'");
+
+        if os.path.basename(fileName) != 'default.xml':
+            try:
+                shutil.copy(fileName, os.path.join(ButtonSavior.SPEECH_SET_DIR, "default.xml"));
+            except:
+                rospy.logerr("Could not copy new program XML file to default.xml.");
 
     #----------------------------------
     # actionPickSpeechSet
@@ -718,6 +737,8 @@ class SpeakEasyController(object):
         # Fill the following array with arrays of ButtonProgram:    
         buttonProgramArrays = [];
         for xmlFileName in xmlFileNames:
+            if xmlFileName == 'default.xml':
+                continue;
             try:
                 (buttonSettingTitle, buttonProgram) = ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram); 
                 buttonProgramArrays.append(buttonProgram);
@@ -728,7 +749,8 @@ class SpeakEasyController(object):
             
         buttonSetSelector = ButtonSetPopupSelector(iter(buttonProgramArrays));
         buttonSetSelected = buttonSetSelector.exec_();
-        if buttonSetSelected != 1:
+        if buttonSetSelected == -1:
+            self.dialogService.showErrorMsg('No button sets have been defined yet.')
             return;
         
         # Get the selected ButtonProgram array:
@@ -832,6 +854,32 @@ class SpeakEasyController(object):
                 continue;
             break;
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
+    
+    #----------------------------------
+    # getSpeechSetFromSpeechFileName
+    #--------------
+    
+    def getSpeechSetFromSpeechFileName(self, filePath):
+        '''
+        Given a file path to a button set, return the button set's number.
+        We assume that the path is well formed, and all button sets are named
+        buttonProgramnnn.xml. If malformed path, shows error msg on screen, and 
+        returns None.
+        @param filePath: Path to xml file.
+        @type filePath: string
+        @return: Number encoded in file name (i.e. nnn)
+        @rtype: int
+        '''
+        
+        # Get something like: buttonSet2.xml:
+        fileName = os.path.basename(filePath).split('.')[0];
+        buttonSetNum = fileName[len('buttonProgram'):];
+        try:
+            return int(buttonSetNum)
+        except ValueError:
+            self.dialogService.showErrorMsg('Bad file path to button sets: %s' % filePath);
+            return None;
+    
     
     #----------------------------------
     # publishPID 

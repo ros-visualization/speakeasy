@@ -15,6 +15,8 @@ from PyQt4.QtCore import pyqtSignal
 #TODO: Play repeatedly.
 #TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
 
+NUM_SPEECH_PROGRAM_BUTTONS = 24;
+
 class Option:
     YES = True;
     NO  = False;
@@ -112,6 +114,12 @@ class TextPanel(QTextEdit):
 
 class DialogService(object):
 
+    class ButtonSaveResult:
+        UPDATE_CURRENT = 0;
+        NEW_SET = 1;
+        CANCEL = 2;
+        
+
     #----------------------------------
     # Initializer
     #--------------
@@ -151,6 +159,36 @@ class DialogService(object):
     def showInfoMessage(self, text):
         self.infoMsg.setText(text);
         self.infoMsg.exec_();        
+
+    #----------------------------------
+    # newButtonSetOrUpdateCurrent
+    #--------------
+    
+    def newButtonSetOrUpdateCurrent(self):
+        '''
+        Asks user whether saving of button set is to be 
+        to a new file, or an update to the current file.
+        Cancel is offered as well.
+        @return: ButtonSaveResult.NEW_SET, ButtonSaveResult.UPDATE_CURRENT, or ButtonSaveResult.CANCEL
+        @rtype: DialogService.ButtonSaveResult
+        '''
+        msgBox = QMessageBox()
+        msgBox.setStyleSheet(SpeakEasyGUI.stylesheetAppBG);
+        msgBox.setText('Create new button set, or update current set?')
+
+        updateCurrButton   = QPushButton('Update current')
+        msgBox.addButton(updateCurrButton, QMessageBox.NoRole)
+        
+        newSetButton   = QPushButton('Create new set')
+        msgBox.addButton(newSetButton, QMessageBox.YesRole)
+        
+        cancelButton = QPushButton('Cancel');
+        msgBox.addButton(cancelButton, QMessageBox.RejectRole)
+
+        value = msgBox.exec_();
+        return value;
+
+
 
 #----------------------------------------------------  SpeakEasyGUI Class ---------------------------
 
@@ -232,6 +270,18 @@ class SpeakEasyGUI(QMainWindow):
                           'SPEECH_10' : 'Speech 10',
                           'SPEECH_11' : 'Speech 11',
                           'SPEECH_12' : 'Speech 12',
+                          'SPEECH_13' : 'Speech 13',
+                          'SPEECH_14' : 'Speech 14',
+                          'SPEECH_15' : 'Speech 15',
+                          'SPEECH_16' : 'Speech 16',
+                          'SPEECH_17' : 'Speech 17',
+                          'SPEECH_18' : 'Speech 18',
+                          'SPEECH_19' : 'Speech 19',
+                          'SPEECH_20' : 'Speech 20',
+                          'SPEECH_21' : 'Speech 21',
+                          'SPEECH_22' : 'Speech 22',
+                          'SPEECH_23' : 'Speech 23',
+                          'SPEECH_24' : 'Speech 24',
                           
                           'SOUND_1' : 'Rooster',
                           'SOUND_2' : 'Drill',
@@ -246,7 +296,7 @@ class SpeakEasyGUI(QMainWindow):
                           'SOUND_11' : 'Seagulls',
                           'SOUND_12' : 'Lift',
                           
-                          'NEW_SPEECH_SET' : 'Create new speech set',
+                          'NEW_SPEECH_SET' : 'Save speech set',
                           'PICK_SPEECH_SET' : 'Pick different speech set',
                           
                           'PLAY_LOCALLY' : 'Play locally',
@@ -616,7 +666,7 @@ class SpeakEasyGUI(QMainWindow):
         '''
 
         buttonLabelArr = [];
-        for i in range(12):
+        for i in range(NUM_SPEECH_PROGRAM_BUTTONS):
             key = "SPEECH_" + str(i+1);
             buttonLabelArr.append(SpeakEasyGUI.interactionWidgets[key]);
                     
