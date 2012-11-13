@@ -21,9 +21,9 @@ import threading
 from functools import partial;
 from threading import Timer;
 
-from python_qt_binding import QtBindingHelper;
-from PyQt4.QtGui import QApplication, QMessageBox, QPushButton;
-from PyQt4.QtCore import QSocketNotifier, QTimer, Slot;
+from python_qt_binding.QtGui import QApplication, QMessageBox, QPushButton;
+from python_qt_binding.QtCore import QSocketNotifier, QTimer, Slot;
+
 
 from utilities.speakeasy_utils import SpeakeasyUtils; 
 

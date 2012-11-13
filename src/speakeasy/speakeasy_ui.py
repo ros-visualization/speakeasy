@@ -6,10 +6,9 @@ import rospy
 from functools import partial;
 from threading import Timer;
 
-from python_qt_binding import QtBindingHelper;
-from PyQt4.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from PyQt4.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox
-from PyQt4.QtCore import pyqtSignal
+from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
+from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox
+from python_qt_binding.QtCore import pyqtSignal
 
 
 #TODO: Play repeatedly.
@@ -241,6 +240,8 @@ class SpeakEasyGUI(QMainWindow):
               'VOICE_3': 'Amy',
               'VOICE_4': 'Shouty',
               'VOICE_5': 'Whispery',
+              'VOICE_6': 'Lawrence',
+              'VOICE_7': 'William'
               };
         
     # ---------------------- Names for Widgets ----------------------
@@ -254,6 +255,8 @@ class SpeakEasyGUI(QMainWindow):
                           'VOICE_3': 'Amy',
                           'VOICE_4': 'Shout',
                           'VOICE_5': 'Whisper',
+                          'VOICE_6': 'Lawrence',
+                          'VOICE_7': 'William',
                           'PLAY_TEXT': 'Play Text',
                           'STOP': 'Stop',
                           'STOP_ALL' : 'Stop All',
