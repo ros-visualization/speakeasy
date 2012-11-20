@@ -24,10 +24,10 @@ class MarkupManagement(object):
              Markup.VOLUME  : openMark +'V',
              Markup.EMPHASIS: openMark +'E'
              }
-    markupOpeningLen = len(marks[Markup.EMPHASIS]); # length of any markup opening
+    markupOpeningLen = max(map(len,marks.items())); # max length of markup openings
     splitter = re.compile(r'[,;\s!?:.<>]+');
     letterChecker = re.compile(r'[a-zA-Z]');
-    digitChecker  = re.compile(r'[0-1]');
+    digitChecker  = re.compile(r'[0-9]');
     
     @staticmethod
     def addMarkup(theStr, markupType, startPos, length=None, numWords=None, value=0):
@@ -75,8 +75,41 @@ class MarkupManagement(object):
         return retStr;    
     
     @staticmethod
-    def changeValue(str, startPos, newValue):
-        pass
+    def changeValue(theStr, startPos, newValue):
+        
+        # Find the opening markup to left of startPos:
+        openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
+        if openMarkPos is None:
+            return None;
+        
+        # Check that markup syntax is correct, and get pointer to the value within the string:
+        valueStartIndex = MarkupManagement.isProperMarkupOpening(theStr, openMarkPos);
+             
+        numMatch = re.match(r'\d+',theStr[valueStartIndex:]);
+        numStr = numMatch.group(0);
+        newStr = theStr[0:valueStartIndex] + str(newValue) + theStr[valueStartIndex+len(numStr):];
+        return newStr;
+    
+    @staticmethod
+    def pointerToEnclosingMarkup(theStr, cursorPos):
+        '''
+        Given a string and a cursor position into it, return the cursor position
+        of the nearest opening markup char.
+        @param theStr: string to examine.
+        @type theStr: String
+        @param cursorPos: starting position of the search.
+        @type cursorPos: int
+        @return: Cursor position resPos such that theStr[resPos] == MarkupManagement.openMark. None if no enclosing openMark is found.
+        @raise ValueError if passed-in cursorPos is out of range.: 
+        
+        '''
+        #  Already pointing to markup opening?
+        if theStr[cursorPos] == MarkupManagement.openMark:
+            return cursorPos;
+        for pos in reversed(range(cursorPos + 1)):
+            if theStr[pos] == MarkupManagement.openMark:
+                return pos;
+        return None
     
     @staticmethod
     def getLenFromNumWords(str, startPos, numWords):
@@ -96,6 +129,43 @@ class MarkupManagement(object):
         substrMatch = wordSearcher.match(str[startPos:]);
         return substrMatch.end();
 
+    @staticmethod
+    def isProperMarkupOpening(theStr, cursorPos=0):
+        '''
+        Return True if theStr contains a legal prosidy markup opening at cursorPos.
+        Else throw error with illuminating text.
+        @param theStr: string to check
+        @type theStr: String
+        @param cursorPos: Starting position
+        @type cursorPos: int
+        @return: Index to start of the markup opening's value, if cursorPos points to a legal markup opening within theStr.
+        @rtype: int
+        @raise ValueError: if anything wrong. 
+        '''
+        # Is the substring after cursorPos even long enough to hold a markup opening? 
+        if len(theStr) < MarkupManagement.markupOpeningLen:
+            raise ValueError("Given string ('%s') is shorter than minimum markup opening length, which is %d." % (theStr, 
+                                                                                                                  MarkupManagement.markupOpeningLen));
+        # Is there a legal markup at cursorPos?:
+        if theStr[cursorPos:cursorPos + MarkupManagement.markupOpeningLen] not in MarkupManagement.marks.values():
+            raise ValueError("Markup opening must be one of %s. But it was '%s'." % (str(MarkupManagement.marks.values()), 
+                                                                                         theStr[cursorPos:cursorPos+MarkupManagement.markupOpeningLen]));
+        # Next must be an integer (possibly after spaces or tabs:):
+        valueStart = None;
+        for pos in range(cursorPos + MarkupManagement.markupOpeningLen, len(theStr)):
+            if MarkupManagement.digitChecker.match(theStr[pos]) is not None:
+                valueStart = pos;
+                break;
+            elif theStr[pos] == ' ' or theStr[pos] == '\t':
+                # Allow spaces and tabs after markup opening and before the value: 
+                continue;
+            else:
+                # Found a non-digit, non-space char after the opening markup marker; illegal opening marker format:
+                break;
+        if valueStart is None:
+            raise ValueError("Bad prosidy markup: markup opening found, but no number follows after index %d in '%s'." % (cursorPos + MarkupManagement.markupOpeningLen,
+                                                                                                                          theStr))
+        return valueStart;
     
     @staticmethod
     def isLetter(oneChar):
@@ -186,6 +256,24 @@ class MarkupTest(unittest.TestCase):
 
         newStr = MarkupManagement.removeMarkup('<E10This little light', 0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from first word when closing mark missing. Got "%s"' % newStr);
+
+    def testChangeValue(self):
+        
+        tstStr = '<E10This> little light';
+        newStr = MarkupManagement.changeValue(tstStr, 0, 20); # String, pos within marked-up sequence, new value:
+        self.assertEqual(newStr, '<E20This> little light', 'Failed to change value with markup first in string. Got "%s".' % newStr); 
     
+        tstStr = 'This <E10little> light';
+        newStr = MarkupManagement.changeValue(tstStr, 9, 30);
+        self.assertEqual(newStr, 'This <E30little> light', 'Failed to change value with markup second in string. Got "%s".' % newStr); 
+
+        tstStr = '<E40This little light>';
+        newStr = MarkupManagement.changeValue(tstStr, 9, 50);
+        self.assertEqual(newStr, '<E50This little light>', 'Failed to change value with markup second in string. Got "%s".' % newStr); 
+
+
+    def isProperMarkupOpening(self):
+        MarkupManagement.isProperMarkupOpening("Good <E10Work", len('Good '));
+
 if __name__ == '__main__':
     unittest.main();
