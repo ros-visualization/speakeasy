@@ -5,32 +5,82 @@ import unittest;
 import re;
 
 
+
 class Markup:
-    SILENCE  = 0
-    RATE     = 1
-    PITCH    = 2
-    VOLUME   = 3
-    EMPHASIS = 4
+    SILENCE  = 'S' #0
+    RATE     = 'R' #1
+    PITCH    = 'P' #2
+    VOLUME   = 'V' #3
+    EMPHASIS = 'E' #4
 
 
 
 class MarkupManagement(object):
     
-    openMark  = '<';    
-    closeMark = '>';
+    openMark  = '[';    
+    closeMark = ']';
     marks = {Markup.SILENCE : openMark +'S',
              Markup.RATE    : openMark +'R',
              Markup.PITCH   : openMark +'P',
              Markup.VOLUME  : openMark +'V',
              Markup.EMPHASIS: openMark +'E'
              }
+    
+    emphasisVals = {0 : 'none',
+                    1 : 'moderate',
+                    2 : 'strong'
+                    };
+
+    units = {Markup.SILENCE : 'ms',
+             Markup.RATE    : '',
+             Markup.PITCH   : '%',
+             Markup.VOLUME  : '%',
+             Markup.EMPHASIS: ''
+             }
+
+
+    
+    ssmlOpener  = {
+                   Markup.SILENCE : '<break time=',
+				   Markup.RATE    : '<prosody rate=',
+				   Markup.PITCH   : '<prosody pitch=',
+				   Markup.VOLUME  : '<prosody volume=',
+				   Markup.EMPHASIS: '<emphasis level='
+    }
+    
+    ssmlCLoser  = {
+                   Markup.SILENCE : ' />',
+				   Markup.RATE    : '</prosody>',
+				   Markup.PITCH   : '</prosody>',
+				   Markup.VOLUME  : '</prosody>',
+				   Markup.EMPHASIS: '</emphasis>'
+    }
+
+
     markupOpeningLen = max(map(len,marks.items())); # max length of markup openings
     splitter = re.compile(r'[,;\s!?:.<>]+');
     letterChecker = re.compile(r'[a-zA-Z]');
-    digitChecker  = re.compile(r'[0-9]');
+    digitChecker  = re.compile(r'[-+]{0,1}[0-9]');
     
     @staticmethod
     def addMarkup(theStr, markupType, startPos, length=None, numWords=None, value=0):
+        '''
+        Given appropriate information, enclose parts of a string in a SpeakEasy speech markup.
+        Note that these are the less intrusive markups (an opening char plus a char identifying
+        the type of markup (speech rate, pitch, volume, level, silence length). 
+        @param theStr: phrase containing the substring to be marked.
+        @type theStr: String
+        @param markupType: indicator for what type of markup is intended
+        @type markupType: MarkupManagement.Marks
+        @param startPos: first string index to be inclosed in the mark
+        @type startPos: int
+        @param length: number of chars to be enclosed in the mark. (If used, do not use numWords)
+        @type length: int
+        @param numWords: number of words to be enclosed in the mark (If used, do not use length)
+        @type numWords: int
+        @param value: the magnitude of the mark.
+        @type value: {int | MarkupManagement.emphasisVals
+        '''
         
         if len(theStr) == 0:
             return theStr;
@@ -54,6 +104,15 @@ class MarkupManagement(object):
     
     @staticmethod
     def removeMarkup(theStr, startPos):
+        '''
+        Remove one SpeakEasy markup from a string.  
+        @param theStr: string containing markup to remove
+        @type theStr: String
+        @param startPos: position somewhere inside the marked-up text, or right on the opening marker. 
+        @type startPos: int
+        @return: a new string with the markup removed.
+        @rtype: String
+        '''
         markupStartPos = theStr[startPos:].find(MarkupManagement.openMark);
         if markupStartPos < 0:
             # No opening mark found:
@@ -73,9 +132,45 @@ class MarkupManagement(object):
         retStr += theStr[markupOpeningEnd:markupEndPos];
         retStr += '' if len(afterMarkup) == 0 else afterMarkup; 
         return retStr;    
+
+    @staticmethod
+    def getValue(theStr, startPos):
+        '''
+        Given a string and position within the string, Find the immediately enclosing
+        markup, and return its magnitude.
+        @param theStr: string containing the markup under consideration.
+        @type theStr: String
+        @param startPos: index into the string, including the opening char of the mark.
+        @type startPos: int
+        @return: magnitude value of the markup
+        @rtype: int
+        '''
+        # Find the opening markup to left of startPos:
+        openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
+        if openMarkPos is None:
+            return None;
+        
+        # Check that markup syntax is correct, and get pointer to the value within the string:
+        valueStartIndex = MarkupManagement.isProperMarkupOpening(theStr, openMarkPos);
+             
+        numMatch = re.match(r'[-+]{0,1}\d+',theStr[valueStartIndex:]);
+        numStr = numMatch.group(0);
+        return int(numStr);
+        
     
     @staticmethod
     def changeValue(theStr, startPos, newValue):
+        '''
+        Change magnitude part of an existing markup.
+        @param theStr: string containing the markup under consideration.
+        @type theStr: String
+        @param startPos: index into the marked-up text, including the opening marker.
+        @type startPos: int
+        @param newValue: new value for the markup
+        @type newValue: int
+        @return: a new string with the respective value modified.
+        @rtype: String.
+        '''
         
         # Find the opening markup to left of startPos:
         openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
@@ -85,7 +180,7 @@ class MarkupManagement(object):
         # Check that markup syntax is correct, and get pointer to the value within the string:
         valueStartIndex = MarkupManagement.isProperMarkupOpening(theStr, openMarkPos);
              
-        numMatch = re.match(r'\d+',theStr[valueStartIndex:]);
+        numMatch = re.match(r'[-+]{0,1}\d+',theStr[valueStartIndex:]);
         numStr = numMatch.group(0);
         newStr = theStr[0:valueStartIndex] + str(newValue) + theStr[valueStartIndex+len(numStr):];
         return newStr;
@@ -113,6 +208,18 @@ class MarkupManagement(object):
     
     @staticmethod
     def getLenFromNumWords(str, startPos, numWords):
+        '''
+        Given a string, a start position within the string, and a number of words,
+        return number of chars to end of start plus numWords words.
+        @param str: string to examine
+        @type str: String
+        @param startPos: start position for counting letters
+        @type startPos: int
+        @param numWords: number of words to include in the count
+        @type numWords: int
+        @return: number of chars between startPos and the end of the numWord's word.
+        @rtype: int
+        '''
         
         wordsPlusRest = str[startPos:];
         tokens = MarkupManagement.splitter.split(wordsPlusRest);
@@ -132,7 +239,7 @@ class MarkupManagement(object):
     @staticmethod
     def isProperMarkupOpening(theStr, cursorPos=0):
         '''
-        Return True if theStr contains a legal prosidy markup opening at cursorPos.
+        Return True if theStr contains a legal speech markup opening at cursorPos.
         Else throw error with illuminating text.
         @param theStr: string to check
         @type theStr: String
@@ -153,7 +260,7 @@ class MarkupManagement(object):
         # Next must be an integer (possibly after spaces or tabs:):
         valueStart = None;
         for pos in range(cursorPos + MarkupManagement.markupOpeningLen, len(theStr)):
-            if MarkupManagement.digitChecker.match(theStr[pos]) is not None:
+            if MarkupManagement.digitChecker.match(theStr[pos:]) is not None:
                 valueStart = pos;
                 break;
             elif theStr[pos] == ' ' or theStr[pos] == '\t':
@@ -178,6 +285,57 @@ class MarkupManagement(object):
                 return pos;
         # All digits:
         return None;
+
+    @staticmethod
+    def convertStringToSSML(theStr):
+        '''
+        Given a string with SpeakEasy markups, replace all SpeakEasy markups with official W3C SSML.
+        @param theStr: string containing the markup under consideration.
+        @type theStr: String
+        @return: new string with only SSML markup
+        @rtype: String.
+        '''
+        moreMarkups = True;
+        while moreMarkups:
+            moreMarkups = False;
+            for i,char in enumerate(theStr):
+                if char != MarkupManagement.openMark:
+                    continue;
+                # What type of markup? Volume? Pause? Pitch?...:
+                markupType = theStr[i+1];
+                # Value of markup:
+                valNum = MarkupManagement.getValue(theStr, i);
+                if markupType == Markup.RATE:
+                    val = valNum / 100.;
+                elif markupType == Markup.EMPHASIS:
+                    val = MarkupManagement.emphasisVals[valNum];
+                else:
+                    val = valNum;
+                units = MarkupManagement.units[markupType];
+                if markupType == Markup.SILENCE:
+                    newStr = theStr[0:i] +\
+                    MarkupManagement.ssmlOpener[markupType] +\
+                    "'" + str(val) + units + "'" +\
+                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(val)):]);
+                    theStr = newStr;
+                    moreMarkups = True
+                    break;
+                else:
+                    newStr = theStr[0:i] +\
+                    MarkupManagement.ssmlOpener[markupType] +\
+                    "'" + str(val) + units + "'" + '>' +\
+                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(valNum)):]);
+                    theStr = newStr;
+                    moreMarkups = True;
+                    break;
+        return newStr;
+        
+    @staticmethod
+    def restToSSML(markupType, theStrRest):
+        for i,char in enumerate(theStrRest):
+            if char == MarkupManagement.closeMark:
+                newStr = theStrRest[0:i] + MarkupManagement.ssmlCLoser[markupType] + theStrRest[i+1:];
+                return newStr;
         
 # ------------------------------------------
 
@@ -217,19 +375,34 @@ class MarkupTest(unittest.TestCase):
     
     def testMarkup(self):
         newStr = MarkupManagement.addMarkup(self.testStr, Markup.EMPHASIS, 0, numWords=1, value=10);
-        self.assertEqual(newStr, '<E10This> little light', 'Failed adding emphasis to first word. Result was "%s".' % newStr);
+        self.assertEqual(newStr,
+                         '%sE10This%s little light' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                         'Failed adding emphasis to first word. Result was "%s".' % newStr);
         
         newStr = MarkupManagement.addMarkup(self.testStr, Markup.EMPHASIS, 5, numWords=1, value=10);
-        self.assertEqual(newStr, 'This <E10little> light', 'Failed adding emphasis to second word. Result was "%s".' % newStr);
+        self.assertEqual(newStr,
+                         'This %sE10little%s light' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                          'Failed adding emphasis to second word. Result was "%s".' % newStr);
         
         newStr = MarkupManagement.addMarkup(self.testStr, Markup.EMPHASIS, 5, numWords=2, value=10);
-        self.assertEqual(newStr, 'This <E10little light>', 'Failed adding emphasis to second and third word. Result was "%s".' % newStr);
+        self.assertEqual(newStr,
+                         'This %sE10little light%s' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                         'Failed adding emphasis to second and third word. Result was "%s".' % newStr);
 
         newStr = MarkupManagement.addMarkup(self.testStr, Markup.EMPHASIS, 11, numWords=1, value=10);
-        self.assertEqual(newStr, 'This little <E10light>', 'Failed adding emphasis to last word. Result was "%s".' % newStr);
+        self.assertEqual(newStr,
+                         'This little %sE10light%s' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                         'Failed adding emphasis to last word. Result was "%s".' % newStr);
 
         newStr = MarkupManagement.addMarkup(self.testStr, Markup.EMPHASIS, 0, numWords=3, value=10);
-        self.assertEqual(newStr, '<E10This little light>', 'Failed adding emphasis to all words. Result was "%s".' % newStr);
+        self.assertEqual(newStr,
+                         '%sE10This little light%s' % (MarkupManagement.openMark,
+                                                        MarkupManagement.closeMark), 
+                         'Failed adding emphasis to all words. Result was "%s".' % newStr);
 
     def testZeroLenMarkedStr(self):
         pass
@@ -239,41 +412,139 @@ class MarkupTest(unittest.TestCase):
 
 
     def testRemoveMarkup(self):
-        newStr = MarkupManagement.removeMarkup('<E10This> little light', 0);
+        newStr = MarkupManagement.removeMarkup('%sE10This%s little light' % (MarkupManagement.openMark,
+                                                                             MarkupManagement.closeMark), 
+                                               0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from first word. Got "%s"' % newStr);
         
-        newStr = MarkupManagement.removeMarkup('<E10This little> light', 0);
+        newStr = MarkupManagement.removeMarkup('%sE10This little%s light' % (MarkupManagement.openMark,
+                                                                             MarkupManagement.closeMark), 
+                                               0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from first and second word. Got "%s"' % newStr);
         
-        newStr = MarkupManagement.removeMarkup('<E10This little light>', 0);
+        newStr = MarkupManagement.removeMarkup('%sE10This little light%s' % (MarkupManagement.openMark,
+                                                                             MarkupManagement.closeMark), 
+                                               0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from first, second and third word. Got "%s"' % newStr);
         
-        newStr = MarkupManagement.removeMarkup('This <E10little> light', 0);
+        newStr = MarkupManagement.removeMarkup('This %sE10little%s light' % (MarkupManagement.openMark,
+                                                                             MarkupManagement.closeMark), 
+                                               0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from second word. Got "%s"' % newStr);
 
         newStr = MarkupManagement.removeMarkup('This little light', 0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup when no markup present. Got "%s"' % newStr);
 
-        newStr = MarkupManagement.removeMarkup('<E10This little light', 0);
+        newStr = MarkupManagement.removeMarkup('%sE10This little light' % (MarkupManagement.openMark),
+                                               0);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from first word when closing mark missing. Got "%s"' % newStr);
 
     def testChangeValue(self):
         
-        tstStr = '<E10This> little light';
+        tstStr = '%sE10This%s little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark); 
         newStr = MarkupManagement.changeValue(tstStr, 0, 20); # String, pos within marked-up sequence, new value:
-        self.assertEqual(newStr, '<E20This> little light', 'Failed to change value with markup first in string. Got "%s".' % newStr); 
+        self.assertEqual(newStr, 
+                         '%sE20This%s little light' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                          'Failed to change value with markup first in string. Got "%s".' % newStr); 
     
-        tstStr = 'This <E10little> light';
+        tstStr = 'This %sE10little%s light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark); 
         newStr = MarkupManagement.changeValue(tstStr, 9, 30);
-        self.assertEqual(newStr, 'This <E30little> light', 'Failed to change value with markup second in string. Got "%s".' % newStr); 
+        self.assertEqual(newStr,
+                         'This %sE30little%s light' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                         'Failed to change value with markup second in string. Got "%s".' % newStr); 
 
-        tstStr = '<E40This little light>';
+        tstStr = '%sE40This little light%s' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
         newStr = MarkupManagement.changeValue(tstStr, 9, 50);
-        self.assertEqual(newStr, '<E50This little light>', 'Failed to change value with markup second in string. Got "%s".' % newStr); 
+        self.assertEqual(newStr,
+                         '%sE50This little light%s' % (MarkupManagement.openMark,
+                                                       MarkupManagement.closeMark), 
+                         'Failed to change value with markup second in string. Got "%s".' % newStr); 
+
+    def testConvertStringToSSMLSingleMarkups(self):
+
+        # Silence
+        tstStr = '%sS10%sThis little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<break time='10ms' />This little light", "Failed Silence at start of sentence. Got '%s'" % newStr);
+        
+        tstStr = 'This little %sS10%s light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "This little <break time='10ms' /> light", "Failed Silence in middle of sentence. Got '%s'" % newStr);
+        
+        # Rate
+        tstStr = '%sR10 This%s little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<prosody rate='0.1'> This</prosody> little light");
+    
+        tstStr = 'This little %sR10 light%s' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "This little <prosody rate='0.1'> light</prosody>");
+        
+        # Pitch
+        tstStr = '%sP10 This%s little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<prosody pitch='10%'> This</prosody> little light");
+        
+        tstStr = 'This %sP10little light%s' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "This <prosody pitch='10%'>little light</prosody>");
+
+        # Volume
+        tstStr = '%sV10 This%s little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<prosody volume='10%'> This</prosody> little light");
+
+        tstStr = '%sV-10 This%s little light' % (MarkupManagement.openMark,
+                                               MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<prosody volume='-10%'> This</prosody> little light");
+
+        # Emphasis
+        tstStr = '%sE0 This%s little light' % (MarkupManagement.openMark,
+                                              MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<emphasis level='none'> This</emphasis> little light");
+
+        tstStr = '%sE0This little light%s' % (MarkupManagement.openMark,
+                                              MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<emphasis level='none'>This little light</emphasis>");
+        
+    def testConvertStringToSSMLMultipleMarkups(self):
+        
+        # No nesting of markups:
+        tstStr = '%sE0 This%s little %sV60light%s' % (MarkupManagement.openMark,
+                                                      MarkupManagement.closeMark,
+                                                      MarkupManagement.openMark,
+                                                      MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<emphasis level='none'> This</emphasis> little <prosody volume='60%'>light</prosody>");
+    
+        # Nested markup:
+        tstStr = '%sV40This %sP60little%s light%s' % (MarkupManagement.openMark,
+                                                      MarkupManagement.openMark,
+                                                      MarkupManagement.closeMark,
+                                                      MarkupManagement.closeMark);
+        newStr = MarkupManagement.convertStringToSSML(tstStr);
+        self.assertEqual(newStr, "<prosody volume='40%'>This <prosody pitch='60%'>little</prosody> light</prosody>");
+        
+    
+    def isProperMarkupOpening():
+        MarkupManagement.isProperMarkupOpening("Good %sE10Work" % MarkupManagement.openMark, len('Good '));
 
 
-    def isProperMarkupOpening(self):
-        MarkupManagement.isProperMarkupOpening("Good <E10Work", len('Good '));
 
 if __name__ == '__main__':
     unittest.main();
