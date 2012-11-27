@@ -1,0 +1,171 @@
+<buttonProgramSet>
+  <buttonProgramSetTitle>default.xml</buttonProgramSetTitle>
+  <buttonSetting>
+    <label>Drink</label>
+    <text>Please get me something to drink.</text>
+    <voice>David</voice>
+    <engine>cepstral</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Eat</label>
+    <text>Please get me something to eat.</text>
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 3</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 4</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 5</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 6</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 7</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 8</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 9</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 10</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 11</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 12</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 13</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 14</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 15</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 16</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 17</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 18</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 19</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 20</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 21</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 22</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>Speech 23</label>
+    <text />
+    <voice>Male</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+  <buttonSetting>
+    <label>default</label>
+    <text>Default</text>
+    <voice>voice_kal_diphone</voice>
+    <engine>festival</engine>
+    <playOnce>True</playOnce>
+  </buttonSetting>
+</buttonProgramSet>

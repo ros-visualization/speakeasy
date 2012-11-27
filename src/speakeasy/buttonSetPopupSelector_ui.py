@@ -218,10 +218,9 @@ class ButtonSetPopupSelector(QDialog):
     def setButtonSetTitleInWindow(self, buttonSetIndex):
         '''
         Given a button set number, displays a help text in the 'pick button set' dialog.
-        :param buttonSetIndex: number of button set (1-based by convention, but 0 is legal).
-                               set to -1 if wish to indicate absence of a relevant set. Will show
-                               as 'Showing button set --'.
-        :type buttonSetIndex: int
+        @param buttonSetIndex: number of button set (1-based by convention, but 0 is legal).
+        set to -1 if wish to indicate absence of a relevant set. Will show as 'Showing button set --'.
+        @type buttonSetIndex: int
         '''
         if buttonSetIndex > -1:
             self.setWindowTitle('Showing button set %d' % buttonSetIndex);

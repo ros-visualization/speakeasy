@@ -79,7 +79,7 @@ class MarkupManagement(object):
         @param numWords: number of words to be enclosed in the mark (If used, do not use length)
         @type numWords: int
         @param value: the magnitude of the mark.
-        @type value: {int | MarkupManagement.emphasisVals
+        @type value: {int | MarkupManagement.emphasisVals}
         '''
         
         if len(theStr) == 0:
@@ -195,7 +195,7 @@ class MarkupManagement(object):
         @param cursorPos: starting position of the search.
         @type cursorPos: int
         @return: Cursor position resPos such that theStr[resPos] == MarkupManagement.openMark. None if no enclosing openMark is found.
-        @raise ValueError if passed-in cursorPos is out of range.: 
+        @raise ValueError: if passed-in cursorPos is out of range.: 
         
         '''
         #  Already pointing to markup opening?
