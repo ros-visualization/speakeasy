@@ -12,8 +12,17 @@ class Markup:
     PITCH    = 'P' #2
     VOLUME   = 'V' #3
     EMPHASIS = 'E' #4
-
-
+    
+    @staticmethod
+    def baseType():
+        '''
+        Needed to enable signals with Markup as a parameter.
+        PyQt signals cannot accommodate parameter types that
+        do not have a C++ equivalent. As a compromise this
+        method provides that base type without breaking
+        encapsulation tooooo badly.
+        '''
+        return type(Markup.SILENCE);
 
 class MarkupManagement(object):
     
@@ -103,33 +112,41 @@ class MarkupManagement(object):
         return newStr; 
     
     @staticmethod
-    def removeMarkup(theStr, startPos):
+    def removeMarkup(theStr, curPos):
         '''
         Remove one SpeakEasy markup from a string.  
         @param theStr: string containing markup to remove
         @type theStr: String
-        @param startPos: position somewhere inside the marked-up text, or right on the opening marker. 
-        @type startPos: int
-        @return: a new string with the markup removed.
+        @param curPos: position somewhere inside the marked-up text, or right on the opening marker. 
+        @type curPos: int
+        @return: a new string with the markup removed. If no enclosing markup found, returns original string.
         @rtype: String
         '''
-        markupStartPos = theStr[startPos:].find(MarkupManagement.openMark);
-        if markupStartPos < 0:
+        markupStartPos = MarkupManagement.pointerToEnclosingMarkup(theStr,curPos);
+        if markupStartPos is None :
             # No opening mark found:
             return theStr;
+        # Get position of first char after the opening markup:
         markupOpeningEnd = markupStartPos +\
                            MarkupManagement.markupOpeningLen +\
                            MarkupManagement.findFirstNonDigit(theStr[MarkupManagement.markupOpeningLen + markupStartPos:]);
-        beforeMarkup = theStr[0:startPos+markupStartPos];
-        markupEndPos = theStr[startPos:].find(MarkupManagement.closeMark);
+        # Get all string parts up to the start of the markup:
+        beforeMarkup = theStr[0:markupStartPos];
+        # Get position of the closing mark, starting the search from
+        # within the markup:
+        markupEndPos = theStr.find(MarkupManagement.closeMark, markupOpeningEnd);
+        # Init return string with everything up to the markup opening:
         retStr = '' if len(beforeMarkup) == 0 else beforeMarkup;
         if markupEndPos < 0:
-            # Found open of markup, but not the close:
+            # Found open of markup, but not the close; add remainder of string past opening markup:
             retStr += theStr[markupOpeningEnd:];
             return retStr;
-        # Have opening and closing of markup:
+        # Have opening and closing of markup. Gather the string part
+        # after the closing mark: 
         afterMarkup = theStr[markupEndPos+len(MarkupManagement.closeMark):];
+        # Add str fragment between the end of the opening markup and the closing mark: 
         retStr += theStr[markupOpeningEnd:markupEndPos];
+        #***retStr += '' if len(afterMarkup) == 0 else afterMarkup; 
         retStr += '' if len(afterMarkup) == 0 else afterMarkup; 
         return retStr;    
 
@@ -429,7 +446,7 @@ class MarkupTest(unittest.TestCase):
         
         newStr = MarkupManagement.removeMarkup('This %sE10little%s light' % (MarkupManagement.openMark,
                                                                              MarkupManagement.closeMark), 
-                                               0);
+                                               9);
         self.assertEqual(newStr, self.testStr, 'Failed to remove markup from second word. Got "%s"' % newStr);
 
         newStr = MarkupManagement.removeMarkup('This little light', 0);
