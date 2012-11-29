@@ -13,7 +13,7 @@ from functools import partial;
 import python_qt_binding;
 from python_qt_binding import QtGui
 from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox, QApplication
+from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QIntValidator, QApplication
 from python_qt_binding.QtCore import pyqtSignal, pyqtSlot
 
 from pythonScriptDialog import DialogService;
@@ -22,11 +22,16 @@ from pythonScriptDialog import DialogService;
 from speakeasy_ui import TextPanel;
 from markupManagement import Markup, MarkupManagement;
 
-#from accessibleSlider import 
+# Maximum silence duration one can insert:
+MAX_SILENCE = 10000;
+
+class SliderMode:
+    PERCENTAGES = 0
+    TIME = 1
 
 class MarkupManagementUI(QDialog):
     
-    markupRequestSig = pyqtSignal(Markup.baseType());
+    markupRequestSig = pyqtSignal(Markup.baseType(), str);
     
     def __init__(self, textPanel=None):
         super(MarkupManagementUI,self).__init__();
@@ -50,30 +55,87 @@ class MarkupManagementUI(QDialog):
         self.rateRadioBt    = self.ui.rateRadioButton;
         self.pitchRadioBt   = self.ui.pitchRadioButton;
         self.volumeRadioBt  = self.ui.volumeRadioButton;
-        self.emphasisRadioBt= self.ui.emphasisRadioButton;
+        self.emphasisNoneRadioBt= self.ui.emphasisNoneValRadioButton;
+        self.emphasisModerateRadioBt= self.ui.emphasisModerateValRadioButton;
+        self.emphasisStrongRadioBt= self.ui.emphasisStrongValRadioButton;
         self.valueSlider    = self.ui.markupValSlider;
-        self.emphasisBox    = self.ui.emphasisValuesGroupBox;
-        self.emphasisBox.hide();
+        self.valueReadout   = self.ui.valueReadoutLineEdit;
+        self.valueReadout.setValidator(QIntValidator());
+        self.valueReadout.setText(str(self.valueSlider.value()));
+        self.sliderMinLabel = self.ui.sliderMinLabel;
+        self.sliderMaxLabel = self.ui.sliderMaxLabel;
+        self.sliderExplanationLabel = self.ui.sliderExplanationLabel;
         
+        # Saved slider percentage value: 
+        self.prevPercentVal = 0;
+        # Saved slider msecs value:
+        self.prevTimeVal = 0;
+        # Remember whether most recently shown slider was percentages or time:
+        self.prevSliderMode = SliderMode.PERCENTAGES;
+        # Initialize UI related states that are changed in response to clicks:
+        self.currMarkupType = Markup.PITCH;
+        self.currentEmph = None
+        self.setUIToPercentages();
         
     def connectWidgets(self):
-        self.deleteRadioBt.clicked.connect(partial(self.speechModTypeAction, 'delete'));
-        self.silenceRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.SILENCE));
-        self.rateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.RATE));
-        self.pitchRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.PITCH));
-        self.volumeRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.VOLUME));
-        self.emphasisRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS));
+        self.deleteRadioBt.clicked.connect(partial(self.speechModTypeAction, 'delete', emph='none'));
+        self.silenceRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.SILENCE, emph='none'));
+        self.rateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.RATE, emph='none'));
+        self.pitchRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.PITCH, emph='none'));
+        self.volumeRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.VOLUME, emph='none'));
+        self.emphasisNoneRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='none'));
+        self.emphasisModerateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='moderate'));
+        self.emphasisStrongRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='strong'));
+        
+        self.valueSlider.valueChanged.connect(self.valueSliderChangedAction);
+        self.valueSlider.sliderReleased.connect(self.valueSliderManualSlideFinishedAction)
+        self.valueReadout.editingFinished.connect(self.valueReadoutEditingFinishedAction);
         
         self.markupRequestSig.connect(self.addOrRemoveMarkup);
     
-    def speechModTypeAction(self, markupType):
-        #self.addOrRemoveMarkup(markupType);
-        self.markupRequestSig.emit(markupType);
+    def speechModTypeAction(self, markupType, emph='none'):
+        self.markupRequestSig.emit(markupType, emph);
            
-    @pyqtSlot(Markup.baseType())
-    def addOrRemoveMarkup(self, markupType):
-        (txtStr, cursorPos, selStart, selEnd) = self.getTextAndSelection();
+    def valueSliderChangedAction(self, newVal):
+        self.valueReadout.setText(str(newVal));
+    
+    def valueSliderManualSlideFinishedAction(self):
+        # Readout box is already updated. Just need to remember
+        # the new value:
+        newSliderVal = self.valueSlider.value();
+        if self.prevSliderMode == SliderMode.PERCENTAGES:
+            self.prevPercentVal = newSliderVal;
+        elif self.prevSliderMode == SliderMode.TIME:
+            self.prevTimeVal = newSliderVal;
+        else:
+            raise ValueError('self.prevSliderMode not initialized.');
         
+    def valueReadoutEditingFinishedAction(self):
+        # Readout entry is already validated to be an integer
+        # of the proper range:
+        readoutValue = int(self.valueReadout.text());
+        self.valueSlider.setValue(readoutValue);
+        if self.prevSliderMode == SliderMode.PERCENTAGES:
+            self.prevPercentVal = readoutValue;
+        elif self.prevSliderMode == SliderMode.TIME:
+            self.prevTimeVal = readoutValue;
+        
+    
+    @pyqtSlot(Markup.baseType(), str)
+    def addOrRemoveMarkup(self, markupType, emph):
+        self.currMarkupType = markupType;
+        self.currentEmph    = emph;
+        if markupType == Markup.EMPHASIS:
+            self.setUIToEmphasis();
+        elif markupType == Markup.PITCH or\
+             markupType == Markup.RATE or\
+             markupType == Markup.VOLUME:
+            self.setUIToPercentages();
+        elif markupType == Markup.SILENCE:
+            self.setUIToTime();
+    
+    def executeMarkupAction(self):
+        (txtStr, cursorPos, selStart, selEnd) = self.getTextAndSelection();
         # Are we to delete enclosing markup?
         if markupType == 'delete':
             newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
@@ -84,11 +146,51 @@ class MarkupManagementUI(QDialog):
             self.dialogService.showErrorMsg('Select a piece of text that you wish to modulate.');
             return;
         selLen = selEnd - selStart;
-        value  = self.valueSlider.value();
+        if markupType != Markup.EMPHASIS:
+            value  = self.valueSlider.value();
+        else:
+            value = MarkupManagement.emphasisCodes[emph];
         newStr = self.markupManager.addMarkup(txtStr, markupType, selStart, length=selLen, value=value);
         self.textPanel.setText(newStr);
         
-      
+    def setUIToEmphasis(self):
+        self.hideSlider();
+    
+    def setUIToTime(self):
+        self.valueSlider.setValue(self.prevTimeVal);
+#        self.sliderMaxLabel.setText(str(MAX_SILENCE));
+#        self.sliderMinLabel.setText = str(0);
+        self.valueSlider.setMinimum(0);
+        self.valueSlider.setMaximum(MAX_SILENCE);
+        self.sliderExplanationLabel.setText('Time(msec)')
+        self.valueReadout.validator().setRange(0,MAX_SILENCE);
+        self.showSlider(SliderMode.TIME);
+    
+    def setUIToPercentages(self):
+        self.valueSlider.setValue(self.prevPercentVal);
+#        self.sliderMaxLabel.setText('100%');
+#        self.sliderMinLabel.setText('-100%');
+        self.sliderExplanationLabel.setText('Magnitude(%)')
+        self.valueReadout.validator().setRange(-100,100);
+        self.showSlider(SliderMode.PERCENTAGES);
+        
+    def hideSlider(self):
+        self.valueSlider.hide();
+        self.sliderMinLabel.hide();
+        self.sliderMaxLabel.hide();
+        self.sliderExplanationLabel.hide();
+        self.valueReadout.hide();
+
+    def showSlider(self, sliderMode):
+#        if sliderMode == SliderMode.PERCENTAGES:
+#            self.setUIToPercentages();
+        self.sliderMinLabel.show();
+        self.sliderMaxLabel.show();
+        self.valueSlider.show();
+        self.sliderExplanationLabel.show();
+        self.prevSliderMode = sliderMode;
+        self.valueReadout.show();
+                  
     def getTextAndSelection(self):
         '''
         Returns a four-tuple string, cursor position, start index, and end index. The string is a copy of

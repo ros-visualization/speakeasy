@@ -35,9 +35,14 @@ class MarkupManagement(object):
              Markup.EMPHASIS: openMark +'E'
              }
     
-    emphasisVals = {0 : 'none',
+    emphasisStrs = {0 : 'none',
                     1 : 'moderate',
                     2 : 'strong'
+                    };
+
+    emphasisCodes = {'none' : 0,
+                     'moderate' : 1, 
+                     'strong' : 2 
                     };
 
     units = {Markup.SILENCE : 'ms',
@@ -88,7 +93,7 @@ class MarkupManagement(object):
         @param numWords: number of words to be enclosed in the mark (If used, do not use length)
         @type numWords: int
         @param value: the magnitude of the mark.
-        @type value: {int | MarkupManagement.emphasisVals}
+        @type value: {int | MarkupManagement.emphasisStrs}
         '''
         
         if len(theStr) == 0:
@@ -325,7 +330,7 @@ class MarkupManagement(object):
                 if markupType == Markup.RATE:
                     val = valNum / 100.;
                 elif markupType == Markup.EMPHASIS:
-                    val = MarkupManagement.emphasisVals[valNum];
+                    val = MarkupManagement.emphasisStrs[valNum];
                 else:
                     val = valNum;
                 units = MarkupManagement.units[markupType];
