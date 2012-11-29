@@ -50,7 +50,7 @@ class MarkupManagementUI(QDialog):
     def setupUI(self):
         guiPath = os.path.join(os.path.dirname(__file__), '../qtFiles/markupManagement/markupManagement/markupmanagementdialog.ui');
         self.ui = python_qt_binding.loadUi(guiPath, self);
-        self.deleteRadioBt  = self.ui.deleteRadioButton;
+        self.deleteButton  = self.ui.deleteButton;
         self.silenceRadioBt = self.ui.silenceRadioButton;
         self.rateRadioBt    = self.ui.rateRadioButton;
         self.pitchRadioBt   = self.ui.pitchRadioButton;
@@ -67,9 +67,11 @@ class MarkupManagementUI(QDialog):
         self.valueReadout   = self.ui.valueReadoutLineEdit;
         self.valueReadout.setValidator(QIntValidator());
         self.valueReadout.setText(str(self.percentageSlider.value()));
-        self.sliderMinLabel = self.ui.sliderMinLabel;
-        self.sliderMaxLabel = self.ui.sliderMaxLabel;
-        self.sliderExplanationLabel = self.ui.sliderExplanationLabel;
+        self.percMinLabel = self.ui.percMinLabel;
+        self.percMaxLabel = self.ui.percMaxLabel;
+        self.timeMinLabel = self.ui.timeMinLabel;
+        self.timeMaxLabel = self.ui.timeMaxLabel;
+        self.axisLabel = self.ui.axisLabel;
         
         # Initialize UI related states that are changed in response to clicks:
         self.currMarkupType = Markup.PITCH;
@@ -77,7 +79,7 @@ class MarkupManagementUI(QDialog):
         self.setUIToPercentages();
         
     def connectWidgets(self):
-        self.deleteRadioBt.clicked.connect(partial(self.speechModTypeAction, 'delete', emph='none'));
+        self.deleteButton.clicked.connect(partial(self.speechModTypeAction, 'delete', emph='none'));
         self.silenceRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.SILENCE, emph='none'));
         self.rateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.RATE, emph='none'));
         self.pitchRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.PITCH, emph='none'));
@@ -190,22 +192,27 @@ class MarkupManagementUI(QDialog):
         #*************
         if sliderID == SliderID.PERCENTAGES or sliderID is None:
             self.percentageSlider.hide();
+            self.percMinLabel.hide();
+            self.percMaxLabel.hide();
+            
         if sliderID == SliderID.TIME or sliderID is None:
             self.timeSlider.hide();
+            self.timeMinLabel.hide();
+            self.timeMaxLabel.hide();
         if sliderID is None:
-            self.sliderMinLabel.hide();
-            self.sliderMaxLabel.hide();
-            self.sliderExplanationLabel.hide();
+            self.axisLabel.hide();
             self.valueReadout.hide();
 
     def showSlider(self, sliderID):
-        self.sliderMinLabel.show();
-        self.sliderMaxLabel.show();
         if sliderID == SliderID.PERCENTAGES:
             self.valuePercSlider.show();
+            self.percMinLabel.show();
+            self.percMaxLabel.show();
         elif sliderID == SliderID.TIME:
             self.timeSlider.show();
-        self.sliderExplanationLabel.show();
+            self.timeMinLabel.show();
+            self.timeMaxLabel.show();
+        self.axisLabel.show();
         self.valueReadout.show();
                   
     def getTextAndSelection(self):
