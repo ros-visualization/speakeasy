@@ -25,7 +25,7 @@ from markupManagement import Markup, MarkupManagement;
 # Maximum silence duration one can insert:
 MAX_SILENCE = 10000;
 
-class SliderMode:
+class SliderID:
     PERCENTAGES = 0
     TIME = 1
 
@@ -58,20 +58,19 @@ class MarkupManagementUI(QDialog):
         self.emphasisNoneRadioBt= self.ui.emphasisNoneValRadioButton;
         self.emphasisModerateRadioBt= self.ui.emphasisModerateValRadioButton;
         self.emphasisStrongRadioBt= self.ui.emphasisStrongValRadioButton;
-        self.valueSlider    = self.ui.markupValSlider;
+        self.valuePercSlider    = self.ui.percentageSlider;
+        self.percSliderMin = self.valuePercSlider.minimum();
+        self.percSliderMax = self.valuePercSlider.maximum();
+        self.valueTimeSlider    = self.ui.timeSlider;
+        self.timeSliderMin = self.valueTimeSlider.minimum();
+        self.timeSliderMax = self.valueTimeSlider.maximum();
         self.valueReadout   = self.ui.valueReadoutLineEdit;
         self.valueReadout.setValidator(QIntValidator());
-        self.valueReadout.setText(str(self.valueSlider.value()));
+        self.valueReadout.setText(str(self.percentageSlider.value()));
         self.sliderMinLabel = self.ui.sliderMinLabel;
         self.sliderMaxLabel = self.ui.sliderMaxLabel;
         self.sliderExplanationLabel = self.ui.sliderExplanationLabel;
         
-        # Saved slider percentage value: 
-        self.prevPercentVal = 0;
-        # Saved slider msecs value:
-        self.prevTimeVal = 0;
-        # Remember whether most recently shown slider was percentages or time:
-        self.prevSliderMode = SliderMode.PERCENTAGES;
         # Initialize UI related states that are changed in response to clicks:
         self.currMarkupType = Markup.PITCH;
         self.currentEmph = None
@@ -87,8 +86,10 @@ class MarkupManagementUI(QDialog):
         self.emphasisModerateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='moderate'));
         self.emphasisStrongRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='strong'));
         
-        self.valueSlider.valueChanged.connect(self.valueSliderChangedAction);
-        self.valueSlider.sliderReleased.connect(self.valueSliderManualSlideFinishedAction)
+        self.percentageSlider.valueChanged.connect(self.valueSliderChangedAction);
+        self.percentageSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.PERCENTAGES));
+        self.timeSlider.valueChanged.connect(self.valueSliderChangedAction);
+        self.timeSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.TIME));
         self.valueReadout.editingFinished.connect(self.valueReadoutEditingFinishedAction);
         
         self.markupRequestSig.connect(self.addOrRemoveMarkup);
@@ -99,27 +100,30 @@ class MarkupManagementUI(QDialog):
     def valueSliderChangedAction(self, newVal):
         self.valueReadout.setText(str(newVal));
     
-    def valueSliderManualSlideFinishedAction(self):
-        # Readout box is already updated. Just need to remember
-        # the new value:
-        newSliderVal = self.valueSlider.value();
-        if self.prevSliderMode == SliderMode.PERCENTAGES:
-            self.prevPercentVal = newSliderVal;
-        elif self.prevSliderMode == SliderMode.TIME:
-            self.prevTimeVal = newSliderVal;
-        else:
-            raise ValueError('self.prevSliderMode not initialized.');
+    def valueSliderManualSlideFinishedAction(self, sliderID):
+        pass
         
     def valueReadoutEditingFinishedAction(self):
-        # Readout entry is already validated to be an integer
-        # of the proper range:
-        readoutValue = int(self.valueReadout.text());
-        self.valueSlider.setValue(readoutValue);
-        if self.prevSliderMode == SliderMode.PERCENTAGES:
-            self.prevPercentVal = readoutValue;
-        elif self.prevSliderMode == SliderMode.TIME:
-            self.prevTimeVal = readoutValue;
-        
+        # Get value from the readout box. The validator
+        # already ensured that the value is an int:
+        newVal = int(self.valueReadout.text());
+        if self.valuePercSlider.isVisible():
+            if newVal > self.percSliderMax:
+                newVal = self.percSliderMax;
+                self.valueReadout.setText(str(newVal));
+            elif newVal < self.percSliderMin:
+                newVal = self.percSliderMin;
+                self.valueReadout.setText(str(newVal));
+            self.valuePercSlider.setValue(newVal);
+
+        elif self.timeSlider.isVisible():
+            if newVal > self.timeSliderMax:
+                newVal = self.timeSliderMax;
+                self.valueReadout.setText(str(newVal));
+            elif newVal < self.timeSliderMin:
+                newVal = self.timeSliderMin;
+                self.valueReadout.setText(str(newVal));
+            self.timeSlider.setValue(newVal);
     
     @pyqtSlot(Markup.baseType(), str)
     def addOrRemoveMarkup(self, markupType, emph):
@@ -154,41 +158,54 @@ class MarkupManagementUI(QDialog):
         self.textPanel.setText(newStr);
         
     def setUIToEmphasis(self):
-        self.hideSlider();
+        self.hideSliders();
     
     def setUIToTime(self):
-        self.valueSlider.setValue(self.prevTimeVal);
+        #*************
+        #return
+        #*************
 #        self.sliderMaxLabel.setText(str(MAX_SILENCE));
 #        self.sliderMinLabel.setText = str(0);
-        self.valueSlider.setMinimum(0);
-        self.valueSlider.setMaximum(MAX_SILENCE);
-        self.sliderExplanationLabel.setText('Time(msec)')
+#        self.sliderExplanationLabel.setText('Time(msec)')
         self.valueReadout.validator().setRange(0,MAX_SILENCE);
-        self.showSlider(SliderMode.TIME);
+        self.valueReadout.setText(str(self.timeSlider.value()));
+        self.showSlider(SliderID.TIME);
+        self.hideSliders(SliderID.PERCENTAGES);
     
     def setUIToPercentages(self):
-        self.valueSlider.setValue(self.prevPercentVal);
+        #*************
+        #return
+        #*************
 #        self.sliderMaxLabel.setText('100%');
 #        self.sliderMinLabel.setText('-100%');
-        self.sliderExplanationLabel.setText('Magnitude(%)')
+#        self.sliderExplanationLabel.setText('Magnitude(%)')
         self.valueReadout.validator().setRange(-100,100);
-        self.showSlider(SliderMode.PERCENTAGES);
+        self.valueReadout.setText(str(self.valuePercSlider.value()));
+        self.showSlider(SliderID.PERCENTAGES);
+        self.hideSliders(SliderID.TIME);
         
-    def hideSlider(self):
-        self.valueSlider.hide();
-        self.sliderMinLabel.hide();
-        self.sliderMaxLabel.hide();
-        self.sliderExplanationLabel.hide();
-        self.valueReadout.hide();
+    def hideSliders(self, sliderID=None):
+        #*************
+        #return
+        #*************
+        if sliderID == SliderID.PERCENTAGES or sliderID is None:
+            self.percentageSlider.hide();
+        if sliderID == SliderID.TIME or sliderID is None:
+            self.timeSlider.hide();
+        if sliderID is None:
+            self.sliderMinLabel.hide();
+            self.sliderMaxLabel.hide();
+            self.sliderExplanationLabel.hide();
+            self.valueReadout.hide();
 
-    def showSlider(self, sliderMode):
-#        if sliderMode == SliderMode.PERCENTAGES:
-#            self.setUIToPercentages();
+    def showSlider(self, sliderID):
         self.sliderMinLabel.show();
         self.sliderMaxLabel.show();
-        self.valueSlider.show();
+        if sliderID == SliderID.PERCENTAGES:
+            self.valuePercSlider.show();
+        elif sliderID == SliderID.TIME:
+            self.timeSlider.show();
         self.sliderExplanationLabel.show();
-        self.prevSliderMode = sliderMode;
         self.valueReadout.show();
                   
     def getTextAndSelection(self):
