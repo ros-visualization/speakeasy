@@ -503,7 +503,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="insertVariationButton">
               <property name="toolTip">
                <string>Insert the chosen speech variation around the selected text</string>
               </property>

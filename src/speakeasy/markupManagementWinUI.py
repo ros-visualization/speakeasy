@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+#TODO:
+#  o Delete button
+#  o Insert button
+#  o Undo?
 
 import sys
 import os
@@ -51,6 +55,7 @@ class MarkupManagementUI(QDialog):
         guiPath = os.path.join(os.path.dirname(__file__), '../qtFiles/markupManagement/markupManagement/markupmanagementdialog.ui');
         self.ui = python_qt_binding.loadUi(guiPath, self);
         self.deleteButton  = self.ui.deleteButton;
+        self.insertVariationButton = self.ui.insertVariationButton;
         self.silenceRadioBt = self.ui.silenceRadioButton;
         self.rateRadioBt    = self.ui.rateRadioButton;
         self.pitchRadioBt   = self.ui.pitchRadioButton;
@@ -95,6 +100,7 @@ class MarkupManagementUI(QDialog):
         self.valueReadout.editingFinished.connect(self.valueReadoutEditingFinishedAction);
         
         self.markupRequestSig.connect(self.addOrRemoveMarkup);
+        self.insertVariationButton.clicked.connect(self.executeMarkupAction);
     
     def speechModTypeAction(self, markupType, emph='none'):
         self.markupRequestSig.emit(markupType, emph);
@@ -130,7 +136,7 @@ class MarkupManagementUI(QDialog):
     @pyqtSlot(Markup.baseType(), str)
     def addOrRemoveMarkup(self, markupType, emph):
         self.currMarkupType = markupType;
-        self.currentEmph    = emph;
+        self.currentEmph    = emph;        
         if markupType == Markup.EMPHASIS:
             self.setUIToEmphasis();
         elif markupType == Markup.PITCH or\
@@ -139,14 +145,21 @@ class MarkupManagementUI(QDialog):
             self.setUIToPercentages();
         elif markupType == Markup.SILENCE:
             self.setUIToTime();
+        elif markupType == 'delete':
+            (txtStr, cursorPos, selStart, selEnd) = self.getTextAndSelection();
+            # Are we to delete enclosing markup?
+            if markupType == 'delete':
+                newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
+                self.textPanel.setText(newStr);
+                return;
     
-    def executeMarkupAction(self):
+    def executeMarkupAction(self, markupType):
         (txtStr, cursorPos, selStart, selEnd) = self.getTextAndSelection();
-        # Are we to delete enclosing markup?
-        if markupType == 'delete':
-            newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
-            self.textPanel.setText(newStr);
-            return;
+#        # Are we to delete enclosing markup?
+#        if markupType == 'delete':
+#            newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
+#            self.textPanel.setText(newStr);
+#            return;
         
         if selStart is None or selEnd is None:
             self.dialogService.showErrorMsg('Select a piece of text that you wish to modulate.');
@@ -163,33 +176,18 @@ class MarkupManagementUI(QDialog):
         self.hideSliders();
     
     def setUIToTime(self):
-        #*************
-        #return
-        #*************
-#        self.sliderMaxLabel.setText(str(MAX_SILENCE));
-#        self.sliderMinLabel.setText = str(0);
-#        self.sliderExplanationLabel.setText('Time(msec)')
         self.valueReadout.validator().setRange(0,MAX_SILENCE);
         self.valueReadout.setText(str(self.timeSlider.value()));
         self.showSlider(SliderID.TIME);
         self.hideSliders(SliderID.PERCENTAGES);
     
     def setUIToPercentages(self):
-        #*************
-        #return
-        #*************
-#        self.sliderMaxLabel.setText('100%');
-#        self.sliderMinLabel.setText('-100%');
-#        self.sliderExplanationLabel.setText('Magnitude(%)')
         self.valueReadout.validator().setRange(-100,100);
         self.valueReadout.setText(str(self.valuePercSlider.value()));
         self.showSlider(SliderID.PERCENTAGES);
         self.hideSliders(SliderID.TIME);
         
     def hideSliders(self, sliderID=None):
-        #*************
-        #return
-        #*************
         if sliderID == SliderID.PERCENTAGES or sliderID is None:
             self.percentageSlider.hide();
             self.percMinLabel.hide();
@@ -233,6 +231,7 @@ class MarkupManagementUI(QDialog):
             selStart = selEnd = None;
         txt       = self.textPanel.getText();
         return (txt,curPos,selStart,selEnd);       
+
           
 # ------------------- Testing -----------------------
 
