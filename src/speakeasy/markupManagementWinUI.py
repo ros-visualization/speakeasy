@@ -2,7 +2,7 @@
 
 #TODO:
 #  o Undo?
-# This <prosody pitch='50%'>0is my test</prosody> . from : This [P+50is my test] 
+#  o Value changes
 
 import sys
 import os
