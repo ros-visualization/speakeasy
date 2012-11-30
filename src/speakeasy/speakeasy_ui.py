@@ -10,6 +10,7 @@ from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColo
 from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox
 from python_qt_binding.QtCore import pyqtSignal
 
+from markupManagementWinUI import MarkupManagementUI;
 
 #TODO: Play repeatedly.
 #TODO: From speakeasy_node's capabilities message, find all voices and their tts engines. Represent them in the radio buttons.
@@ -304,6 +305,7 @@ class SpeakEasyGUI(QMainWindow):
                           
                           'PLAY_LOCALLY' : 'Play locally',
                           'PLAY_AT_ROBOT' : 'Play at robot',
+                          'SPEECH_MODULATION' : 'Speech modulation',
                           'PASTE' : 'Paste', 
                           'CLEAR' : 'Clear', 
                           } 
@@ -556,7 +558,11 @@ class SpeakEasyGUI(QMainWindow):
         speechControlsLayout.addWidget(self.speechInputFld);
         
         layout.addLayout(speechControlsLayout);
-    
+        
+        # Create and hide the dialog for adding Cepstral voice modulation 
+        # markup to text in the text input field:
+        self.speechControls = MarkupManagementUI(textPanel=self.speechInputFld, parent=self);
+
     #----------------------------------
     # addVoiceRadioButtons
     #--------------
@@ -769,7 +775,8 @@ class SpeakEasyGUI(QMainWindow):
         '''
         
         (buttonGridLayout, self.convenienceButtonDict) =\
-            SpeakEasyGUI.buildButtonGrid([SpeakEasyGUI.interactionWidgets['PASTE'],
+            SpeakEasyGUI.buildButtonGrid([SpeakEasyGUI.interactionWidgets['SPEECH_MODULATION'],
+                                          SpeakEasyGUI.interactionWidgets['PASTE'],
                                           SpeakEasyGUI.interactionWidgets['CLEAR'],
                                           ],
                                          2); # Two columns

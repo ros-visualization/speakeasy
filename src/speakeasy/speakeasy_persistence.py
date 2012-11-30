@@ -204,8 +204,8 @@ class ButtonSavior(object):
             return [];
         try:
             domTree = ElementTree.parse(fd);
-        except Exception:
-            ButtonSavior.reportError("Cannot open file '" + str(absFileName) + "' for retrieving button settings set.");
+        except Exception, e:
+            ButtonSavior.reportError("Cannot process file '" + str(absFileName) + "' for retrieving button settings set: %s" % `e`);
             return [];
     
         #domTreeIt = domTree.iter(); # Pythyon 2.7

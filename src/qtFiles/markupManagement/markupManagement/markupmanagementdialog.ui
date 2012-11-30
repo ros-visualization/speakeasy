@@ -99,6 +99,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Available variations to selected portions of text.</string>
+        </property>
         <property name="title">
          <string>Variation Inserts</string>
         </property>
@@ -228,6 +231,9 @@
                   <pointsize>11</pointsize>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>Add 'no' emphasis to selected text</string>
+                </property>
                 <property name="text">
                  <string>None</string>
                 </property>
@@ -246,6 +252,9 @@
                   <pointsize>11</pointsize>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>Add 'moderate' emphasis to selected text.</string>
+                </property>
                 <property name="text">
                  <string>Moderate</string>
                 </property>
@@ -263,6 +272,9 @@
                  <font>
                   <pointsize>11</pointsize>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string>Add 'strong' emphasis to selected text</string>
                 </property>
                 <property name="text">
                  <string>Strong</string>
@@ -288,8 +300,6 @@
           </item>
          </layout>
         </widget>
-        <zorder>layoutWidget</zorder>
-        <zorder>verticalLayoutWidget_3</zorder>
        </widget>
       </item>
       <item>
@@ -299,6 +309,9 @@
         </property>
         <item>
          <widget class="QSlider" name="percentageSlider">
+          <property name="toolTip">
+           <string>Percentage slider for Rate, Pitch, and Volume modifications to selected text.</string>
+          </property>
           <property name="minimum">
            <number>-100</number>
           </property>
@@ -319,13 +332,16 @@
         <item>
          <widget class="QSlider" name="timeSlider">
           <property name="toolTip">
-           <string>Set magnitude of speech variation</string>
+           <string>Millisecond slider for duration of silences inserted between words</string>
           </property>
           <property name="minimum">
            <number>0</number>
           </property>
           <property name="maximum">
            <number>10000</number>
+          </property>
+          <property name="value">
+           <number>20</number>
           </property>
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -505,7 +521,7 @@
             <item>
              <widget class="QPushButton" name="insertVariationButton">
               <property name="toolTip">
-               <string>Insert the chosen speech variation around the selected text</string>
+               <string>Apply the  speech variation chosen by the radio buttons on the left around the selected text</string>
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton{ background-color :rgb(164, 246, 255) ;color:black }</string>

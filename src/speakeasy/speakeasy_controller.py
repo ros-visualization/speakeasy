@@ -43,19 +43,21 @@ from speakeasy_ui import standardLookHandler;
 from speakeasy.speakeasy_persistence import ButtonSavior;
 
 from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
-from speakeasy import speakeasy_persistence
+from speakeasy import speakeasy_persistence;
+
+from markupManagement import MarkupManagement;
 
 #TODO: Delete:
 ## Try importing ROS related modules. Remember whether
 ## that worked. In the SpeakEasyController __init__() method
 ## we'll switch to local, and warn user if appropriate:
-#try:
-#    import roslib; roslib.load_manifest('speakeasy');
-#    import rospy
-#    ROS_IMPORT_OK = True;
-#except ImportError:
-#    # Ros not installed on this machine; run locally:
-#    ROS_IMPORT_OK = False;
+try:
+    import roslib; roslib.load_manifest('speakeasy');
+    import rospy
+    ROS_IMPORT_OK = True;
+except ImportError:
+    # Ros not installed on this machine; run locally:
+    ROS_IMPORT_OK = False;
 # ----------------------------------------------- Class Program ------------------------------------
 
 class ButtonProgram(object):
@@ -256,6 +258,7 @@ class SpeakEasyController(object):
         processes know that SpeakEasy is no longer running.
         '''
         try:
+            self.gui.speechControls.shutdown();
             os.remove(SpeakEasyController.PID_PUBLICATION_FILE);
         except:
             pass
@@ -336,6 +339,9 @@ class SpeakEasyController(object):
         pasteButton.clicked.connect(self.actionPaste);
         clearButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['CLEAR']];
         clearButton.clicked.connect(self.actionClear);
+        speechControlButton = self.gui.convenienceButtonDict[SpeakEasyGUI.interactionWidgets['SPEECH_MODULATION']];
+        speechControlButton.clicked.connect(self.actionSpeechControls);
+        
         
         # Remote control of clearing text field, and speaking what's in the
         # text field from other applications. Handled via Unix signals SIGUSR1
@@ -469,9 +475,20 @@ class SpeakEasyController(object):
         return;
    
     #----------------------------------
-    #   
+    # convertRawTextToSSML   
     #--------------
    
+    def convertRawTextToSSML(self, rawText):
+        '''
+        Given a string with SpeakEasy speech modulation markup, convert the
+        string to W3C SSML marked-up text, and return a new string. Example:
+        'This is [P90my] test' --> 'This is <prosody pitch='+90%'>my</prosody> test'.
+        Note: Only the Cepstral engine currently handles SSML.
+        @param theStr: string to convert
+        @type theStr: String
+        '''
+        ssmlText = MarkupManagement.convertStringToSSML(rawText);
+        return ssmlText;
     
     #----------------------------------
     # actionRecorderButtons
@@ -499,7 +516,13 @@ class SpeakEasyController(object):
                 ttsEngine = "festival"
             else:
                 ttsEngine = "cepstral"
-            self.sayText(self.gui.speechInputFld.getText(), voice, ttsEngine, self.gui.playOnceChecked());
+            rawText = self.gui.speechInputFld.getText();
+            if ttsEngine == 'cepstral':
+                # Convert any speech modulation markup to official W3C SSML markup:
+                ssmlText = self.convertRawTextToSSML(rawText);
+            else:
+                ssmlText = rawText;
+            self.sayText(ssmlText, voice, ttsEngine, self.gui.playOnceChecked());
             return;
         
         # Stop button pushed?
@@ -617,7 +640,13 @@ class SpeakEasyController(object):
         onlyPlayOnce = program.playOnce;
         voice        = program.activeVoice;
         ttsEngine    = program.ttsEngine;
-        self.sayText(program.getText(), voice, ttsEngine, onlyPlayOnce);
+        rawText = program.getText()
+        if ttsEngine == 'cepstral':
+            # Convert any speech modulation markup to official W3C SSML markup:
+            ssmlText = self.convertRawTextToSSML(rawText);
+        else:
+            ssmlText = rawText;
+        self.sayText(ssmlText, voice, ttsEngine, onlyPlayOnce);
              
     #----------------------------------
     # actionSoundButtons 
@@ -744,7 +773,7 @@ class SpeakEasyController(object):
                 buttonProgramArrays.append(buttonProgram);
             except ValueError as e:
                 # Bad XML:
-                rospy.logerr(e.toStr());
+                rospy.logerr(`e`);
                 return;
             
         buttonSetSelector = ButtonSetPopupSelector(iter(buttonProgramArrays));
@@ -788,6 +817,17 @@ class SpeakEasyController(object):
         textArea = self.gui.speechInputFld;
         currCursor = textArea.textCursor();
         currCursor.insertText(QApplication.clipboard().text());
+    
+    #----------------------------------
+    # actionSpeechControls 
+    #--------------
+        
+    def actionSpeechControls(self):
+        '''
+        Raise the voice modulation control panel.
+        '''
+        self.gui.speechControls.show();
+        self.gui.speechControls.raise_();
         
     #----------------------------------
     # installDefaultSpeechSet
@@ -845,14 +885,10 @@ class SpeakEasyController(object):
             os.makedirs(ButtonSavior.SPEECH_SET_DIR);
         suffix = 1;
         newFileName = "buttonProgram1.xml";
-        for filename in os.listdir(ButtonSavior.SPEECH_SET_DIR):
-            if filename == 'default.xml':
-                continue;
-            if filename == newFileName:
-                suffix += 1;
-                newFileName = "buttonProgram" + str(suffix) + ".xml";
-                continue;
-            break;
+        fileSet = set(os.listdir(ButtonSavior.SPEECH_SET_DIR));
+        while newFileName in fileSet:
+            suffix += 1;
+            newFileName = "buttonProgram" + str(suffix) + ".xml";
         return os.path.join(ButtonSavior.SPEECH_SET_DIR, newFileName);
     
     #----------------------------------
@@ -1002,5 +1038,4 @@ if __name__ == "__main__":
 
     # Enter Qt application main loop
     sys.exit(app.exec_());
-        
         

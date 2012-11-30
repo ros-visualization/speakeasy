@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 #TODO:
-#  o Delete button
-#  o Insert button
 #  o Undo?
+# This <prosody pitch='50%'>0is my test</prosody> . from : This [P+50is my test] 
 
 import sys
 import os
@@ -23,11 +22,18 @@ from python_qt_binding.QtCore import pyqtSignal, pyqtSlot
 from pythonScriptDialog import DialogService;
 
 
-from speakeasy_ui import TextPanel;
+try:
+    from speakeasy_ui import TextPanel;
+except ImportError:
+    pass
+    
 from markupManagement import Markup, MarkupManagement;
 
 # Maximum silence duration one can insert:
 MAX_SILENCE = 10000;
+
+DO_DELETE = True;
+DONT_DELETE = False;
 
 class SliderID:
     PERCENTAGES = 0
@@ -35,10 +41,13 @@ class SliderID:
 
 class MarkupManagementUI(QDialog):
     
+    # Signal used to indicate that a new radio button was selected:
     markupRequestSig = pyqtSignal(Markup.baseType(), str);
+    # Signal to indicate that the Delete Variation, or the InsertVariation button was pushed:
+    insDelSignal = pyqtSignal(Markup.baseType(), str);
     
-    def __init__(self, textPanel=None):
-        super(MarkupManagementUI,self).__init__();
+    def __init__(self, textPanel=None, parent=None):
+        super(MarkupManagementUI,self).__init__(parent=parent);
 
         self.dialogService = DialogService();
         # Fill our space with the UI:
@@ -47,13 +56,20 @@ class MarkupManagementUI(QDialog):
         if textPanel is None:
             self.textPanel = TextPanel(self.ui.testTextEdit);
         else:
-            self.textPanel = textPanel;        
+            self.textPanel = textPanel;
+            # Hide the testing text panel
+            self.testTextEdit.hide();
+                     
         self.connectWidgets();
         self.markupManager = MarkupManagement();
         
     def setupUI(self):
+        
         guiPath = os.path.join(os.path.dirname(__file__), '../qtFiles/markupManagement/markupManagement/markupmanagementdialog.ui');
         self.ui = python_qt_binding.loadUi(guiPath, self);
+        
+
+        # Define slightly shorter names to the UI elements:
         self.deleteButton  = self.ui.deleteButton;
         self.insertVariationButton = self.ui.insertVariationButton;
         self.silenceRadioBt = self.ui.silenceRadioButton;
@@ -84,7 +100,8 @@ class MarkupManagementUI(QDialog):
         self.setUIToPercentages();
         
     def connectWidgets(self):
-        self.deleteButton.clicked.connect(partial(self.speechModTypeAction, 'delete', emph='none'));
+        
+        # Radio button connections:
         self.silenceRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.SILENCE, emph='none'));
         self.rateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.RATE, emph='none'));
         self.pitchRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.PITCH, emph='none'));
@@ -93,25 +110,64 @@ class MarkupManagementUI(QDialog):
         self.emphasisModerateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='moderate'));
         self.emphasisStrongRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='strong'));
         
+        # Slider connections:
         self.percentageSlider.valueChanged.connect(self.valueSliderChangedAction);
-        self.percentageSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.PERCENTAGES));
+        #self.percentageSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.PERCENTAGES));
         self.timeSlider.valueChanged.connect(self.valueSliderChangedAction);
-        self.timeSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.TIME));
+        #self.timeSlider.sliderReleased.connect(partial(self.valueSliderManualSlideFinishedAction, SliderID.TIME));
+        
+        # Value readout and input:
         self.valueReadout.editingFinished.connect(self.valueReadoutEditingFinishedAction);
         
-        self.markupRequestSig.connect(self.addOrRemoveMarkup);
-        self.insertVariationButton.clicked.connect(self.executeMarkupAction);
+        # Buttons connections:
+        self.insertVariationButton.clicked.connect(partial(self.insOrDelButtonPushedAction, DONT_DELETE));
+        self.deleteButton.clicked.connect(partial(self.insOrDelButtonPushedAction, DO_DELETE));
+        
+        # Signal connections:
+        self.markupRequestSig.connect(self.adjustUIToRadioButtonSelection);
+        self.insDelSignal.connect(self.executeMarkupAction);
+    
+    def insOrDelButtonPushedAction(self, shouldDelete):
+        '''
+        Handles variation insert and delete buttons.
+        @param markupType: Type of variation selected (the radio buttons)
+        @type markupType: Markup
+        @param emph: emphasis value (relevant only if Emphasis radio button active).
+        @type emph: String
+        '''
+        if shouldDelete == DO_DELETE:
+            self.insDelSignal.emit('delete', self.currentEmph);
+        else:
+            self.insDelSignal.emit(self.currMarkupType, self.currentEmph);
     
     def speechModTypeAction(self, markupType, emph='none'):
+        '''
+        Handles all radio button clicks. Raises a signal so that action is
+        taken outside the GUI loop.
+        @param markupType: the radio button type that was activated.
+        @type markupType: Markup
+        @param emph: {'none' | 'moderate' | 'strong'}
+        @type emph: string
+        '''
         self.markupRequestSig.emit(markupType, emph);
            
     def valueSliderChangedAction(self, newVal):
+        '''
+        Synchronize the digital input-output slider value box with a newly 
+        set slider value.
+        @param newVal: the new slider value
+        @type newVal: int
+        '''
         self.valueReadout.setText(str(newVal));
     
-    def valueSliderManualSlideFinishedAction(self, sliderID):
-        pass
+#    def valueSliderManualSlideFinishedAction(self, sliderID):
+#        pass
         
     def valueReadoutEditingFinishedAction(self):
+        '''
+        User typed a value into the value I/O box. Synchronize
+        the slider that is currently visible.
+        '''
         # Get value from the readout box. The validator
         # already ensured that the value is an int:
         newVal = int(self.valueReadout.text());
@@ -134,9 +190,18 @@ class MarkupManagementUI(QDialog):
             self.timeSlider.setValue(newVal);
     
     @pyqtSlot(Markup.baseType(), str)
-    def addOrRemoveMarkup(self, markupType, emph):
+    def adjustUIToRadioButtonSelection(self, markupType, emph):
+        '''
+        Signal handler for markupRequestSig. This signal is sent when
+        a radio button is clicked in the UI. The UI is modified to
+        reflect the next possible actions.
+        @param markupType: the radio button that was clicked.
+        @type markupType: Markup
+        @param emph: relevant if Markup == Markup.EMPHASIS: the value of the emphasis value ('none', 'moderate', 'strong').
+        @type emph: string
+        '''
         self.currMarkupType = markupType;
-        self.currentEmph    = emph;        
+        self.currentEmph    = emph;
         if markupType == Markup.EMPHASIS:
             self.setUIToEmphasis();
         elif markupType == Markup.PITCH or\
@@ -153,41 +218,81 @@ class MarkupManagementUI(QDialog):
                 self.textPanel.setText(newStr);
                 return;
     
-    def executeMarkupAction(self, markupType):
+    @pyqtSlot(Markup.baseType(), str)
+    def executeMarkupAction(self, markupType, emph):
+        '''
+        Handles signal insDelSignal is emitted, which happens when the Delete or
+        Insert Variation button is clicked. Operates
+        on the text panel to surround a selected text piece with a variation markup, or
+        deletes a variation markup the surrounds the current cursor position.
+        @param markupType: the active radio button's identifier, or 'delete' 
+        @type markupType: {Markup | 'delete'}
+        '''
+        # Get a copy of the text panel's current content, the cursor position,
+        # and selection boundaries, if a selection is present:
         (txtStr, cursorPos, selStart, selEnd) = self.getTextAndSelection();
-#        # Are we to delete enclosing markup?
-#        if markupType == 'delete':
-#            newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
-#            self.textPanel.setText(newStr);
-#            return;
         
-        if selStart is None or selEnd is None:
-            self.dialogService.showErrorMsg('Select a piece of text that you wish to modulate.');
+        # Are we to delete enclosing markup?
+        if markupType == 'delete':
+            newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
+            self.textPanel.setText(newStr);
             return;
-        selLen = selEnd - selStart;
-        if markupType != Markup.EMPHASIS:
-            value  = self.valueSlider.value();
+
+        # All actions other than markup silence, and deletion require a selection:         
+        if markupType != Markup.SILENCE:
+            if selStart is None or selEnd is None:
+                self.dialogService.showErrorMsg('Select a piece of text that you wish to modulate.');
+                return;
+            else:
+                selLen = selEnd - selStart;
+        if markupType == Markup.SILENCE:
+            value = self.valueTimeSlider.value();
+            # Silence is inserted between words or at the start of a string.
+            # So the cursor position is the marker, not a selection:
+            selStart = cursorPos;
+            selLen = 0;
+        elif markupType != Markup.EMPHASIS:
+            value  = self.valuePercSlider.value();
         else:
             value = MarkupManagement.emphasisCodes[emph];
-        newStr = self.markupManager.addMarkup(txtStr, markupType, selStart, length=selLen, value=value);
+        try:
+            newStr = self.markupManager.addMarkup(txtStr, markupType, selStart, length=selLen, value=value);
+        except ValueError, e:
+            self.dialogService.showErrorMsg(`e`);
+            return;
         self.textPanel.setText(newStr);
         
     def setUIToEmphasis(self):
+        '''
+        Modify UI to show only emphasis choices: 
+        '''
         self.hideSliders();
     
     def setUIToTime(self):
+        '''
+        Modify UI to show the time duration slider for defining silence duration:
+        '''
         self.valueReadout.validator().setRange(0,MAX_SILENCE);
         self.valueReadout.setText(str(self.timeSlider.value()));
         self.showSlider(SliderID.TIME);
         self.hideSliders(SliderID.PERCENTAGES);
     
     def setUIToPercentages(self):
+        '''
+        Modify UI to show the percentage slider relevant to 
+        volume, rate, and pitch markups.
+        '''
         self.valueReadout.validator().setRange(-100,100);
         self.valueReadout.setText(str(self.valuePercSlider.value()));
         self.showSlider(SliderID.PERCENTAGES);
         self.hideSliders(SliderID.TIME);
         
     def hideSliders(self, sliderID=None):
+        '''
+        Hide one or both percentage or time sliders.
+        @param sliderID: which slider to hide. None if hide both
+        @type sliderID: {SliderID | None}
+        '''
         if sliderID == SliderID.PERCENTAGES or sliderID is None:
             self.percentageSlider.hide();
             self.percMinLabel.hide();
@@ -202,6 +307,11 @@ class MarkupManagementUI(QDialog):
             self.valueReadout.hide();
 
     def showSlider(self, sliderID):
+        '''
+        Reveal the specified slider
+        @param sliderID: the slider to reveal (never both)
+        @type sliderID: SliderID
+        '''
         if sliderID == SliderID.PERCENTAGES:
             self.valuePercSlider.show();
             self.percMinLabel.show();
@@ -232,7 +342,9 @@ class MarkupManagementUI(QDialog):
         txt       = self.textPanel.getText();
         return (txt,curPos,selStart,selEnd);       
 
-          
+    def shutdown(self):
+        sys.exit();
+        
 # ------------------- Testing -----------------------
 
 class TextPanel(object):
