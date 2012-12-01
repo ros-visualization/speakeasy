@@ -7,7 +7,7 @@ from functools import partial;
 from threading import Timer;
 
 from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox
+from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox, QFocusEvent
 from python_qt_binding.QtCore import pyqtSignal
 
 from markupManagementWinUI import MarkupManagementUI;
@@ -444,7 +444,8 @@ class SpeakEasyGUI(QMainWindow):
         self.buildOptionsRadioButtons(appLayout);
         
         appWidget.setLayout(appLayout);
-        
+    
+        #*******self.connectEvents();    
         self.show();
 
     #----------------------------------
@@ -505,6 +506,17 @@ class SpeakEasyGUI(QMainWindow):
                 self.programButtonGridLayout.addWidget(newButtonsIt.next());
         except StopIteration:
             pass;
+    
+    #----------------------------------
+    # connectEvents
+    #--------------
+    
+    def connectEvents(self):
+        mousePressEvent.connect(self.textAreaMouseClick);
+        
+    def textAreaMouseClick(self, event):
+        print('Text area clicked.')
+    
     
     #----------------------------------
     # connectSignalsToWidgets 

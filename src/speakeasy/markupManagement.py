@@ -73,6 +73,8 @@ class MarkupManagement(object):
     splitter = re.compile(r'[,;\s!?:.<>]+');
     letterChecker = re.compile(r'[a-zA-Z]');
     digitChecker  = re.compile(r'[-+]{0,1}[0-9]');
+    # Given '[V20foo', return 'V'. Same with '[  V  10  foo...':
+    markupFinder  = re.compile(r'[^a-zA-Z]*([a-zA-z]+)'); 
     
     # Recognize a string that's an unclosed markup. Examples:
     #   o foo [E40bar    -> Yes
@@ -188,10 +190,36 @@ class MarkupManagement(object):
         afterMarkup = theStr[markupEndPos+len(MarkupManagement.closeMark):];
         # Add str fragment between the end of the opening markup and the closing mark: 
         retStr += theStr[markupOpeningEnd:markupEndPos];
-        #***retStr += '' if len(afterMarkup) == 0 else afterMarkup; 
         retStr += '' if len(afterMarkup) == 0 else afterMarkup; 
         return retStr;    
 
+    @staticmethod
+    def getMarkupType(theStr, startPos):
+        '''
+        Given a string and a position index into the string, find the
+        immediately enclosing markup, and return its markup type.
+        @param theStr: string containing the markup under consideration.
+        @type theStr: String
+        @param startPos: index into the string, possibly that being the opening char of the mark.
+        @type startPos:
+        @return: the Markup type of the enclosing markup, or None if no enclosing markup.
+        @rtype: {Markup | None}
+        @raise ValueError: if syntax error
+        '''
+        # Find the opening markup to left of startPos:
+        openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
+        if openMarkPos is None:
+            return None;
+        
+        # Check that markup syntax is correct, throwing an error if not:
+        MarkupManagement.isProperMarkupOpening(theStr, openMarkPos);
+        # Get the markup:
+        markupMatch = MarkupManagement.markupFinder.match(theStr[openMarkPos:]);
+        if markupMatch is None:
+            return None
+        markupType = markupMatch.group(1);
+        return markupType;
+    
     @staticmethod
     def getValue(theStr, startPos):
         '''
@@ -199,10 +227,11 @@ class MarkupManagement(object):
         markup, and return its magnitude.
         @param theStr: string containing the markup under consideration.
         @type theStr: String
-        @param startPos: index into the string, including the opening char of the mark.
+        @param startPos: index into the string, possibly that being the opening char of the mark.
         @type startPos: int
         @return: magnitude value of the markup
         @rtype: int
+        @raise ValueError: if syntax error        
         '''
         # Find the opening markup to left of startPos:
         openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
@@ -298,7 +327,7 @@ class MarkupManagement(object):
     @staticmethod
     def isProperMarkupOpening(theStr, cursorPos=0):
         '''
-        Return True if theStr contains a legal speech markup opening at cursorPos.
+        Return index of markup magnitude if theStr contains a legal speech markup opening at cursorPos.
         Else throw error with illuminating text.
         @param theStr: string to check
         @type theStr: String
@@ -458,6 +487,19 @@ class MarkupTest(unittest.TestCase):
         theLen = MarkupManagement.getLenFromNumWords('  this   is   me.', 6, 2); # 2 spaces before 'this', 3 spaces before 'is' and 'me'
         self.assertEqual(theLen, 10, 'Failed find len 2 words from end of 2nd word in string with spaces. Expected %d, got %d.' % (10, theLen));
 
+    def testGetMarkupType(self):
+        self.assertEqual(MarkupManagement.getMarkupType('[V10foo]', 0), 'V');
+        self.assertEqual(MarkupManagement.getMarkupType('[V 10 foo]', 0), 'V');
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 8), 'V');
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 10), 'V');
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 0), None);
+
+    def getValue(self):
+        self.assertEqual(MarkupManagement.getMarkupType('[V10foo]', 0), 10);
+        self.assertEqual(MarkupManagement.getMarkupType('[V 10 foo]', 0), 10);
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 8), 10);
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 10), 10);
+        self.assertEqual(MarkupManagement.getMarkupType('bluebell[V 10 foo]', 0), None);
     
     def testAddMarkupEmptyStr(self):
         self.assertEqual(MarkupManagement.addMarkup('', Markup.EMPHASIS, 0, 10, value=29), '', "Markup for empty str failed.");

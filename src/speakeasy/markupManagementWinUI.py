@@ -46,6 +46,9 @@ class MarkupManagementUI(QDialog):
     # Signal to indicate that the Delete Variation, or the InsertVariation button was pushed:
     insDelSignal = pyqtSignal(Markup.baseType(), str);
     
+    
+    # --------------------------   Public Methods   --------------------------    
+    
     def __init__(self, textPanel=None, parent=None):
         super(MarkupManagementUI,self).__init__(parent=parent);
 
@@ -62,6 +65,72 @@ class MarkupManagementUI(QDialog):
                      
         self.connectWidgets();
         self.markupManager = MarkupManagement();
+
+    def getCurrSliderValue(self):
+        '''
+        Return the slider value of the currently active
+        slider: percentages for Volume/Pitch/Rate, or milliseconds for Silence.
+        @return: slider value
+        @rtype: int
+        '''
+        return self.valueReadout.value();
+    
+    def getCurrEmphValue(self):
+        '''
+        Return currently selected emphasis value radiobutton as an integer.
+        Return None if no emphasis radio button is selected.
+        @return: 0 for 'none', 1 for 'moderate', 2 for 'strong'
+        @int
+        '''
+        if self.emphasisNoneRadioBt.isChecked():
+            return MarkupManagement.emphasisStrs[0];
+        elif self.emphasisModerateRadioBt.isChecked():
+            return MarkupManagement.emphasisStrs[1];
+        elif self.emphasisStrongRadioBt.isChecked():
+            return MarkupManagement.emphasisStrs[2];
+        return None
+    
+    def setUIForMarkup(self, markupType, sliderVal=None, emph=None):
+        '''
+        Adjust the markup control panel's UI to match a particular
+        markup type, and emphasis value. For example, an input of
+        Markup.PITCH will hide the silence time slider, and instead
+        expose the percentage slider. If sliderVal is None, the slider's
+        value will remain unchanged. All radio buttons will be unchecked,
+        unless emph is provided. In that case one of the three emphasis radio
+        buttons will be checked. Silence/Volume/Pitch/Rate will still be unchecked.
+        @param markupType: the markup for which the UI is to be adjusted.
+        @type markupType: Markup
+        @param sliderVal: optionally, the value to which the visible slider is to be set.
+        @type sliderVal: int
+        @param emph: optionally, which emphasis checkbox is to be checked.
+        @type emph: int [0..2] for 'none', 'moderate', 'strong'
+        '''
+        if markupType == Markup.EMPHASIS:
+            self.setUIToEmphasis();
+        elif markupType == Markup.PITCH or\
+             markupType == Markup.RATE or\
+             markupType == Markup.VOLUME:
+            self.setUIToPercentages();
+        elif markupType == Markup.SILENCE:
+            self.setUIToTime();
+        self.silenceRadioBt.setChecked(False);
+        self.rateRadioBt.setChecked(False);
+        self.pitchRadioBt.setChecked(False);
+        self.volumeRadioBt.setChecked(False);
+        if sliderVal is not None:
+            if type(sliderVal) != type(10):
+                return;
+            visibleSlider = self.visibleSlider();              
+            if visibleSlider is not None:
+                sliderVal = min(visibleSlider.maximum(), sliderVal);
+                sliderVal = max(visibleSlider.minimum(), sliderVal);
+                visibleSlider.setValue(sliderVal);
+                # Echo the new slider value on the digital readout:
+                self.valueReadout.setText(str(sliderVal));
+                
+
+    # --------------------------   Private Methods   --------------------------
         
     def setupUI(self):
         
@@ -322,7 +391,22 @@ class MarkupManagementUI(QDialog):
             self.timeMaxLabel.show();
         self.axisLabel.show();
         self.valueReadout.show();
-                  
+                
+    def visibleSlider(self):
+        '''
+        Return the slider object that is currently visible to the user.
+        @return: slider object (percentage or time slider). If both sliders
+        are currently hidden, return None.
+        @rtype: {QSlider | None}
+        '''
+        
+        if self.valuePercSlider.isvisible():
+            return self.valuePercSlider;
+        elif self.valueTimeSlider.isvisible():
+            return self.valueTimeSlider;
+        else:
+            return None
+          
     def getTextAndSelection(self):
         '''
         Returns a four-tuple string, cursor position, start index, and end index. The string is a copy of
