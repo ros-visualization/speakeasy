@@ -197,7 +197,8 @@ class MarkupManagement(object):
     def getMarkupType(theStr, startPos):
         '''
         Given a string and a position index into the string, find the
-        immediately enclosing markup, and return its markup type.
+        immediately enclosing markup, and return its markup type, or None
+        if no markup surrounds the startPos
         @param theStr: string containing the markup under consideration.
         @type theStr: String
         @param startPos: index into the string, possibly that being the opening char of the mark.
@@ -206,6 +207,8 @@ class MarkupManagement(object):
         @rtype: {Markup | None}
         @raise ValueError: if syntax error
         '''
+        if startPos >= len(theStr):
+            return None;
         # Find the opening markup to left of startPos:
         openMarkPos = MarkupManagement.pointerToEnclosingMarkup(theStr, startPos);
         if openMarkPos is None:
@@ -224,13 +227,13 @@ class MarkupManagement(object):
     def getValue(theStr, startPos):
         '''
         Given a string and position within the string, Find the immediately enclosing
-        markup, and return its magnitude.
+        markup, and return its magnitude, or None if no markup surrounds startPos.
         @param theStr: string containing the markup under consideration.
         @type theStr: String
         @param startPos: index into the string, possibly that being the opening char of the mark.
         @type startPos: int
         @return: magnitude value of the markup
-        @rtype: int
+        @rtype: {int | None}
         @raise ValueError: if syntax error        
         '''
         # Find the opening markup to left of startPos:
@@ -277,21 +280,27 @@ class MarkupManagement(object):
     def pointerToEnclosingMarkup(theStr, cursorPos):
         '''
         Given a string and a cursor position into it, return the cursor position
-        of the nearest opening markup char.
+        of the nearest opening markup char. Return None if no markup encloses the position.
         @param theStr: string to examine.
         @type theStr: String
         @param cursorPos: starting position of the search.
         @type cursorPos: int
         @return: Cursor position resPos such that theStr[resPos] == MarkupManagement.openMark. None if no enclosing openMark is found.
+        @rtype: {int | None}
         @raise ValueError: if passed-in cursorPos is out of range.: 
         
         '''
+        if cursorPos >= len(theStr):
+            return None;
         #  Already pointing to markup opening?
         if theStr[cursorPos] == MarkupManagement.openMark:
             return cursorPos;
         for pos in reversed(range(cursorPos + 1)):
             if theStr[pos] == MarkupManagement.openMark:
                 return pos;
+            elif theStr[pos] == MarkupManagement.closeMark:
+                # Cursor position is *outside* the markup whose opening we found:
+                return None;
         return None
     
     @staticmethod
@@ -461,7 +470,15 @@ class MarkupTest(unittest.TestCase):
         self.assertIsNotNone(MarkupManagement.unclosedMarkupChecker.match('foo[R20'), "Did not recognize 'foo[R20' as unclosed markup.");  
         self.assertIsNone(MarkupManagement.unclosedMarkupChecker.match('fooE20bar'), "Incorrectly recognized 'fooE20bar' as unclosed markup.");
         self.assertIsNone(MarkupManagement.unclosedMarkupChecker.match('foo[K20bar'), "Incorrectly recognized 'foo[K20bar' as unclosed markup.");
-        
+    
+    def testEnclosingMarkerFinding(self):
+        # Cursor position inside markup (the 8):
+        self.assertEqual(MarkupManagement.pointerToEnclosingMarkup('Foo [P20 bar] blue', 8), 4);
+        # Cursor before markup:
+        self.assertEqual(MarkupManagement.pointerToEnclosingMarkup('Foo [P20 bar] blue', 2), None);
+        # Cursor after markup:
+        self.assertEqual(MarkupManagement.pointerToEnclosingMarkup('Foo [P20 bar] blue', 15), None);
+    
     def testLenFromNumWords(self):
         theLen = MarkupManagement.getLenFromNumWords('this is me.', 0, 1);
         self.assertEqual(theLen, 4, 'Failed find len one word from start. Expected %d, got %d.' % (4, theLen));

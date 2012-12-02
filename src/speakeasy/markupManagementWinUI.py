@@ -2,7 +2,12 @@
 
 #TODO:
 #  o Undo?
-#  o Value changes
+#  o Value changes: a. changing text box instead of slider fails: erases text
+#  o Nesting fails:  [ P74 [R74test]]: Some operation added the space between [ and P74
+#  o Inserting: select entire marked-up block, then add surrounding markup: => '[ [P52R74test]]'. That's wrong
+# Henry instructions:
+#  o Select only text, not the markup (?)
+#  o 
 
 import sys
 import os
@@ -17,7 +22,7 @@ import python_qt_binding;
 from python_qt_binding import QtGui
 from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
 from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QIntValidator, QApplication
-from python_qt_binding.QtCore import pyqtSignal, pyqtSlot
+from python_qt_binding.QtCore import pyqtSignal, pyqtSlot, QObject
 
 from pythonScriptDialog import DialogService;
 
@@ -45,8 +50,7 @@ class MarkupManagementUI(QDialog):
     markupRequestSig = pyqtSignal(Markup.baseType(), str);
     # Signal to indicate that the Delete Variation, or the InsertVariation button was pushed:
     insDelSignal = pyqtSignal(Markup.baseType(), str);
-    
-    
+
     # --------------------------   Public Methods   --------------------------    
     
     def __init__(self, textPanel=None, parent=None):
@@ -58,10 +62,12 @@ class MarkupManagementUI(QDialog):
         
         if textPanel is None:
             self.textPanel = TextPanel(self.ui.testTextEdit);
+            self.testing = True;
         else:
             self.textPanel = textPanel;
             # Hide the testing text panel
             self.testTextEdit.hide();
+            self.testing = False;
                      
         self.connectWidgets();
         self.markupManager = MarkupManagement();
@@ -90,7 +96,7 @@ class MarkupManagementUI(QDialog):
             return MarkupManagement.emphasisStrs[2];
         return None
     
-    def setUIForMarkup(self, markupType, sliderVal=None, emph=None):
+    def setUIForMarkup(self, markupType, val=None):
         '''
         Adjust the markup control panel's UI to match a particular
         markup type, and emphasis value. For example, an input of
@@ -101,10 +107,8 @@ class MarkupManagementUI(QDialog):
         buttons will be checked. Silence/Volume/Pitch/Rate will still be unchecked.
         @param markupType: the markup for which the UI is to be adjusted.
         @type markupType: Markup
-        @param sliderVal: optionally, the value to which the visible slider is to be set.
-        @type sliderVal: int
-        @param emph: optionally, which emphasis checkbox is to be checked.
-        @type emph: int [0..2] for 'none', 'moderate', 'strong'
+        @param val: optionally, the value to which the visible slider is to be set.
+        @type val: {int | None}
         '''
         if markupType == Markup.EMPHASIS:
             self.setUIToEmphasis();
@@ -114,22 +118,54 @@ class MarkupManagementUI(QDialog):
             self.setUIToPercentages();
         elif markupType == Markup.SILENCE:
             self.setUIToTime();
-        self.silenceRadioBt.setChecked(False);
-        self.rateRadioBt.setChecked(False);
-        self.pitchRadioBt.setChecked(False);
-        self.volumeRadioBt.setChecked(False);
-        if sliderVal is not None:
-            if type(sliderVal) != type(10):
-                return;
-            visibleSlider = self.visibleSlider();              
-            if visibleSlider is not None:
-                sliderVal = min(visibleSlider.maximum(), sliderVal);
-                sliderVal = max(visibleSlider.minimum(), sliderVal);
-                visibleSlider.setValue(sliderVal);
-                # Echo the new slider value on the digital readout:
-                self.valueReadout.setText(str(sliderVal));
+        if markupType == Markup.SILENCE:
+            self.silenceRadioBt.setChecked(True);
+        elif markupType == Markup.RATE:
+            self.rateRadioBt.setChecked(True);
+        elif markupType == Markup.PITCH:
+            self.pitchRadioBt.setChecked(True);
+        elif markupType == Markup.VOLUME:
+            self.volumeRadioBt.setChecked(True);
+        
+        # Depending on the markup type, the value passed in is
+        # different: If markupTYpe is Emphasis, the val is an
+        # emphasis code, in all other cases the value is a slider
+        # value:
+        if val is None:
+            return;
+        # If bad value type, forget it:
+        if type(val) != type(10):
+            return;
+        if markupType == Markup.EMPHASIS:
+            if val == 0:
+                self.emphasisNoneRadioBt.setChecked(True);
+            elif val == 1:
+                self.emphasisModerateRadioBt.setChecked(True);
+            elif val == 2:
+                self.emphasisStrongRadioBt.setChecked(True);
+            # Any other value is illegal. Either way, we're done:
+            return;
                 
-
+        # Markup is one with a slider value:
+        visibleSlider = self.visibleSlider();              
+        if visibleSlider is not None:
+            sliderVal = min(visibleSlider.maximum(), val);
+            sliderVal = max(visibleSlider.minimum(), val);
+            visibleSlider.setValue(sliderVal);
+            # Echo the new slider value on the digital readout:
+            self.valueReadout.setText(str(sliderVal));
+                
+    def cursorInMarkup(self):
+        '''
+        Return a Markup value if cursor of text panel is currently within
+        a markup. Else return None
+        @return: a Markup value if the text cursor sits anywhere within a marked-up text fragment. Else None.
+        @rtype {int | None}
+        '''
+        return self.markupManager.getMarkupType(self.textPanel.getText(), self.textPanel.getCursorPos());
+        
+        
+        
     # --------------------------   Private Methods   --------------------------
         
     def setupUI(self):
@@ -175,6 +211,7 @@ class MarkupManagementUI(QDialog):
         self.rateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.RATE, emph='none'));
         self.pitchRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.PITCH, emph='none'));
         self.volumeRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.VOLUME, emph='none'));
+        
         self.emphasisNoneRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='none'));
         self.emphasisModerateRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='moderate'));
         self.emphasisStrongRadioBt.clicked.connect(partial(self.speechModTypeAction, Markup.EMPHASIS, emph='strong'));
@@ -195,6 +232,27 @@ class MarkupManagementUI(QDialog):
         # Signal connections:
         self.markupRequestSig.connect(self.adjustUIToRadioButtonSelection);
         self.insDelSignal.connect(self.executeMarkupAction);
+        
+        if not self.testing:
+            self.textPanel.mouseClickSignal.connect(self.readyMarkupValChangeUI);
+
+    @pyqtSlot()
+    def readyMarkupValChangeUI(self):
+        '''
+        Handler for cursor changes in the text area. Check whether the cursor is
+        within text that is surrounded by markup. If so, find which markup that is,
+        and modify the UI to be appropriate for that markup type (expose the correct
+        slider, etc.).
+        '''
+        theStr = self.textPanel.getText();
+        cursorPos = self.textPanel.getCursorPos();
+        enclosingMarkupType = self.markupManager.getMarkupType(theStr, cursorPos)
+        if enclosingMarkupType is None:
+            return
+        markupValue = self.markupManager.getValue(theStr, cursorPos);
+        self.setUIForMarkup(enclosingMarkupType, markupValue);
+        # Restore the cursor position to where it was (it gets set to 0 by the actions above):
+        self.textPanel.textCursor().setPosition(cursorPos); # **** Necessary ???
     
     def insOrDelButtonPushedAction(self, shouldDelete):
         '''
@@ -228,10 +286,25 @@ class MarkupManagementUI(QDialog):
         @type newVal: int
         '''
         self.valueReadout.setText(str(newVal));
-    
-#    def valueSliderManualSlideFinishedAction(self, sliderID):
-#        pass
+        self.updateMarkupValueInTextPanel(newVal);
         
+    def updateMarkupValueInTextPanel(self, newVal):
+        # If text panel cursor is currently within a markup,
+        # modify that markup's value, unless it's an emphasis,
+        # which has no continuous value:
+        theStr = self.textPanel.getText();
+        curPos = self.textPanel.getCursorPos();
+        cursor = self.textPanel.textCursor();
+        markupType = self.markupManager.getMarkupType(theStr, curPos);
+        if markupType is None:
+            return;
+        newStr = self.markupManager.changeValue(theStr, curPos, newVal);
+        self.textPanel.setText(newStr);
+        # Set the cursor to where it was before replacing the string
+        # in the text panel:
+        cursor.setPosition(curPos)
+        self.textPanel.setTextCursor(cursor);
+             
     def valueReadoutEditingFinishedAction(self):
         '''
         User typed a value into the value I/O box. Synchronize
@@ -258,6 +331,7 @@ class MarkupManagementUI(QDialog):
                 self.valueReadout.setText(str(newVal));
             self.timeSlider.setValue(newVal);
     
+    
     @pyqtSlot(Markup.baseType(), str)
     def adjustUIToRadioButtonSelection(self, markupType, emph):
         '''
@@ -273,6 +347,8 @@ class MarkupManagementUI(QDialog):
         self.currentEmph    = emph;
         if markupType == Markup.EMPHASIS:
             self.setUIToEmphasis();
+            emphasisValueInt = MarkupManagement.emphasisCodes[emph];
+            self.updateMarkupValueInTextPanel(emphasisValueInt);
         elif markupType == Markup.PITCH or\
              markupType == Markup.RATE or\
              markupType == Markup.VOLUME:
@@ -286,6 +362,7 @@ class MarkupManagementUI(QDialog):
                 newStr = self.markupManager.removeMarkup(txtStr, cursorPos);
                 self.textPanel.setText(newStr);
                 return;
+        
     
     @pyqtSlot(Markup.baseType(), str)
     def executeMarkupAction(self, markupType, emph):
@@ -400,9 +477,9 @@ class MarkupManagementUI(QDialog):
         @rtype: {QSlider | None}
         '''
         
-        if self.valuePercSlider.isvisible():
+        if self.valuePercSlider.isVisible():
             return self.valuePercSlider;
-        elif self.valueTimeSlider.isvisible():
+        elif self.valueTimeSlider.isVisible():
             return self.valueTimeSlider;
         else:
             return None
@@ -432,6 +509,8 @@ class MarkupManagementUI(QDialog):
 # ------------------- Testing -----------------------
 
 class TextPanel(object):
+
+    mouseClickSignal = pyqtSignal();
     
     def __init__(self, qTextPanel):
         self.textPanel = qTextPanel;
@@ -448,7 +527,10 @@ class TextPanel(object):
     
     def textCursor(self):
         return self.textPanel.textCursor();
-    
+
+    def getCursorPos(self):
+        return self.textCursor().position;
+
     def isEmpty(self):
         return len(self.textPanel.toPlainText()) == 0;
           

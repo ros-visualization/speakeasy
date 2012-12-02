@@ -8,7 +8,7 @@ from threading import Timer;
 
 from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
 from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QFrame, QInputDialog, QDoubleSpinBox, QMessageBox, QFocusEvent
-from python_qt_binding.QtCore import pyqtSignal
+from python_qt_binding.QtCore import pyqtSignal, pyqtSlot
 
 from markupManagementWinUI import MarkupManagementUI;
 
@@ -62,7 +62,7 @@ class TextPanel(QTextEdit):
     Text input field whose number of lines may be specified approximately.
     '''
     
-    # Class whose instances implements a sizeable, editable text input field.
+    mouseClickSignal = pyqtSignal();
 
     #----------------------------------
     # Initializer 
@@ -91,11 +91,35 @@ class TextPanel(QTextEdit):
         return self.toPlainText().encode('utf-8');
     
     #----------------------------------
+    # getCursorPos
+    #--------------
+    
+    def getCursorPos(self):
+        return self.textCursor().position();
+    
+    #----------------------------------
     # isEmpty
     #--------------
 
     def isEmpty(self):
         return len(self.toPlainText()) == 0;
+
+
+    #----------------------------------
+    # isEmpty
+    #--------------
+
+    @pyqtSlot()
+    def mouseReleaseEvent(self,event):
+        '''
+        Called when mouse is clicked within the text panel.
+        Raise a new signal that enclosing applications can
+        subscribe to, and have the internal signal cascading
+        system percolate the signal to the QTextPanel handler.
+        @param event: details of the mouse event
+        @type event: QMouseSignal
+        '''
+        self.mouseClickSignal.emit();
 
 # ----------------------------------------------- Class CommChannel ------------------------------------
 
