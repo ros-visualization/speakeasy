@@ -86,9 +86,13 @@ class MarkupManagement(object):
     # with REPV standing for Rate, Emphasis, Pitch, Volume, and Silence. We piece this 
     # regex together using the symbolic names for the markers and mark letters:
     
-    unclosedMarkupChecker = re.compile(r'[^' + openMark + ']*\\' + openMark +\
+    unclosedMarkupChecker = re.compile(r'[^' + openMark + ']*(\\' + openMark +\
                                        '[' + Markup.RATE + Markup.EMPHASIS + Markup.PITCH + Markup.VOLUME + Markup.SILENCE +\
-                                       '][+-]{0,1}[0-9]*[^\\' + closeMark + ']+$');
+                                       '][+-]{0,1}[0-9]*)[^\\' + closeMark + ']+$');
+                                       
+    partialUnclosedMarkupChecker = re.compile(r'[^' + openMark + ']*(\\' + openMark +\
+                                       '[' + Markup.RATE + Markup.EMPHASIS + Markup.PITCH + Markup.VOLUME + Markup.SILENCE +\
+                                       ']{0,1}[+-]{0,1}[0-9]*)$');
     
     @staticmethod
     def addMarkup(theStr, markupType, startPos, length=None, numWords=None, value=0):
@@ -125,9 +129,23 @@ class MarkupManagement(object):
                 raise ValueError('Either length or numWords must be provided. Both are None.')
             length = MarkupManagement.getLenFromNumWords(theStr, startPos, numWords);
         
+        # Tricky situation: user selection spans *part* of a markup. Example:
+        # 'foo [P24Test] bar' They want to nest another markup around this Pitch
+        # pitch markup, and they select not just the word 'Test', but also a fragment
+        # of '[P24'. Just a fragment, not all of it. We need to automatically change the
+        # selection to include either none of the existing markup, or all. We do the
+        # latter:
         beforeMarkup = theStr[0:startPos].strip();
-        markedStr    = theStr[startPos:startPos+length].strip();
-        afterMarkup  = theStr[startPos+len(markedStr):].strip();
+        markupFragMatchObj = MarkupManagement.partialUnclosedMarkupChecker.match(beforeMarkup);
+        if markupFragMatchObj is not None:
+            # Got a fragment, which is stored in the match obj's group(1):
+            markupFrag = markupFragMatchObj.group(1);
+            beforeMarkup = theStr[0:startPos-len(markupFrag)].strip();
+            markedStr    = theStr[startPos-len(markupFrag):startPos+length].strip();
+            afterMarkup  = theStr[startPos + length:].strip();
+        else:            
+            markedStr    = theStr[startPos:startPos+length].strip();
+            afterMarkup  = theStr[startPos + len(markedStr):].strip();
 
         newStr = '';
         if len(beforeMarkup) > 0:
@@ -379,7 +397,9 @@ class MarkupManagement(object):
     def isUnclosedMarkup(theStr):
         '''
         Returns a match object if theStr ends with an unclosed markup,
-        such as 'foo[E20bar', else returns None.
+        such as 'foo[E20bar', else returns None. The match object's
+        group(1) will contain the partial markup. Example: 'foobar[P30bar'
+        returns a match object m. And m.group(1) would return '[P30'
         @param theStr: string to examine
         @type theStr: String
         @return: None or match object
@@ -389,8 +409,9 @@ class MarkupManagement(object):
 
     @staticmethod
     def findFirstNonDigit(theStr):
+        sign = set(['-','+'])
         for pos, oneChar in enumerate(theStr):
-            if MarkupManagement.digitChecker.match(oneChar) is None:
+            if MarkupManagement.digitChecker.match(oneChar) is None and not oneChar in sign:
                 return pos;
         # All digits:
         return None;
@@ -403,19 +424,39 @@ class MarkupManagement(object):
         @type theStr: String
         @return: new string with only SSML markup
         @rtype: String.
+        @raise ValueError: if markup syntax error is found. Illuminating error message is provided.
         '''
+        # In case no markup is in the string at all:
+        newStr = theStr;
+        # Need to close nested markup in reverse order from
+        # how it is incountered in a once-through sequential 
+        # scan:
+        markupStack = [];
         moreMarkups = True;
         while moreMarkups:
             moreMarkups = False;
             for i,char in enumerate(theStr):
+                if char == MarkupManagement.closeMark:
+                    # Close the most recently opened markup:
+                    if len(markupStack) == 0:
+                        raise ValueError("Closing marker without prior opening markup at position %d in '%s'" % (i, theStr));
+                    mostRecentMarkup = markupStack.pop();
+                    theStr = theStr[0:i] + MarkupManagement.ssmlCLoser[mostRecentMarkup] + theStr[i+1:];
+                    newStr = theStr;
+                    moreMarkups = True;
+                    break;
                 if char != MarkupManagement.openMark:
                     continue;
+                # Found a new markup opening:
                 # What type of markup? Volume? Pause? Pitch?...:
                 markupType = theStr[i+1];
+                # Remember this markup for when it's closing time:
+                markupStack.append(markupType);
                 # Value of markup:
                 valNum = MarkupManagement.getValue(theStr, i);
 #               # OK to feed rate as percentage in spite of examples for that
-#               # approach missing. All examples are decimal nums for rates.
+#               # approach missing in Cepstral's SSML documention. All examples 
+#               # there are decimal nums for rates.
 #               # So the following is commented out
 #                if markupType == Markup.RATE:
 #                    val = valNum / 100.;
@@ -426,9 +467,9 @@ class MarkupManagement(object):
                 units = MarkupManagement.units[markupType];
                 if markupType == Markup.SILENCE:
                     newStr = theStr[0:i] +\
-                    MarkupManagement.ssmlOpener[markupType] +\
-                    "'" + str(val) + units + "'" +\
-                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(val)):]);
+                        MarkupManagement.ssmlOpener[markupType] +\
+                        "'" + str(val) + units + "'" +\
+                        theStr[i+2+len(str(val)):];
                     theStr = newStr;
                     moreMarkups = True
                     break;
@@ -442,12 +483,68 @@ class MarkupManagement(object):
                         valStr = str(val); 
                     newStr = theStr[0:i] +\
                     MarkupManagement.ssmlOpener[markupType] +\
-                    "'" + valStr + units + "'" + '>' +\
-                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(valNum)):]);
+                        "'" + valStr + units + "'" + '>' +\
+                        theStr[i+2+len(str(valNum)):];
                     theStr = newStr;
                     moreMarkups = True;
                     break;
         return newStr;
+
+
+#    @staticmethod
+#    def convertStringToSSML(theStr):
+#        '''
+#        Given a string with SpeakEasy markups, replace all SpeakEasy markups with official W3C SSML.
+#        @param theStr: string containing the markup under consideration.
+#        @type theStr: String
+#        @return: new string with only SSML markup
+#        @rtype: String.
+#        '''
+#        newStr = theStr;
+#        moreMarkups = True;
+#        while moreMarkups:
+#            moreMarkups = False;
+#            for i,char in enumerate(theStr):
+#                if char != MarkupManagement.openMark:
+#                    continue;
+#                # What type of markup? Volume? Pause? Pitch?...:
+#                markupType = theStr[i+1];
+#                # Value of markup:
+#                valNum = MarkupManagement.getValue(theStr, i);
+##               # OK to feed rate as percentage in spite of examples for that
+##               # approach missing. All examples are decimal nums for rates.
+##               # So the following is commented out
+##                if markupType == Markup.RATE:
+##                    val = valNum / 100.;
+#                if markupType == Markup.EMPHASIS:
+#                    val = MarkupManagement.emphasisStrs[valNum];
+#                else:
+#                    val = valNum;
+#                units = MarkupManagement.units[markupType];
+#                if markupType == Markup.SILENCE:
+#                    newStr = theStr[0:i] +\
+#                    MarkupManagement.ssmlOpener[markupType] +\
+#                    "'" + str(val) + units + "'" +\
+#                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(val)):]);
+#                    theStr = newStr;
+#                    moreMarkups = True
+#                    break;
+#                else:
+#                    # Note: CEPSTRAL (maybe also W3C's?) SSML require a plus sign
+#                    #       before positive percentages. (And of course a minus sign
+#                    #       for negative numbers):
+#                    if markupType != Markup.EMPHASIS and val > 0:
+#                        valStr = '+' + str(val);
+#                    else:
+#                        valStr = str(val); 
+#                    newStr = theStr[0:i] +\
+#                    MarkupManagement.ssmlOpener[markupType] +\
+#                    "'" + valStr + units + "'" + '>' +\
+#                    MarkupManagement.restToSSML(markupType, theStr[i+2+len(str(valNum)):]);
+#                    theStr = newStr;
+#                    moreMarkups = True;
+#                    break;
+#        return newStr;
         
     @staticmethod
     def restToSSML(markupType, theStrRest):
@@ -470,6 +567,20 @@ class MarkupTest(unittest.TestCase):
         self.assertIsNotNone(MarkupManagement.unclosedMarkupChecker.match('foo[R20'), "Did not recognize 'foo[R20' as unclosed markup.");  
         self.assertIsNone(MarkupManagement.unclosedMarkupChecker.match('fooE20bar'), "Incorrectly recognized 'fooE20bar' as unclosed markup.");
         self.assertIsNone(MarkupManagement.unclosedMarkupChecker.match('foo[K20bar'), "Incorrectly recognized 'foo[K20bar' as unclosed markup.");
+    
+    def testPartialUnclosedMarkupChecker(self):
+        self.assertIsNotNone(MarkupManagement.partialUnclosedMarkupChecker.match('foo[E20'));
+        self.assertEqual(MarkupManagement.partialUnclosedMarkupChecker.match('foo[E20').group(1),'[E20');
+        
+        self.assertIsNotNone(MarkupManagement.partialUnclosedMarkupChecker.match('foo[E'));
+        self.assertEqual(MarkupManagement.partialUnclosedMarkupChecker.match('foo[E').group(1),'[E');
+        
+        self.assertIsNotNone(MarkupManagement.partialUnclosedMarkupChecker.match('foo['));
+        self.assertEqual(MarkupManagement.partialUnclosedMarkupChecker.match('foo[').group(1),'[');
+        
+        self.assertIsNone(MarkupManagement.partialUnclosedMarkupChecker.match('foo'));
+        self.assertIsNone(MarkupManagement.partialUnclosedMarkupChecker.match('foo[E20bar'));
+    
     
     def testEnclosingMarkerFinding(self):
         # Cursor position inside markup (the 8):
@@ -582,7 +693,7 @@ class MarkupTest(unittest.TestCase):
                                                                                MarkupManagement.closeMark,
                                                                                MarkupManagement.closeMark));
         newStr = MarkupManagement.addMarkup(tstStr, Markup.PITCH, 9, 6, value=30);
-        self.assertEqual(newStr, 'This %sE10%sP30Little%s light%s of mine.' % (MarkupManagement.openMark,
+        self.assertEqual(newStr, 'This %sP30%sE10Little%s light%s of mine.' % (MarkupManagement.openMark,
                                                                                MarkupManagement.openMark,
                                                                                MarkupManagement.closeMark,
                                                                                MarkupManagement.closeMark));

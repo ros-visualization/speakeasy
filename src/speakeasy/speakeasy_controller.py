@@ -487,7 +487,10 @@ class SpeakEasyController(object):
         @param theStr: string to convert
         @type theStr: String
         '''
-        ssmlText = MarkupManagement.convertStringToSSML(rawText);
+        try:
+            ssmlText = MarkupManagement.convertStringToSSML(rawText);
+        except ValueError as e:
+            self.dialogService.showErrorMsg(`e`);
         return ssmlText;
     
     #----------------------------------

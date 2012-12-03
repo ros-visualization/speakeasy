@@ -2,12 +2,13 @@
 
 #TODO:
 #  o Undo?
-#  o Value changes: a. changing text box instead of slider fails: erases text
-#  o Nesting fails:  [ P74 [R74test]]: Some operation added the space between [ and P74
-#  o Inserting: select entire marked-up block, then add surrounding markup: => '[ [P52R74test]]'. That's wrong
+#  o Click in markup; select a different markup type in control; move slider ==> number changes
+#  o [R-68[P69test]]: cursor on 68, and try to delete: keeps the -68 in the text. 
 # Henry instructions:
 #  o Select only text, not the markup (?)
-#  o 
+#  o Occasionally, (after drag/drop?) text typed into the Text Panel does not advance the cursor.
+#    Each letter replaces the previous one. Workaround: click anywhere outside the text panel, then
+#    click within the panel again. 
 
 import sys
 import os
@@ -21,7 +22,7 @@ from functools import partial;
 import python_qt_binding;
 from python_qt_binding import QtGui
 from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColor, QPushButton, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QLabel
-from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QIntValidator, QApplication
+from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QIntValidator, QApplication 
 from python_qt_binding.QtCore import pyqtSignal, pyqtSlot, QObject
 
 from pythonScriptDialog import DialogService;
@@ -176,7 +177,9 @@ class MarkupManagementUI(QDialog):
 
         # Define slightly shorter names to the UI elements:
         self.deleteButton  = self.ui.deleteButton;
+        self.deleteButton.setAutoDefault(False);
         self.insertVariationButton = self.ui.insertVariationButton;
+        self.insertVariationButton.setAutoDefault(False);
         self.silenceRadioBt = self.ui.silenceRadioButton;
         self.rateRadioBt    = self.ui.rateRadioButton;
         self.pitchRadioBt   = self.ui.pitchRadioButton;
@@ -191,7 +194,9 @@ class MarkupManagementUI(QDialog):
         self.timeSliderMin = self.valueTimeSlider.minimum();
         self.timeSliderMax = self.valueTimeSlider.maximum();
         self.valueReadout   = self.ui.valueReadoutLineEdit;
+        
         self.valueReadout.setValidator(QIntValidator());
+        
         self.valueReadout.setText(str(self.percentageSlider.value()));
         self.percMinLabel = self.ui.percMinLabel;
         self.percMaxLabel = self.ui.percMaxLabel;
@@ -298,6 +303,11 @@ class MarkupManagementUI(QDialog):
         markupType = self.markupManager.getMarkupType(theStr, curPos);
         if markupType is None:
             return;
+        # If mark type in the text is different than the mark type whose
+        # radio button is active in the markup control panel, then do nothing:
+        if self.getSelectedMarkupRadioBtn() != markupType:
+            return;
+        
         newStr = self.markupManager.changeValue(theStr, curPos, newVal);
         self.textPanel.setText(newStr);
         # Set the cursor to where it was before replacing the string
@@ -330,8 +340,7 @@ class MarkupManagementUI(QDialog):
                 newVal = self.timeSliderMin;
                 self.valueReadout.setText(str(newVal));
             self.timeSlider.setValue(newVal);
-    
-    
+        
     @pyqtSlot(Markup.baseType(), str)
     def adjustUIToRadioButtonSelection(self, markupType, emph):
         '''
@@ -403,7 +412,7 @@ class MarkupManagementUI(QDialog):
             value = MarkupManagement.emphasisCodes[emph];
         try:
             newStr = self.markupManager.addMarkup(txtStr, markupType, selStart, length=selLen, value=value);
-        except ValueError, e:
+        except ValueError as e:
             self.dialogService.showErrorMsg(`e`);
             return;
         self.textPanel.setText(newStr);
@@ -484,6 +493,25 @@ class MarkupManagementUI(QDialog):
         else:
             return None
           
+    def getSelectedMarkupRadioBtn(self):
+        '''
+        Return the Markup type whose radio button is selected in the
+        markup control panel. If none selected, return None
+        @return: the Markup type whose radio button is selected
+        @rtype: {Markup | None}
+        '''
+        if self.silenceRadioBt.isChecked():
+            return Markup.SILENCE;
+        elif self.rateRadioBt.isChecked(): 
+            return Markup.RATE;
+        elif self.pitchRadioBt.isChecked():
+            return Markup.PITCH;
+        elif self.volumeRadioBt.isChecked():
+            return Markup.VOLUME;
+        elif self.emphasisNoneRadioBt.isChecked() or self.emphasisModerateRadioBt.isChecked() or self.emphasisStrongRadioBt.isChecked():
+            return Markup.EMPHASIS; 
+        return None;
+    
     def getTextAndSelection(self):
         '''
         Returns a four-tuple string, cursor position, start index, and end index. The string is a copy of
@@ -505,6 +533,10 @@ class MarkupManagementUI(QDialog):
 
     def shutdown(self):
         sys.exit();
+
+
+#******    class ValueReadoutValidator(QRegExpValidator):
+         
         
 # ------------------- Testing -----------------------
 
