@@ -1,0 +1,23 @@
+python-dev:
+  ubuntu:
+    lucid: python-dev
+    maverick: python-dev
+    natty: python-dev
+    oneiric: python-dev
+    precise: python-dev
+festival:
+  ubuntu:
+    lucid: festival
+    maverick: festival
+    natty: festival
+    oneiric: festival
+    precise: festival
+python-qt4:
+  ubuntu:
+    lucid: python-qt4
+    maverick: python-qt4
+    natty: python-qt4
+    oneiric: python-qt4
+    precise: python-qt4
+
+
