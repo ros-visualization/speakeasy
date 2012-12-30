@@ -23,13 +23,16 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/speakeasy</url>
 
+<!-- ***********
   <depend package="rospy" />
   <depend package="diagnostic_msgs" />
+  <depend package="python_qt_binding"/>
 
   <rosdep name="python-qt4"/>
   <rosdep name="festival"/>
   <rosdep name="alsa-oss"/>
-  <depend package="python_qt_binding"/>
+
+*********** -->
 
 </package>
 
