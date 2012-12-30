@@ -23,6 +23,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/speakeasy</url>
 
+
+  <rosdep name="python-dev"/>
 <!-- ***********
   <depend package="rospy" />
   <depend package="diagnostic_msgs" />
