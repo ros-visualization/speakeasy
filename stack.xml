@@ -19,15 +19,11 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/speakeasy</url>
 
-
-<!-- *********************
   <depend stack="common" />
   <depend stack="common_msgs" />
   <depend stack="python_qt_binding" />
   <depend stack="ros" />
   <depend stack="ros_comm" />
   <rosdep name="python-qt4"/>
-
-****************** -->
 
 </stack>
