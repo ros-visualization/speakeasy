@@ -1,0 +1,3 @@
+<launch>
+	<node name="speakeasy_node" pkg="speakeasy" type="speakeasy_node.py"/>
+</launch>
