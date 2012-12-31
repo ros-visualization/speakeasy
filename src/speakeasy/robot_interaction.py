@@ -897,9 +897,9 @@ if __name__ == '__main__':
         sys.exit();
 
     # Test text to speech:
-#    rospy.loginfo("Testing text-to-speech...");
-#    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
-#    rospy.loginfo("Done testing text-to-speech...\n------------------");
+    rospy.loginfo("Testing text-to-speech...");
+    roboComm.say("Testing", ttsEngine='festival', numRepeats=2, blockTillDone=False);
+    rospy.loginfo("Done testing text-to-speech...\n------------------");
     #while len(roboComm.speechThreads) != 0:
     #    rospy.loginfo("Waiting for %d speech thread(s) to terminate..." % len(roboComm.speechThreads));
     #    rospy.sleep(3.0);
