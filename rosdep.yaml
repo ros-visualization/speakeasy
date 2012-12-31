@@ -12,5 +12,12 @@ python-qt4:
     natty: python-qt4
     oneiric: python-qt4
     precise: python-qt4
+alsa-oss:
+  ubuntu:
+    lucid: alsa-oss
+    maverick: alsa-oss
+    natty: alsa-oss
+    oneiric: alsa-oss
+    precise: alsa-oss
 
 
