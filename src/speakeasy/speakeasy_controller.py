@@ -566,7 +566,11 @@ class SpeakEasyController(object):
             self.initLocalOperation();
         elif playLocation == PlayLocation.ROBOT:
             self.stopAll();
-            self.initROSOperation();
+            success = self.initROSOperation();
+            if not success:
+                self.dialogService.showErrorMsg('Could not communicate with robot. Is the rosmaster node running?');
+                # Switch radio button selection back to 'Play Locally':
+                self.gui.setWhereToPlay(PlayLocation.LOCALLY);
     
     #----------------------------------
     # actionProgramButtons 

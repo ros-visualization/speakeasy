@@ -93,9 +93,9 @@ class RoboComm(object):
         
 
         # init_node hangs indefinitely if roscore is not running.
-        # Therefore: check for that. If roscore isn't running,
-
-        if not SpeakeasyUtils.processRunning('rosmaster'):
+        # Therefore: check for that. 
+        
+        if not SpeakeasyUtils.rosMasterRunning():
             raise NotImplementedError("The roscore process is not running.");
         
         # We now know that ROS is installed, and that roscore is running.
@@ -891,8 +891,8 @@ if __name__ == '__main__':
     
     try:
         roboComm = RoboComm();
-    except NotImplementedError:
-        rospy.logerr("You must start a SpeakEasy service first.");
+    except NotImplementedError as e:
+        rospy.logerr(`e`);
         import sys
         sys.exit();
 

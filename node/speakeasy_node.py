@@ -83,7 +83,8 @@ class SpeakEasyServer(object):
         
         
     def handleTextToSpeechRequest(self, req):
-        
+
+        rospy.logdebug("T2S request: " + str(req));        
         with self.lock:
             ttsCmd = req.command;
             if ttsCmd == SpeakEasyServer.SAY:

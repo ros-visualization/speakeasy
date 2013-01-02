@@ -351,7 +351,8 @@ class Festival(TextToSpeechEngine):
         # escaped for the Bash shell to deal with them:
         #******text = self.bashQuotify(text);
         # Too complicated to set a voice for now. Ignore that parameter.
-        commandLine = 'echo "' + str(text) + '" | padsp festival --tts &';
+        #commandLine = 'echo "' + str(text) + '" | padsp festival --tts &';
+        commandLine = 'echo "' + str(text) + '" | aoss festival --tts &';
         os.system(commandLine);
         
     def sayToFile(self, text, voice=None, destFileName=None):
@@ -428,7 +429,8 @@ class Cepstral(TextToSpeechEngine):
         
         voice = self.checkVoiceValid(voice, self.defaultVoice);
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "' &";
+        #commandLine = "padsp swift -n " + str(voice) + " '" + str(text) + "' &";
+        commandLine = "aoss swift -n " + str(voice) + " '" + str(text) + "' &";
         os.system(commandLine);
         
     def stop(self):
@@ -447,7 +449,8 @@ class Cepstral(TextToSpeechEngine):
             destFile = os.open(destFileName, 'w')
         
         failureMsg = "Sound synthesis failed. Is Cepstral's swift installed? Is a Cepstral voice installed? Try running 'rosdep satisfy speakeasy|sh'. Refer to http://pr.willowgarage.com/wiki/sound_play/Troubleshooting"
-        commandLine = 'padsp swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName) + " &";
+        #commandLine = 'padsp swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName) + " &";
+        commandLine = 'aoss swift -n ' + str(voice) + ' "' + str(text) + '"' + ' -o ' + str(destFileName) + " &";
         os.system(commandLine);
         os.close(destFile);
         if os.stat(destFileName).st_size == 0:

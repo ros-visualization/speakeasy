@@ -4,6 +4,8 @@ import os;
 import subprocess;
 import re;
 import time;
+import socket;
+import string;
 
 import unittest;
 
@@ -23,6 +25,30 @@ class SpeakeasyUtils(object):
         @rtype: string
         '''
         return os.path.splitext(filePath)[1][1:].strip()
+
+    #----------------------------------
+    # uriPointsToLocalhost
+    #--------------
+
+    @staticmethod
+    def uriPointsToLocalhost(theURI):
+        '''
+        Examines whether given URI is a pointer to localhost. Checks for
+        'http://localhost:', 'http://127.0.1.1:', 'http://shortHostname:', and
+        'http://hostnameWithFQDN:'. Will miss 'http://<ownOutsideIPAddress>'   
+        @param theURI: URI to test. Example: contents of ROS_MASTER_URI
+        @type theURI: string
+        '''
+        if string.find(theURI, 'http://localhost') > -1:
+            return True;
+        if string.find(theURI, 'http://127.0.1.1') > -1:
+            return True;
+        if string.find(theURI, 'http://' + socket.gethostname() + ':') > -1:
+             return True;
+        if string.find(theURI, 'http://' + socket.gethostbyaddr(socket.gethostname())[0]) > -1:
+             return True;
+        return False;
+
 
     #----------------------------------
     # processRunning
@@ -49,6 +75,17 @@ class SpeakeasyUtils(object):
                 if proc_name in res[0][1] and pid != os.getpid() and pid != ps_pid:
                     return True
         return False
+
+    #----------------------------------
+    #  rosMasterRunning
+    #--------------
+    
+    @staticmethod
+    def rosMasterRunning():
+        nodeList = subprocess.check_output(["rosnode", "list"])
+        if string.find(nodeList, '/rosout') > -1:
+            return True;
+        return False;
 
     #----------------------------------
     #  rosNodeRunning
@@ -280,7 +317,12 @@ class UtilsTest(unittest.TestCase):
 #                         realPath,
 #                         "Could not find rospy package. findPackage returns '%s' instead of '%s'" % 
 #                         (str(SpeakeasyUtils.findPackage("rospy")), realPath));
-        
+    
+#    def testUriPointsToLocalhost(self):
+#        self.assertTrue(SpeakeasyUtils.uriPointsToLocalhost('http://localhost:113111'), "Failed to recognize 'http://localhost:113111' as localhost.");
+#        self.assertTrue(SpeakeasyUtils.uriPointsToLocalhost('http://127.0.1.1:113111'), "Failed to recognize 'http://127.0.1.1:113111' as localhost.");
+#        self.assertTrue(SpeakeasyUtils.uriPointsToLocalhost('http://' + socket.gethostname() + ':113111'), "Failed to recognize 'http://<hostname>:113111' as localhost.");
+#        self.assertFalse(SpeakeasyUtils.uriPointsToLocalhost('http://foo.bar.com:113111'), "Erroneously recognized 'http://foo.bar.com:113111' as localhost.");
         
     def testBashQuotify(self):
         self.assertEqual(SpeakeasyUtils.bashQuotify("Foo"), "Foo", "Failed string without embedded single quote.");
