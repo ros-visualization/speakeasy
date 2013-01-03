@@ -1,7 +1,6 @@
 #!/bin/env python
 
 import roslib;
-roslib.load_manifest('slider_gui');
 roslib.load_manifest('python_qt_binding');
 
 import os;
