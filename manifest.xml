@@ -29,6 +29,7 @@
 
   <rosdep name="festival"/>
   <rosdep name="alsa-oss"/>
+  <rosdep name="python-pygame"/>
 
 </package>
 
