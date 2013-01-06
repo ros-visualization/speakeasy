@@ -21,9 +21,8 @@ import threading
 from functools import partial;
 from threading import Timer;
 
-from python_qt_binding.QtGui import QApplication, QMessageBox, QPushButton;
-from python_qt_binding.QtCore import QSocketNotifier, QTimer, Slot;
-
+from python_qt_binding.QtGui import QApplication, QMessageBox, QPushButton, QAction;
+from python_qt_binding.QtCore import Qt, QSocketNotifier, QTimer, Slot;
 
 from utilities.speakeasy_utils import SpeakeasyUtils; 
 
@@ -366,7 +365,12 @@ class SpeakEasyController(object):
         for programButton in self.gui.programButtonDict.values():
             programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
             programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
-    
+            # Each program button gets a context menu. 
+            # Context menu entry to copy programmed text to the text area:
+            copyToTextAreaAction = QAction('Copy to text area', programButton);
+            copyToTextAreaAction.triggered.connect(partial(self.programButtonContextMenuCopyToTextAreaAction, programButton));
+            programButton.addAction(copyToTextAreaAction);
+            programButton.setContextMenuPolicy(Qt.ActionsContextMenu);
     
     #----------------------------------
     # getAvailableSoundEffectFileNames
@@ -571,6 +575,34 @@ class SpeakEasyController(object):
                 self.dialogService.showErrorMsg('Could not communicate with robot. Is the rosmaster node running?');
                 # Switch radio button selection back to 'Play Locally':
                 self.gui.setWhereToPlay(PlayLocation.LOCALLY);
+    
+    #----------------------------------
+    # programButtonContextMenuAction
+    #--------------
+
+    def programButtonContextMenuCopyToTextAreaAction(self, buttonObj):
+        program = None;
+        try:    
+            program = self.programs[buttonObj];
+        except KeyError:
+            self.dialogService.showErrorMsg("This button does not contain a program. Press-and-hold for " +\
+                                            str(int(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
+                                            " seconds to program.");
+            return;
+        ttsEngine    = program.ttsEngine;
+        rawText = program.getText()
+        if (len(rawText) == 0):
+            self.dialogService.showErrorMsg("This button does not contain a program. Press-and-hold for " +\
+                                            str(int(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
+                                            " seconds to program.");
+            return;
+        if ttsEngine == 'cepstral':
+            # Convert any speech modulation markup to official W3C SSML markup:
+            ssmlText = self.convertRawTextToSSML(rawText);
+        else:
+            ssmlText = rawText;
+        textArea = self.gui.speechInputFld;
+        textArea.append(ssmlText);
     
     #----------------------------------
     # actionProgramButtons 
