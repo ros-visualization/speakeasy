@@ -1,0 +1,4 @@
+speakeasy
+=========
+
+SpeakEasy provides a sound node to run on a robot, and a GUI to run on a client. GUI users can type text for conversion to speech by the sound node. Utterances can be saved to buttons, and sound effects are available via buttons. Two versions, one started via launch/speakeasy_ros.launch separates control GUI from the low level speech engine control. This version can run the GUI and the  actual speech in different ROS nodes. Use it, for example, if  the sound is to be generated on the robot, and the GUI on a laptop.  The second version, started with launch/speakeasy_standalone.launch combines all speech engine  interaction with the GUI file. This means that the GUI and the  speech engine share a process, and must both operate on the same machine.
