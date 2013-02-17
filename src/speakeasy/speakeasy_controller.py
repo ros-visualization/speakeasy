@@ -1,4 +1,36 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2013, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of the Willow Garage nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE
+
 
 # TODO:
 #   - Robot ops with new msg
@@ -45,6 +77,7 @@ from speakeasy.buttonSetPopupSelector_ui import ButtonSetPopupSelector;
 from speakeasy import speakeasy_persistence;
 
 from markupManagement import MarkupManagement;
+from speakeasy.speakeasy_persistence import ButtonSavior
 
 #TODO: Delete:
 ## Try importing ROS related modules. Remember whether
@@ -157,8 +190,10 @@ class SpeakEasyController(object):
         2. Cepstral: Depends on your installation. Voices are individually licensed.       
     '''
     
-    VERSION = '1.1';
+    VERSION = '1.2';
     PID_PUBLICATION_FILE = "/tmp/speakeasyPID";
+    PROJECT_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..');
+    CONFIG_PATH = os.path.join(os.getenv('HOME'), '.speakeasy');
     
     # Mapping from sound button names ('SOUND_1', 'SOUND_2', etc) to sound filename (just basename):
     soundPaths = {}
@@ -197,6 +232,12 @@ class SpeakEasyController(object):
         # we can warn user of the import error condition further
         # down, when the GUI is up:
         DEFAULT_PLAY_LOCATION_ORIG = DEFAULT_PLAY_LOCATION;
+    
+        # If this is the first time SpeakEasy is started on this machine,
+        # by this user, then create a .speakeasy subdirectory under the
+        # user's HOME, and copy all sound effects and buttonPrograms
+        # into that subdirectory:
+        self.initConfigDir();
               
         if self.stand_alone:
             localInit = self.initLocalOperation();
@@ -247,6 +288,25 @@ class SpeakEasyController(object):
         # Let other processes know out pid: 
         self.publishPID();
 
+    def initConfigDir(self):
+        SpeakEasyController.SOUND_DIR = os.path.join(SpeakEasyController.CONFIG_PATH, 'sounds');
+        origSpeechSetDir =  ButtonSavior.SPEECH_SET_DIR;
+        ButtonSavior.SPEECH_SET_DIR = os.path.join(SpeakEasyController.CONFIG_PATH, 
+                                                   os.path.basename(ButtonSavior.SPEECH_SET_DIR));
+        
+        # Config dir already exists?                                           
+        if os.path.isdir(SpeakEasyController.CONFIG_PATH):
+            return;
+        
+        # No. ==> First time start of SpeakEasy for this user on this machine.
+        # Copy the default sounds and button programs to the config dir
+        # ($HOME/.speakeasy):
+        shutil.copytree(os.path.join(SpeakEasyController.PROJECT_ROOT,'sounds'), 
+                        SpeakEasyController.SOUND_DIR);
+                        
+        # Button programs directory:                            
+        shutil.copytree(origSpeechSetDir, ButtonSavior.SPEECH_SET_DIR);
+        
     #----------------------------------
     # shutdown 
     #--------------
@@ -404,12 +464,12 @@ class SpeakEasyController(object):
         
     def getAvailableLocalSoundEffectFileNames(self):
         
-        scriptDir = os.path.dirname(os.path.realpath(__file__));
-        soundDir = os.path.join(scriptDir, "../../sounds");
-        if not os.path.exists(soundDir):
+#        scriptDir = os.path.dirname(os.path.realpath(__file__));
+#        soundDir = os.path.join(scriptDir, "../../sounds");
+        if not os.path.exists(SpeakEasyController.SOUND_DIR):
             raise ValueError("No sound files found.")
         
-        fileAndDirsList = os.listdir(soundDir);
+        fileAndDirsList = os.listdir(SpeakEasyController.SOUND_DIR);
         fileList = [];
         # Grab all usable sound file names:
         for fileName in fileAndDirsList:
@@ -424,9 +484,8 @@ class SpeakEasyController(object):
             # Chop extension off the basename (e.g. rooster.wav --> rooster):
             sound_file_basenames.append(os.path.splitext(os.path.basename(full_file_name))[0]);
             # Map basename (e.g. 'rooster.wav') to its full file name.
-            self.soundPathsFull[baseName] = os.path.join(soundDir,full_file_name);
+            self.soundPathsFull[baseName] = os.path.join(SpeakEasyController.SOUND_DIR,full_file_name);
         return sound_file_basenames;
-    
     
     #----------------------------------
     # sayText 
