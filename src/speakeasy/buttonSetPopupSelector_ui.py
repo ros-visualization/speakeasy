@@ -94,7 +94,6 @@ class ButtonSetPopupSelector(QDialog):
         self.OKButton = QPushButton("Pick this One");
         self.OKButton.setStyleSheet(SpeakEasyGUI.recorderButtonStylesheet);
         self.OKButton.setMinimumHeight(SpeakEasyGUI.BUTTON_MIN_HEIGHT);
-        #self.OKButton.clicked.connect(partial(QDialog.done, self, 1));
         self.OKButton.clicked.connect(self.clickedOKButton);
         
         self.currentNextPrevDirection = NextPrev.NEXT;

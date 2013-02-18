@@ -39,7 +39,16 @@
 # Note: Unfortunately, this code was written before I knew about QtCreator. So 
 #       all of the UI is created in code (see file speakeasy_ui.py).
 
-import roslib; roslib.load_manifest('speakeasy');
+## Try importing ROS related modules. Remember whether
+## that worked. In the SpeakEasyController __init__() method
+## we'll switch to local, and warn user if appropriate:
+try:
+    import roslib; roslib.load_manifest('speakeasy');
+    import rospy
+    ROS_IMPORT_OK = True;
+except ImportError:
+    print('ROS not installed on this machine; run locally, but PYTHONPATH must be set to include all SpeakEasy file locations.')
+    ROS_IMPORT_OK = False;
 
 import sys
 import os
@@ -79,18 +88,7 @@ from speakeasy import speakeasy_persistence;
 from markupManagement import MarkupManagement;
 from speakeasy.speakeasy_persistence import ButtonSavior
 
-#TODO: Delete:
-## Try importing ROS related modules. Remember whether
-## that worked. In the SpeakEasyController __init__() method
-## we'll switch to local, and warn user if appropriate:
-try:
-    import roslib; roslib.load_manifest('speakeasy');
-    import rospy
-    ROS_IMPORT_OK = True;
-except ImportError:
-    # Ros not installed on this machine; run locally:
-    ROS_IMPORT_OK = False;
-# ----------------------------------------------- Class Program ------------------------------------
+# ----------------------------------------------- Class ButtonProgram ------------------------------------
 
 class ButtonProgram(object):
     
@@ -178,6 +176,32 @@ class ButtonProgram(object):
         domOneButtonProgramRoot.append(ButtonSavior.createXMLElement(ButtonSavior.BUTTON_PLAY_ONCE, content=str(self.playOnce)));                                       
         return domOneButtonProgramRoot
 
+# ----------------------------------------------- Class ButtonSet ------------------------------------
+
+class ButtonSet(object):
+    '''
+    Class to hold one set of ButtonProgram instances that together
+    form a set of buttons that are visible in the UI.
+    '''
+    
+    def __init__(self, buttonProgArray, fileName):
+        '''
+        The array of ButtonProgram objects that constitute the new
+        ButtonSet, and the file name that represents its .xml equivalent
+        on disk. 
+        @param buttonProgArray: the ButtonProgram instances of the ButtonSet
+        @type buttonProgArray: [ButtonProgram]
+        @param fileName: basename of file that holds the XML encoded information of the new set. Not the full path; example: buttonSet1.xml.
+        @type fileName: string
+        '''
+        self.buttonProgArray = buttonProgArray
+        self.fileName = fileName
+        
+    def getXMLFileName(self):
+        return self.fileName;
+    
+    def getButtonProgram(self):
+        return self.buttonProgArray;
 
 # ----------------------------------------------- Class SpeakEasyController ------------------------------------
 
@@ -239,7 +263,7 @@ class SpeakEasyController(object):
         # into that subdirectory:
         self.initConfigDir();
               
-        if self.stand_alone:
+        if self.stand_alone or not ROS_IMPORT_OK:
             localInit = self.initLocalOperation();
         else: # Robot operation
             robotInit = self.initROSOperation();
@@ -273,7 +297,7 @@ class SpeakEasyController(object):
         # No speech buttons programmed yet:
         self.programs = {};
 
-        self.currentButtonSetFile = os.path.join(speakeasy_persistence.ButtonSavior.SPEECH_SET_DIR,'default.xml');
+        self.currentButtonSetFile = os.path.join(ButtonSavior.SPEECH_SET_DIR, 'default.xml');
         
         # Accept SIGUSR1 and SIGUSR2 from other processes
         # to initiate PASTE and CLEAR operations, of the 
@@ -295,18 +319,38 @@ class SpeakEasyController(object):
                                                    os.path.basename(ButtonSavior.SPEECH_SET_DIR));
         
         # Config dir already exists?                                           
-        if os.path.isdir(SpeakEasyController.CONFIG_PATH):
-            return;
+        if not os.path.isdir(SpeakEasyController.CONFIG_PATH):
+            # No. ==> First time start of SpeakEasy for this user on this machine.
+            # Copy the default sounds and button programs to the config dir
+            # ($HOME/.speakeasy):
+            shutil.copytree(os.path.join(SpeakEasyController.PROJECT_ROOT,'sounds'), 
+                            SpeakEasyController.SOUND_DIR);
+                            
+            # Button programs directory:                            
+            shutil.copytree(origSpeechSetDir, ButtonSavior.SPEECH_SET_DIR);
         
-        # No. ==> First time start of SpeakEasy for this user on this machine.
-        # Copy the default sounds and button programs to the config dir
-        # ($HOME/.speakeasy):
-        shutil.copytree(os.path.join(SpeakEasyController.PROJECT_ROOT,'sounds'), 
-                        SpeakEasyController.SOUND_DIR);
-                        
-        # Button programs directory:                            
-        shutil.copytree(origSpeechSetDir, ButtonSavior.SPEECH_SET_DIR);
+    def findButtonFileOriginalForDefault(self):
+        '''
+        Attempt to find buttonProgram file that is the same as the 
+        default.xml file, except for the title. Doesn't work; ran out of time.
+        '''
+        buttonSetDefaultFile = os.path.join(ButtonSavior.SPEECH_SET_DIR, 'default.xml');
+        with open(buttonSetDefaultFile, 'r') as fd:
+            defaultSet = fd.readlines();
+        defaultSetInfoOnly = defaultSet[2:];
         
+        fileAndDirsList = os.listdir(ButtonSavior.SPEECH_SET_DIR);
+        for fileName in fileAndDirsList:
+            if fileName == 'default.xml':
+                continue;
+            fullFileName = os.path.join(ButtonSavior.SPEECH_SET_DIR, fileName);
+            with open(fullFileName, 'r') as fd:
+                xmlContent = fd.readlines();
+            xmlSetInfoOnly = xmlContent[2:];
+            if xmlSetInfoOnly == defaultSetInfoOnly:
+                return fullFileName;
+        return None;
+            
     #----------------------------------
     # shutdown 
     #--------------
@@ -705,7 +749,9 @@ class SpeakEasyController(object):
         if self.gui.speechInputFld.isEmpty():
             self.dialogService.showErrorMsg("You need to enter text in the input panel to program a button.");
             return;
-        
+        if os.path.basename(self.currentButtonSetFile) == 'default.xml':
+            self.dialogService.showInfoMessage("Before (re)programming a button, please choose an existing button set via the 'Pick different speech set' button, or create a new set via the 'Save speech set' button.");
+            return;
         newButtonLabel = self.gui.getNewButtonLabel();
         if newButtonLabel is not None:
             self.gui.setButtonLabel(buttonObj,newButtonLabel);
@@ -863,12 +909,17 @@ class SpeakEasyController(object):
         
         # Fill the following array with arrays of ButtonProgram:    
         buttonProgramArrays = [];
+        # Associate each ButtonProgram array with the file name
+        # from which it was built:
+        buttonProgramSetFiles = {};
         for xmlFileName in xmlFileNames:
             if xmlFileName == 'default.xml':
                 continue;
             try:
                 (buttonSettingTitle, buttonProgram) = ButtonSavior.retrieveFromFile(xmlFileName, ButtonProgram); 
                 buttonProgramArrays.append(buttonProgram);
+                buttonSet = ButtonSet(buttonProgram, xmlFileName);
+                buttonProgramSetFiles[buttonSet] = xmlFileName; 
             except ValueError as e:
                 # Bad XML:
                 rospy.logerr(`e`);
@@ -879,10 +930,24 @@ class SpeakEasyController(object):
         if buttonSetSelected == -1:
             self.dialogService.showErrorMsg('No button sets have been defined yet.')
             return;
+        if buttonSetSelected == 0:
+            # User cancelled:
+            return;
         
         # Get the selected ButtonProgram array:
         buttonPrograms = buttonSetSelector.getCurrentlyShowingSet();
         self.replaceProgramButtons(buttonPrograms);
+        
+        # Update the disk file:
+        #***buttonSetBaseFilename = buttonProgramSetFiles[buttonPrograms];
+        buttonSetBaseFilename = None;
+        for buttonSet in buttonProgramSetFiles.keys():
+            if buttonSet.getButtonProgram() == buttonPrograms:
+                buttonSetBaseFilename = buttonSet.getXMLFileName();
+                break;
+            
+        if buttonSetBaseFilename is not None:
+            self.currentButtonSetFile = os.path.join(ButtonSavior.SPEECH_SET_DIR, buttonSetBaseFilename);       
         
         # Copy this new XML file into default.xml, so that it will be
         # loaded next time the application starts:
