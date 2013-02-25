@@ -26,6 +26,7 @@
   <depend package="rospy" />
   <depend package="diagnostic_msgs" />
   <depend package="python_qt_binding"/>
+  <depend package="robhum_ui_utils"/>
 
   <rosdep name="festival"/>
   <rosdep name="alsa-oss"/>

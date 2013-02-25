@@ -24,5 +24,6 @@
   <depend stack="python_qt_binding" />
   <depend stack="ros" />
   <depend stack="ros_comm" />
+  <depend stack="robhum_ui_utils" />
 
 </stack>
