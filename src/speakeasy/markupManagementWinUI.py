@@ -56,7 +56,7 @@ from python_qt_binding.QtGui import QTextEdit, QErrorMessage, QMainWindow, QColo
 from python_qt_binding.QtGui import QButtonGroup, QRadioButton, QIntValidator, QApplication 
 from python_qt_binding.QtCore import pyqtSignal, pyqtSlot, QObject
 
-from robhum_ui_utils.qt_dialog_service import DialogService;
+from qt_dialog_service.qt_dialog_service import DialogService; 
 
 
 try:
