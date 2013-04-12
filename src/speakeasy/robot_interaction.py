@@ -35,8 +35,9 @@ import threading;
 import unittest;
 import time;
 
+import speakeasy
 from speakeasy.msg import SpeakEasyStatus;
-from speakeasy.msg import SpeakEasyMusic, SpeakEasySound, SpeakEasyPlayhead, SpeakEasyTextToSpeech;
+from speakeasy.msg import SpeakEasyMusic, SpeakEasySound, SpeakEasyPlayhead, SpeakEasyTextToSpeech, SpeakEasyButtonProgram;
 
 from music_player import TimeReference, PlayStatus; 
 
@@ -95,6 +96,7 @@ class RoboComm(object):
     
     PLAYHEAD_MSG_TIMEOUT = 0.5; # seconds
     
+    ROS_BUTTON_PROGRAM_BROADCASTER = None;
 
     def __init__(self):
         '''
@@ -637,6 +639,31 @@ class RoboComm(object):
         except:
             return None;
     
+    # --------------------------------------------   Broadcasting a Button Program via ROS  -------------------------------
+    
+    # Used to insert programmed speech into the GUIs of other applications,
+    # like Puppet. 
+    
+    @staticmethod
+    def broadcastButtonProgram(text, voice, ttsEngine):
+
+        # Have we broadcast a button program before?
+        if RoboComm.ROS_BUTTON_PROGRAM_BROADCASTER is None:
+            # No, let's create a ros publisher:
+            if SpeakeasyUtils.rosMasterRunning():
+		        # Declare us to be a ROS node.
+		        # Allow multiple GUIs to run simultaneously. Therefore
+		        # the anonymous=True:
+                nodeInfo = rospy.init_node('speakeasy_remote_gui', anonymous=True);
+                RoboComm.ROS_BUTTON_PROGRAM_BROADCASTER = rospy.Publisher('SpeakEasyButtonProgram', speakeasy.msg.SpeakEasyButtonProgram);
+            else:
+                raise NotImplementedError("ROS master must be running to broadcast button programs.")
+            
+        msg = SpeakEasyButtonProgram()
+        msg.text = text
+        msg.voiceName = voice
+        msg.engineName = ttsEngine
+        RoboComm.ROS_BUTTON_PROGRAM_BROADCASTER.publish(msg)
     
     # --------------------------------------------   Repeater Thread Methods -------------------------------
     

@@ -309,7 +309,7 @@ class SpeakEasyController(object):
         self.connectWidgetsToActions()
         self.installDefaultSpeechSet();
         
-        # Let other processes know out pid: 
+        # Let other processes know our pid: 
         self.publishPID();
 
     def initConfigDir(self):
@@ -469,11 +469,18 @@ class SpeakEasyController(object):
         for programButton in self.gui.programButtonDict.values():
             programButton.pressed.connect(partial(self.actionProgramButtons, programButton));
             programButton.released.connect(partial(self.actionProgramButtonRelease, programButton));
+            
             # Each program button gets a context menu. 
             # Context menu entry to copy programmed text to the text area:
             copyToTextAreaAction = QAction('Copy to text area', programButton);
             copyToTextAreaAction.triggered.connect(partial(self.programButtonContextMenuCopyToTextAreaAction, programButton));
             programButton.addAction(copyToTextAreaAction);
+
+            broadcastSavedProgramAction = QAction('Broadcast Program', programButton);
+            broadcastSavedProgramAction.triggered.connect(partial(self.programButtonContextMenuBroadcastSavedProgramAction, 
+                                                                  programButton));
+            programButton.addAction(broadcastSavedProgramAction);
+
             programButton.setContextMenuPolicy(Qt.ActionsContextMenu);
     
     #----------------------------------
@@ -680,7 +687,7 @@ class SpeakEasyController(object):
                 self.gui.setWhereToPlay(PlayLocation.LOCALLY);
     
     #----------------------------------
-    # programButtonContextMenuAction
+    # programButtonContextMenuCopyToTextAreaAction
     #--------------
 
     def programButtonContextMenuCopyToTextAreaAction(self, buttonObj):
@@ -706,6 +713,40 @@ class SpeakEasyController(object):
             ssmlText = rawText;
         textArea = self.gui.speechInputFld;
         textArea.append(ssmlText);
+
+    #----------------------------------
+    # programButtonBroadcastSavedProgramAction
+    #--------------
+
+    def programButtonContextMenuBroadcastSavedProgramAction(self, buttonObj):
+        
+        program = None;
+        try:    
+            program = self.programs[buttonObj];
+        except KeyError:
+            self.dialogService.showErrorMsg("This button does not contain a program. Press-and-hold for " +\
+                                            str(int(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
+                                            " seconds to program.");
+            return;
+        ttsEngine    = program.getTtsEngine()
+        rawText = program.getText()
+        if (len(rawText) == 0):
+            self.dialogService.showErrorMsg("This button does not contain a program. Press-and-hold for " +\
+                                            str(int(SpeakEasyGUI.PROGRAM_BUTTON_HOLD_TIME)) +\
+                                            " seconds to program.");
+            return;
+        if ttsEngine == 'cepstral':
+            # Convert any speech modulation markup to official W3C SSML markup:
+            ssmlText = self.convertRawTextToSSML(rawText);
+        else:
+            ssmlText = rawText;
+        
+        voice = program.getVoice();
+        
+        try:
+            RoboComm.broadcastButtonProgram(ssmlText, voice, ttsEngine)
+        except NotImplementedError:
+            self.dialogService.showErrorMsg("Broadcasting button programs requires the ROS master to be running.")
     
     #----------------------------------
     # actionProgramButtons 
