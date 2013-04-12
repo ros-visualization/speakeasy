@@ -654,8 +654,8 @@ class RoboComm(object):
 		        # Declare us to be a ROS node.
 		        # Allow multiple GUIs to run simultaneously. Therefore
 		        # the anonymous=True:
+                RoboComm.ROS_BUTTON_PROGRAM_BROADCASTER = rospy.Publisher('SpeakEasyButtonProgram', SpeakEasyButtonProgram);
                 nodeInfo = rospy.init_node('speakeasy_remote_gui', anonymous=True);
-                RoboComm.ROS_BUTTON_PROGRAM_BROADCASTER = rospy.Publisher('SpeakEasyButtonProgram', speakeasy.msg.SpeakEasyButtonProgram);
             else:
                 raise NotImplementedError("ROS master must be running to broadcast button programs.")
             
