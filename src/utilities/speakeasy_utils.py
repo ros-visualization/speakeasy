@@ -6,7 +6,7 @@ import re;
 import time;
 import socket;
 import string;
-
+import xmlrpclib;
 import unittest;
 
 class SpeakeasyUtils(object):
@@ -82,10 +82,17 @@ class SpeakeasyUtils(object):
     
     @staticmethod
     def rosMasterRunning():
-        nodeList = subprocess.check_output(["rosnode", "list"])
-        if string.find(nodeList, '/rosout') > -1:
-            return True;
-        return False;
+        masterURI = os.getenv("ROS_MASTER_URI");
+        if len(masterURI) == 0:
+            return False;
+        try:
+            proxy = xmlrpclib.ServerProxy( masterURI )
+            state = proxy.getSystemState("")
+            if state[0] != 1:
+                return False
+        except:
+            return False;
+        return True;     
 
     #----------------------------------
     #  rosNodeRunning

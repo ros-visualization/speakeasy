@@ -214,7 +214,7 @@ class SpeakEasyController(object):
         2. Cepstral: Depends on your installation. Voices are individually licensed.       
     '''
     
-    VERSION = '0.1.3';
+    VERSION = '0.1.4';
     PID_PUBLICATION_FILE = "/tmp/speakeasyPID";
     PROJECT_ROOT = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..');
     CONFIG_PATH = os.path.join(os.getenv('HOME'), '.speakeasy');
